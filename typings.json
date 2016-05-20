@@ -10,10 +10,8 @@
     "mocha": "registry:dt/mocha#2.2.5+20160317120654",
     "react": "registry:dt/react#0.14.0+20160423065914",
     "react-dom": "registry:dt/react-dom#0.14.0+20160412154040",
-    "react-redux": "registry:dt/react-redux#4.4.0+20160501125835",
     "redux-devtools": "registry:dt/redux-devtools#3.0.0+20151215130854",
-    "redux-devtools-dock-monitor": "registry:dt/redux-devtools-dock-monitor#1.0.1+20151216103641",
-    "sinon": "registry:dt/sinon#1.16.0+20160517064723"
+    "redux-devtools-dock-monitor": "registry:dt/redux-devtools-dock-monitor#1.0.1+20151216103641"
   },
   "devDependencies": {
     "chai": "registry:npm/chai#3.5.0+20160415060238",

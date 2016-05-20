@@ -1,15 +1,16 @@
+
 const log = getLogger(__filename)
 
 import {isFunction,Enumerable,SelfTyped} from '../util'
 import {Store,Dispatch} from 'redux'
 import {ActionMessage} from './ActionTypes'
-import {State,Reducer} from '../reducers'
+import {State,ILeafState,Reducer} from '../reducers'
 
 
 // Internal type definition for 
 // function that gets the store state
-type GetStoreState = () => State
-type DispatchState = Dispatch<State>
+export type GetStoreState = () => State
+export type DispatchState = Dispatch<State>
 
 /**
  * Reference to a dispatcher
@@ -51,7 +52,7 @@ export function setStoreProvider(newDispatch:DispatchState|Store<State>,newGetSt
 
 
 export type ActionOptions = {
-	reducers?:Reducer<State>[]
+	reducers?:Reducer<ILeafState>[]
 	mapped?:string[]
 }
 
@@ -65,7 +66,7 @@ export type ActionOptions = {
  */
 export function ActionDescriptor(options:ActionOptions = {}) {
 	
-	return function<S extends State,M extends ActionMessage<S>>(target:ActionFactory<S,M>, propertyKey:string, descriptor:TypedPropertyDescriptor<any>) {
+	return function<S extends ILeafState,M extends ActionMessage<S>>(target:ActionFactory<S,M>, propertyKey:string, descriptor:TypedPropertyDescriptor<any>) {
 		const actionCreator = descriptor.value
 		const {mapped:argNames, reducers} = options
 
@@ -115,7 +116,7 @@ export function ActionDescriptor(options:ActionOptions = {}) {
 					if (!stateFn)
 						throw new Error(`Unable to find mapped reduce function on state ${propertyKey}`)
 
-					return stateFn.apply(state, args)
+					return stateFn(...args)
 				}]
 			}
 
@@ -134,7 +135,7 @@ export function ActionDescriptor(options:ActionOptions = {}) {
  * Base class for action implementations for a given state
  *
  */
-export abstract class ActionFactory<S extends State,M extends ActionMessage<S>> {
+export abstract class ActionFactory<S extends ILeafState,M extends ActionMessage<S>> {
 
 	private _dispatcher:Function
 	private _getState:Function

@@ -80,3 +80,8 @@ export function getProperty<T>(o:any,path:string,defaultValue:T = null):T {
 	
 	return partVal as T
 }
+
+
+export function toProperCase(str:string):string {
+	return str.charAt(0).toUpperCase() + str.substring(1)
+}

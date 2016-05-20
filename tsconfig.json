@@ -9,9 +9,10 @@
 		"preserveConstEnums": true,
 		"allowSyntheticDefaultImports": true,
 		"sourceMap": true,
+		"inlineSourceMap": true,
 		"jsx": "react",
 		"baseUrl": "./",
-		"out": "dist",
+		"outDir": "dist",
 		"paths": {
 			"typedux": ["./src/index"],
 			"typedux/*": ["./src/*"],

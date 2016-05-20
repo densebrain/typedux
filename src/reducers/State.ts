@@ -5,7 +5,7 @@ import * as Immutable from 'immutable'
 /**
  *
  */
-export interface ILeafState extends Immutable.Record.Class {
+export interface ILeafState {
 	error:Error
 }
 
