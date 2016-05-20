@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="TS Source" pattern="file[typedux]:typings//*||file[typedux]:src//*" />
+</component>
