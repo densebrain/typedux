@@ -17,16 +17,38 @@ import StateObserver from './StateObserver'
  */
 class ObservableStore<S extends State> implements Store<S> {
 
-	static createObservableStore<S extends State>(leafReducers:ILeafReducer<any,any>[],middlewares:Middleware[] = [],initialState:S = null,enhancer:StoreEnhancer<S> = null):ObservableStore<S> {
-		// TODO: implement the store creation here
+	private createRootReducer(...leafReducers:ILeafReducer<any,any>[]) {
+		this.rootReducer = new RootReducer(...leafReducers)
+		return <A extends ActionMessage<any>>(state:S,action:A):S => {
+			
+			return ((this.rootReducer) ?
+				this.rootReducer.handle(state,action) :
+				null) as S
+		}
 	}
 
-
-	private store:Store<S>
-	private rootReducer:RootReducer
-	private observers:StateObserver[] = []
-	constructor(store:Store<State>) {
+	/**
+	 * Factory method for creating a new observable store
+	 * 
+	 * @param leafReducers
+	 * @param initialState
+	 * @param enhancer
+	 * @returns {ObservableStore<S>}
+	 */
+	static createObservableStore<S extends State>(leafReducers:ILeafReducer<any,any>[],initialState:S = ({} as any),enhancer:StoreEnhancer<S> = null):ObservableStore<S> {
 		
+		return new ObservableStore(leafReducers,initialState,enhancer)
+	}
+
+	private observers:StateObserver[] = []
+	private rootReducer:RootReducer
+	private rootReducerFn
+	private store:Store<S>
+	
+	constructor(leafReducers:ILeafReducer<any,any>[],initialState:S = ({} as any),enhancer:StoreEnhancer<S> = null) {
+		
+		this.rootReducerFn = this.createRootReducer(...leafReducers)
+		this.store = createStore(this.rootReducerFn,initialState,enhancer)
 	}
 
 	/**
@@ -38,20 +60,14 @@ class ObservableStore<S extends State> implements Store<S> {
 		return this.store;
 	}
 
-	private createReducer() {
-		return <A extends ActionMessage<any>>(state:S,action:A):S => {
-			return ((this.rootReducer) ?
-				this.rootReducer.handle(state,action) :
-				null) as S
-		}
-	}
+	
 
 	/**
 	 * Update the reducers
 	 */
 	replaceReducers(...leafReducers:ILeafReducer<any,any>[]):void {
-		this.rootReducer = new RootReducer(...leafReducers)
-		this.store.replaceReducer(this.createReducer())
+		this.rootReducerFn = this.createRootReducer(...leafReducers)
+		this.store.replaceReducer(this.rootReducerFn)
 	}
 
 	/**

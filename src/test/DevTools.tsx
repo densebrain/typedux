@@ -4,7 +4,6 @@ import {createDevTools} from 'redux-devtools'
 
 // import * as LogMonitor from 'redux-devtools-log-monitor'
 import DockMonitor from 'redux-devtools-dock-monitor'
-import {Provider} from 'react-redux'
 
 // import * as FilterableLogMonitor from 'redux-devtools-filterable-log-monitor'
 

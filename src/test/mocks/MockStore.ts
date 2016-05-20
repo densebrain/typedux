@@ -8,6 +8,7 @@ import {isFunction} from 'typedux/util'
 export interface MockStore<S> extends Store<S> {
 	setState(newState)
 	getActions()
+	getReducer:Reducer<S>
 	clearActions()
 }
 
@@ -15,7 +16,7 @@ export interface MockStore<S> extends Store<S> {
  * Shape of the factory used to build stores
  */
 export interface MockStoreFactory {
-	(fromState:any,storeReducer = null,onStateChange:Function = null,storeMixins:any = null):MockStore
+	(fromState:any,storeReducer?:any,onStateChange?:Function,storeMixins?:any):MockStore<any>
 }
 
 /**
@@ -91,7 +92,7 @@ function mockStoreFactory(middlewares:Middleware[]):MockStoreFactory {
 
 		if (middlewares.length) {
 			const addMiddleware = applyMiddleware(...middlewares)(makeStore)
-			return addMiddleware(storeReducer,fromState)
+			return addMiddleware(storeReducer,fromState) as any
 		} else {
 			return makeStore()
 		}
