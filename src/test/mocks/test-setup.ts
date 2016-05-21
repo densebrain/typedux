@@ -9,7 +9,6 @@ declare global {
 	var expect:chaiGlobal.ExpectStatic
 	var assert:chaiGlobal.AssertStatic
 	var config:any
-
 }
 
 const g = global as any
