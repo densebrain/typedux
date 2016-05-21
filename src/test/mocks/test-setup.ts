@@ -5,9 +5,9 @@ import * as chaiGlobal from 'chai'
 
 declare global {
 	var sinon:sinonGlobal.SinonStatic
-	var Assertion:chaiGlobal.AssertionStatic;
-	var expect:chaiGlobal.ExpectStatic;
-	var assert:chaiGlobal.AssertStatic;
+	var Assertion:chaiGlobal.AssertionStatic
+	var expect:chaiGlobal.ExpectStatic
+	var assert:chaiGlobal.AssertStatic
 	var config:any
 
 }

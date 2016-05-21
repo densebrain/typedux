@@ -5,7 +5,7 @@ import {isFunction, toProperCase,Enumerable} from "./index"
 
 const log = getLogger(__filename)
 
-const PropertyTypeMapKey = Symbol('typemute:property-type-map-key')
+const PropertyTypeMapKey = Symbol('typemutant:property-type-map-key')
 
 
 
@@ -23,12 +23,6 @@ export class NotMutableError extends Error {
 	}
 }
 
-export class MutationRequiresSetterError extends Error {
-	constructor(msg:string = null) {
-		super(makeErrorMsg('MutationRequiresSetterError',msg))
-	}
-}
-
 
 
 /**
@@ -38,7 +32,7 @@ export class MutationRequiresSetterError extends Error {
  * @returns {function(any): undefined}
  * @constructor
  */
-export function Model(opts = {}) {
+export function RecordModel(opts = {}) {
 	return (target) => {
 		console.log('In decorator')
 	}
@@ -51,7 +45,7 @@ export function Model(opts = {}) {
  * @returns {function(any, string): undefined}
  * @constructor
  */
-export function Property(opts = {}) {
+export function RecordProperty(opts = {}) {
 	return function(target:any,propertyKey:string) {
 		const propType = Reflect.getMetadata('design:type',target,propertyKey)
 
@@ -72,7 +66,7 @@ export function Property(opts = {}) {
 /**
  * Typed constructor for models
  */
-export interface ConcreteTypeOf<T> extends Function {
+export interface RecordModelConstructor<T> extends Function {
 	new (props?:any): T;
 }
 
@@ -82,26 +76,58 @@ export interface ConcreteTypeOf<T> extends Function {
  */
 export type Mutator<T> = (obj:T) => T
 
-export class TypeWrapper<T, TType extends ConcreteTypeOf<T>> {
+
+/**
+ * Creates mixed types
+ *
+ * I take no credit for the brilliance in this
+ *
+ * look in file header for credits
+ */
+export class RecordTypeWrapper<T, TType extends RecordModelConstructor<T>> {
 
 
+	/**
+	 * Create a new RecordTypeWrapper passing the same type twice
+	 * _type = for the instance type, typeof
+	 * dupe = the static type, should be identical
+	 * @param _type
+	 * @param dupe
+	 */
 	constructor(private _type: new () => T, dupe: TType = undefined) {}
 
+	/**
+	 * Return instance type
+	 *
+	 * @returns {any}
+	 */
 
 	get asType(): T {
 		return <any>this._type;
 	}
 
 
+	/**
+	 * Return the static type
+	 *
+	 * @returns {any}
+	 */
 	get asStaticType(): TType {
 		return <any>this._type;
 	}
 
 
+	/**
+	 * Mix in an additional type
+	 *
+	 * @param t
+	 * @param dupe
+	 * @returns {any}
+	 */
 	mixType<Z, ZType extends new () => Z> (
-		t: ConcreteTypeOf<Z>,
+		t: RecordModelConstructor<Z>,
 		dupe: ZType = undefined
-	): TypeWrapper<T & Z, ConcreteTypeOf<T & Z> & TType & ZType>  {
+	): RecordTypeWrapper<T & Z, RecordModelConstructor<T & Z> & TType & ZType>  {
 
 
 		return <any>this;
@@ -116,7 +142,7 @@ export class TypeWrapper<T, TType extends ConcreteTypeOf<T>> {
 /**
  * Immutable class wrapper
  */
-export class ImmutableBaseObject<T extends any,TT extends any> {
+export class RecordBaseObject<T extends any,TT extends any> {
 
 
 	/**
@@ -150,7 +176,21 @@ export class ImmutableBaseObject<T extends any,TT extends any> {
 		return this.mutable
 	}
 
+	/**
+	 * Empty constructor for typing purposes
+	 */
 	constructor()
+
+	/**
+	 * Real constructor
+	 *
+	 * @param typeClazz - the RecordTypeWrapper asType
+	 * @param finalClazz - ref to this constructor
+	 * @param modelClazz - the underlying model class
+	 * @param propTypeMap - the property map used to create the record
+	 * @param recordType - the Record.Class
+	 * @param props - initial properties
+	 */
 	constructor(
 		typeClazz:{new():TT},
 		finalClazz:any,
@@ -167,25 +207,29 @@ export class ImmutableBaseObject<T extends any,TT extends any> {
 		private recordType?:Immutable.Record.Class,
 		props?:any
 	){
-		// const tw = new TypeWrapper(modelClazz)
-		// 	.mixType(ImmutableBaseObject)
-
-		//this._type = tw.asType
-		//this._type = this as any
 
 		if (!this.record)
 			this.record = new recordType(props)
 
 	}
 
-	// get type() {
-	// 	return this._type
-	// }
 
+	/**
+	 * Type of class, type guards, instance of,
+	 * etc, etc
+	 *
+	 * @returns {string}
+	 */
 	get type() {
 		return typeof this.typeClazz
 	}
 
+	/**
+	 * withMutation - used by every helper method
+	 *
+	 * @param mutator
+	 * @returns {RecordBaseObject}
+	 */
 	withMutation(mutator:Mutator<TT>) {
 		const newRecord = this.record.withMutations((recordMutating:this) => {
 			this.mutable = true
@@ -203,6 +247,13 @@ export class ImmutableBaseObject<T extends any,TT extends any> {
 
 	}
 
+	/**
+	 * Set a field with property key
+	 *
+	 * @param propertyKey
+	 * @param newValue
+	 * @returns {any}
+	 */
 	set(propertyKey,newValue):TT {
 		return this.withMutation(instance => {
 
@@ -211,11 +262,15 @@ export class ImmutableBaseObject<T extends any,TT extends any> {
 		}) as any
 	}
 
+	/**
+	 * Clone an instance, remember, you will not
+	 * have the original model in the prototype chain
+	 *
+	 * @param newRecord
+	 * @returns {any}
+	 */
 	clone(newRecord = null) {
 		const newInstance = new this.finalClazz()
-		// 	Object.create(
-		// 	(<any>this).__proto__
-		// ) as this
 
 		Object.assign(newInstance,{
 			recordType: this.recordType,
@@ -240,18 +295,24 @@ export class ImmutableBaseObject<T extends any,TT extends any> {
  * solved with https://github.com/Microsoft/TypeScript/issues/7934
  *
  * @param modelClazz
- * @returns {modelClazz & ImmutableBaseObject<T>}
+ * @returns {modelClazz & RecordBaseObject<T>}
  */
 export function makeImmutable<T extends Object>(modelClazz:{new():T}) {
 
 
-	const typeWrapper = new TypeWrapper(modelClazz,modelClazz)
-		.mixType(ImmutableBaseObject,ImmutableBaseObject)
+	const typeWrapper = new RecordTypeWrapper(modelClazz,modelClazz)
+		.mixType(RecordBaseObject,RecordBaseObject)
 
-	type ComposedType = typeof typeWrapper.asType
-	type ConcreteComposedType = ConcreteTypeOf<ImmutableBaseObject<T,ComposedType> & T>
+	type ComposedRecordType = typeof typeWrapper.asType
+	type ComposedRecordConstructorType = RecordModelConstructor<RecordBaseObject<T,ComposedRecordType> & T>
 
-	function makeClazz() {
+	/**
+	 * Create the anonymous class that implements the
+	 * ComposedRecordType
+	 *
+	 * @returns {any}
+	 */
+	function makeClazz():ComposedRecordConstructorType {
 
 		const propTypeMap = Reflect.getMetadata(PropertyTypeMapKey, modelClazz.prototype)
 		if (!propTypeMap)
@@ -275,7 +336,7 @@ export function makeImmutable<T extends Object>(modelClazz:{new():T}) {
 
 
 		// Build the final class
-		const newClazz = class extends ImmutableBaseObject<T,ComposedType> {
+		const newClazz = class extends RecordBaseObject<T,ComposedRecordType> {
 			constructor(private props = {}) {
 				super(typeWrapper.asStaticType,newClazz,modelClazz, propTypeMap, recordType, props)
 			}
@@ -299,17 +360,29 @@ export function makeImmutable<T extends Object>(modelClazz:{new():T}) {
 			.forEach(propName => {
 				log.debug(`Defining property "${modelClazz.name}.${propName}"`)
 
-				newClazz.prototype['set' + toProperCase(propName)] =
-					function (newVal) {
-						return this.set(propName, newVal)
-					}
 
 				Object.defineProperty(newClazz.prototype, propName, {
 					configurable: false,
+
+					/**
+					 * Getter for annotated property
+					 * - if this.isMutable, the mutating record
+					 *      is used
+				     * - otherwise the non mutating record is used
+					 * @returns {any}
+					 */
 					get: function () {
-						return (this.isMutable) ? this.recordMutating[propName] : this.record[propName]
+						return (this.isMutable) ?
+							this.recordMutating[propName] :
+							this.record[propName]
 					},
 
+					/**
+					 * Setter for @RecordProperty
+					 * - sets mutating value, error if not mutating
+					 * @param newVal
+					 * @throws NotMutableError if not mutating - duh
+					 */
 					set: function (newVal) {
 						if (!this.isMutable)
 							throw new NotMutableError(`${modelClazz.name}.${propName}`)
@@ -326,5 +399,5 @@ export function makeImmutable<T extends Object>(modelClazz:{new():T}) {
 	}
 
 
-	return makeClazz() as ConcreteComposedType
+	return makeClazz()
 }
