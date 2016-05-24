@@ -4,7 +4,7 @@
   "description": "Slightly adjusted Redux (awesome by default) for TS with immutablejs built in",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo funny"
+    "test": "gulp test"
   },
   "repository": {
     "type": "git",
@@ -45,6 +45,7 @@
     "gulp-sourcemaps": "^1.6.0",
     "gulp-typescript": "^2.13.4",
     "gulp-util": "^3.0.7",
+    "lodash": "^4.13.1",
     "merge2": "^1.0.2",
     "mocha": "^2.4.5",
     "mocha-junit-reporter": "^1.11.1",

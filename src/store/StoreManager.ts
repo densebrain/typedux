@@ -20,7 +20,7 @@ class ObservableStore<S extends State> implements Store<S> {
 	private createRootReducer(...leafReducers:ILeafReducer<any,any>[]) {
 		this.rootReducer = new RootReducer(...leafReducers)
 		return <A extends ActionMessage<any>>(state:S,action:A):S => {
-			
+
 			return ((this.rootReducer) ?
 				this.rootReducer.handle(state,action) :
 				null) as S
@@ -29,24 +29,24 @@ class ObservableStore<S extends State> implements Store<S> {
 
 	/**
 	 * Factory method for creating a new observable store
-	 * 
+	 *
 	 * @param leafReducers
 	 * @param initialState
 	 * @param enhancer
 	 * @returns {ObservableStore<S>}
 	 */
 	static createObservableStore<S extends State>(leafReducers:ILeafReducer<any,any>[],initialState:S = ({} as any),enhancer:StoreEnhancer<S> = null):ObservableStore<S> {
-		
+
 		return new ObservableStore(leafReducers,initialState,enhancer)
 	}
 
 	private observers:StateObserver[] = []
 	private rootReducer:RootReducer
 	private rootReducerFn
-	private store:Store<S>
-	
+	private store
+
 	constructor(leafReducers:ILeafReducer<any,any>[],initialState:S = ({} as any),enhancer:StoreEnhancer<S> = null) {
-		
+
 		this.rootReducerFn = this.createRootReducer(...leafReducers)
 		this.store = createStore(this.rootReducerFn,initialState,enhancer)
 	}
@@ -60,7 +60,7 @@ class ObservableStore<S extends State> implements Store<S> {
 		return this.store;
 	}
 
-	
+
 
 	/**
 	 * Update the reducers
@@ -148,10 +148,10 @@ class ObservableStore<S extends State> implements Store<S> {
 					this.observers.splice(index,1)
 					return true
 				}
-				
+
 				return false
 			})
-			
+
 			observer.removed = true
 		}
 

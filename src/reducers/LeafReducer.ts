@@ -2,7 +2,6 @@
 
 
 import {ActionMessage} from "../actions"
-import {State,ILeafState} from '../reducers'
 
 
 /**
@@ -10,7 +9,7 @@ import {State,ILeafState} from '../reducers'
  * T - type of actions/enum
  * M - type of message
  */
-export interface ILeafReducer<S extends ILeafState,A extends ActionMessage<S>> {
+export interface ILeafReducer<S extends any,A extends ActionMessage<S>> {
 
 	/**
 	 * The path to the leaf it handles

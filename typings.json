@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "chai": "registry:npm/chai#3.5.0+20160415060238",
+    "lodash": "registry:npm/lodash#4.0.0+20160416211519",
     "sinon": "registry:npm/sinon#1.16.0+20160427193336"
   }
 }

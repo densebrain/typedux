@@ -1,5 +1,5 @@
 import {Middleware,Store,Reducer,applyMiddleware,Unsubscribe,Action} from 'redux'
-import {isFunction} from 'typedux/util'
+import {isFunction} from '../../util'
 
 /**
  * Slightly extended Store interface for

@@ -3,7 +3,7 @@
 // import { Document, DocumentationState, ConfluenceDocument,
 // 	DocumentationActionMessage,DocumentationKey } from '../models/DocumentationModel'
 //
-// import {ActionFactory, ActionDescriptor} from "./Actions";
+// import {ActionFactory, Action} from "./Actions";
 //
 // import {ResourceStatus} from "../models/CommonModel";
 //
@@ -64,13 +64,13 @@
 // 		return DocumentationState
 // 	}
 //
-// 	@ActionDescriptor()
+// 	@Action()
 // 	updateDocument(id:string,documentUpdates) {}
 //
-// 	@ActionDescriptor()
+// 	@Action()
 // 	showDocument(id:string,isTip:boolean) {}
 //
-// 	@ActionDescriptor()
+// 	@Action()
 // 	retrieveDocument(id:string,isTip:boolean = false) {
 //
 // 		return (dispatch, getState) => {
@@ -103,13 +103,13 @@
 // 		};
 // 	}
 //
-// 	@ActionDescriptor()
+// 	@Action()
 // 	searchStarted(query:string) {}
 //
-// 	@ActionDescriptor()
+// 	@Action()
 // 	searchCompleted(results:Document[]) {}
 //
-// 	@ActionDescriptor()
+// 	@Action()
 // 	search(query:string) {
 // 		let url = makeSearchUrl(query);
 // 		log.info(`Getting confluence search ${url}`);
@@ -175,7 +175,7 @@
 //
 // 	}
 //
-// 	@ActionDescriptor()
+// 	@Action()
 // 	getDocument(id:string) {
 // 		return (dispatch, getState) => {
 // 			const actions = this.withDispatcher(dispatch)

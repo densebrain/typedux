@@ -1,12 +1,6 @@
 import * as Immutable from 'immutable'
 
-
-
 /**
- *
+ * Store State 
  */
-export interface ILeafState {
-	error:Error
-}
-
-export type State = Immutable.Map<string,ILeafState>
+export type State = Immutable.Map<string,any>

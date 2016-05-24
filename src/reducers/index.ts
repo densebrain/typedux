@@ -1,7 +1,14 @@
+import RootReducer from './RootReducer'
+
+export {
+	RootReducer
+}
+
 export * from './ReducerTypes'
 export * from './RootReducer'
 export * from './LeafReducer'
 export * from './State'
+
 //let log = (require('Log') as any).make('Reducers')
 
 // import { combineReducers } from 'redux'

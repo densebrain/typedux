@@ -1,6 +1,6 @@
 import {getLogger} from 'typelogger'
 import * as Immutable from 'immutable'
-import {State,ILeafState} from './State'
+import {State} from './State'
 import {ActionMessage} from "../actions"
 import {ILeafReducer} from './LeafReducer'
 //import DocumentationReducer from "./DocumentationReducer"
@@ -11,9 +11,9 @@ import {ILeafReducer} from './LeafReducer'
 const log = getLogger(__filename)
 
 /**
- * Ensure the state we get back is still 
+ * Ensure the state we get back is still
  * an Immutable.Map
- * 
+ *
  * @param state
  * @returns {boolean}
  */
@@ -23,7 +23,7 @@ function stateTypeGuard(state:any):state is State {
 
 class RootReducer {
 
-	private reducers:ILeafReducer<ILeafState,ActionMessage<ILeafState>>[] = []
+	private reducers:ILeafReducer<any,ActionMessage<any>>[] = []
 
 	constructor(...reducers:ILeafReducer<any,any>[]) {
 		this.reducers.push(...reducers)
@@ -39,12 +39,21 @@ class RootReducer {
 		return state
 	}
 
+	makeGenericHandler() {
+		return (state:State,action:ActionMessage<any>) => {
+			return this.handle(state,action)
+		}
+	}
 
 	handle(state:State,action:ActionMessage<any>) {
-		if (!state || !stateTypeGuard(state))
-			state = this.defaultState()
+		let hasChanged = false
 
-		let hasChanged = false;
+		if (!state || !stateTypeGuard(state)) {
+			state = this.defaultState()
+			hasChanged = true
+		}
+
+
 
 		let nextState = state.withMutations((tempState) => {
 			for (let reducer of this.reducers) {
@@ -79,10 +88,11 @@ class RootReducer {
 					// Now iterate the reducers on the message
 					if (action.reducers) {
 						action.reducers.forEach((actionReducer) => {
-							if (reducerState instanceof action.stateType)
+							if (action.stateType && reducerState instanceof action.stateType)
 								checkReducerStateChange(actionReducer(reducerState, action))
 						})
 					}
+
 
 				} catch (e) {
 					log.error(`Error occurred on reducer leaf ${leaf}`,e)

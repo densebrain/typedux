@@ -1,4 +1,5 @@
 import 'reflect-metadata'
+import '../index'
 import * as sinonGlobal from 'sinon'
 import * as chaiGlobal from 'chai'
 
@@ -9,7 +10,6 @@ declare global {
 	var expect:chaiGlobal.ExpectStatic
 	var assert:chaiGlobal.AssertStatic
 	var config:any
-
 }
 
 const g = global as any
@@ -20,4 +20,6 @@ g.expect = chaiGlobal.expect
 g.sinon = sinonGlobal
 
 
-export {}
+export {
+
+}
