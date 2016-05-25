@@ -5,6 +5,6 @@ export interface ActionMessage<S> extends Action {
 	type:string
 	stateType:any
 	args?:any[]
-	reducers:Reducer<S>[]
+	reducers:Reducer<S,ActionMessage<S>>[]
 	error:Error
 }

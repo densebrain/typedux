@@ -19,7 +19,7 @@ import {ActionFactory} from './ActionFactory'
  */
 
 export type ActionOptions = {
-	reducers?:Reducer<any>[]
+	reducers?:Reducer<any,any>[]
 	mapped?:string[]
 }
 

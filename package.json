@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Slightly adjusted Redux (awesome by default) for TS with immutablejs built in",
   "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
     "test": "gulp test"
   },

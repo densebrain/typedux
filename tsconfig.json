@@ -15,9 +15,7 @@
 		"outDir": "dist",
 		"paths": {
 			"typedux": ["./src/index"],
-			"typedux/*": ["./src/*"],
-			"typedux-mocks": ["./src/test/mocks/index"],
-			"typedux-mocks/*": ["./src/test/mocks/*"]
+			"typedux/*": ["./src/*"]
 		}
 	},
 	"exclude": [

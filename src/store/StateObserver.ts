@@ -4,7 +4,7 @@ import {State} from '../reducers'
 
 const log = getLogger(__filename)
 
-export default class StateObserver {
+export class StateObserver {
 
 	removed:boolean = false
 
@@ -30,4 +30,6 @@ export default class StateObserver {
 		this.handler(newValue,cachedValue,this);
 	}
 }
+
+export default StateObserver
 

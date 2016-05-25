@@ -1,4 +1,5 @@
 import {getLogger} from 'typelogger'
+import {Reducer as ReduxReducer,Action as ReduxAction} from 'redux'
 import * as Immutable from 'immutable'
 import {State} from './State'
 import {ActionMessage} from "../actions"
@@ -29,7 +30,7 @@ class RootReducer {
 		this.reducers.push(...reducers)
 	}
 
-	private defaultState():State {
+	defaultState():State {
 		let state = Immutable.Map<string,any>({})
 
 		this.reducers.forEach((reducer) => {
@@ -39,13 +40,13 @@ class RootReducer {
 		return state
 	}
 
-	makeGenericHandler() {
-		return (state:State,action:ActionMessage<any>) => {
-			return this.handle(state,action)
+	makeGenericHandler<S extends State>():ReduxReducer<S> {
+		return (state:S,action:ReduxAction):S => {
+			return this.handle(state,action as ActionMessage<any>) as S
 		}
 	}
 
-	handle(state:State,action:ActionMessage<any>) {
+	handle(state:State,action:ActionMessage<any>):State {
 		let hasChanged = false
 
 		if (!state || !stateTypeGuard(state)) {

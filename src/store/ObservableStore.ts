@@ -2,8 +2,15 @@ import RootReducer from "../reducers/RootReducer";
 const log = getLogger(__filename)
 
 // Vendor
-import { Store,createStore,Reducer,compose,Unsubscribe, Action,
-	applyMiddleware,Middleware, StoreEnhancer } from 'redux'
+import {
+	Store,
+	createStore,
+	Reducer,
+	Unsubscribe,
+	Action as ReduxAction,
+	StoreEnhancer
+} from 'redux'
+
 import {ActionMessage} from '../actions'
 import {State,ILeafReducer} from '../reducers'
 
@@ -15,29 +22,30 @@ import StateObserver from './StateObserver'
 /**
  * Manage the redux store for RADS
  */
-class ObservableStore<S extends State> implements Store<S> {
+export class ObservableStore<S extends State> implements Store<S> {
 
 	private createRootReducer(...leafReducers:ILeafReducer<any,any>[]) {
 		this.rootReducer = new RootReducer(...leafReducers)
-		return <A extends ActionMessage<any>>(state:S,action:A):S => {
+		this.rootReducerFn = this.rootReducer.makeGenericHandler()
 
-			return ((this.rootReducer) ?
-				this.rootReducer.handle(state,action) :
-				null) as S
-		}
+		// <A extends ActionMessage<any>>(state:S,action:A):S => {
+		//
+		// 	return ((this.rootReducer) ?
+		// 		this.rootReducer.handle(state,action) :
+		// 		null) as S
+		// }
 	}
 
 	/**
 	 * Factory method for creating a new observable store
 	 *
 	 * @param leafReducers
-	 * @param initialState
 	 * @param enhancer
-	 * @returns {ObservableStore<S>}
+	 * @returns {ObservableStore<State>}
 	 */
-	static createObservableStore<S extends State>(leafReducers:ILeafReducer<any,any>[],initialState:S = ({} as any),enhancer:StoreEnhancer<S> = null):ObservableStore<S> {
+	static createObservableStore(leafReducers:ILeafReducer<any,any>[],enhancer:StoreEnhancer<any> = null):ObservableStore<State> {
 
-		return new ObservableStore(leafReducers,initialState,enhancer)
+		return new ObservableStore(leafReducers,enhancer)
 	}
 
 	private observers:StateObserver[] = []
@@ -45,10 +53,14 @@ class ObservableStore<S extends State> implements Store<S> {
 	private rootReducerFn
 	private store
 
-	constructor(leafReducers:ILeafReducer<any,any>[],initialState:S = ({} as any),enhancer:StoreEnhancer<S> = null) {
+	constructor(leafReducers:ILeafReducer<any,any>[],enhancer:StoreEnhancer<S> = null) {
 
-		this.rootReducerFn = this.createRootReducer(...leafReducers)
-		this.store = createStore(this.rootReducerFn,initialState,enhancer)
+		this.createRootReducer(...leafReducers)
+		this.store = createStore(
+			this.rootReducerFn,
+			this.rootReducer.defaultState(),
+			enhancer
+		)
 	}
 
 	/**
@@ -56,7 +68,7 @@ class ObservableStore<S extends State> implements Store<S> {
 	 *
 	 * @returns {any}
 	 */
-	getInternalStore() {
+	getReduxStore() {
 		return this.store;
 	}
 
@@ -84,11 +96,11 @@ class ObservableStore<S extends State> implements Store<S> {
 
 
 	subscribe(listener:()=>void):Unsubscribe {
-		return this.getInternalStore().subscribe(listener);
+		return this.getReduxStore().subscribe(listener);
 	}
 
 	replaceReducer(nextReducer:Reducer<S>):void {
-		throw new Error('We dont play with no regular reducers ;)')
+		throw new Error("We don't play with no regular reducers ;)")
 	}
 
 	/**
@@ -96,11 +108,11 @@ class ObservableStore<S extends State> implements Store<S> {
 	 * @returns {*}
 	 */
 	getState():S {
-		return this.getInternalStore().getState();
+		return this.getReduxStore().getState();
 	}
 
-	dispatch<A extends Action>(action:A):A {
-		return this.getInternalStore().dispatch(action)
+	dispatch<A extends ReduxAction>(action:A):A {
+		return this.getReduxStore().dispatch(action)
 	}
 
 	scheduleNotification() {

@@ -117,7 +117,7 @@ export abstract class ActionFactory<S extends any,M extends ActionMessage<S>> {
 	 * @param reducers
 	 * @param data
 	 * @param args
-	 * @returns {M}
+	 * @returns {ActionMessage}
 	 */
 	newMessage(type:string, reducers = [],args = [], data = {}):M {
 		const messageObject = {
