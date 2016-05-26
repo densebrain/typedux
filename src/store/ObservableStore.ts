@@ -61,6 +61,11 @@ export class ObservableStore<S extends State> implements Store<S> {
 			this.rootReducer.defaultState(),
 			enhancer
 		)
+
+		this.subscribe(() => {
+			log.info('State changed - SCHEDULE NOTIFY')
+			this.scheduleNotification()
+		})
 	}
 
 	/**
