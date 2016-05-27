@@ -5,7 +5,7 @@ import {isFunction} from '../util'
 import {ActionMessage} from './ActionTypes'
 import {Reducer} from '../reducers'
 import {ActionFactory} from './ActionFactory'
-
+import {isRecordObject} from 'typemutant'
 
 
 /**
@@ -18,6 +18,7 @@ import {ActionFactory} from './ActionFactory'
  * @param error
  */
 
+
 export type ActionOptions = {
 	reducers?:Reducer<any,any>[]
 	mapped?:string[]
@@ -25,7 +26,7 @@ export type ActionOptions = {
 
 
 /**
- * Method decorator to descript actions
+ * Method decorator for actions
  *
  * @param options
  * @returns {function(ActionFactory<S, M>, string, PropertyDescriptor): {value: (function(...[any]): any)}}
@@ -82,11 +83,14 @@ export function Action(options:ActionOptions = {}) {
 			if (finalReducers.length === 0) {
 				log.info('Creating mapped handler', propertyKey)
 				finalReducers = [(state:S, message:M):S => {
-					const stateFn = state[propertyKey]
+					let stateFn = state[propertyKey]
 					if (!stateFn)
 						throw new Error(`Unable to find mapped reduce function on state ${propertyKey}`)
 
-					return stateFn(...args)
+					return (isRecordObject(state)) ?  (state.withMutation(tempState => {
+						tempState[propertyKey](...args)
+						return tempState
+					})) : stateFn(...args)
 				}]
 			}
 
