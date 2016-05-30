@@ -52,6 +52,7 @@ export class ObservableStore<S extends State> implements Store<S> {
 	private rootReducer:RootReducer
 	private rootReducerFn
 	private store
+	private pendingTick
 
 	constructor(leafReducers:ILeafReducer<any,any>[],enhancer:StoreEnhancer<S> = null) {
 
@@ -120,19 +121,23 @@ export class ObservableStore<S extends State> implements Store<S> {
 		return this.getReduxStore().dispatch(action)
 	}
 
+
 	scheduleNotification() {
-		// if (this.pendingTick) return;
+		if (this.pendingTick) return;
 
-		let state = this.getState();
-		log.info('Store updated',state);
+		this.pendingTick = nextTick(() => {
+			let state = this.getState();
+			//log.info('Store updated',state === this.lastState);
 
-		// this.pendingTick = null;
-		this.observers.forEach((listener) => {
-			log.info('notifying', listener)
+			this.pendingTick = null;
+			this.observers.forEach((listener) => {
+				log.info('notifying', listener)
 
-			listener.onChange(state)
+				if (!listener.onChange(state)) {
+					log.debug('state change was ignored by',listener)
+				}
+			})
 		})
-
 	}
 
 	/**
@@ -150,7 +155,7 @@ export class ObservableStore<S extends State> implements Store<S> {
 	 * @param handler
 	 * @returns {function()} unsubscribe observer
 	 */
-	observe(path:string, handler) {
+	observe(path:string|string[], handler) {
 		let observer = new StateObserver(path,handler)
 		this.observers.push(observer)
 
