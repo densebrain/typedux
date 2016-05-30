@@ -87,10 +87,17 @@ export function Action(options:ActionOptions = {}) {
 					if (!stateFn)
 						throw new Error(`Unable to find mapped reduce function on state ${propertyKey}`)
 
-					return (isRecordObject(state)) ?  (state.withMutation(tempState => {
-						tempState[propertyKey](...args)
-						return tempState
-					})) : stateFn(...args)
+					if (isRecordObject(state)) {
+						const newState = state.withMutation(tempState => {
+							tempState[propertyKey](...args)
+							return tempState
+						})
+
+						return  ((newState === (state as any)) ? state : newState) as S
+						
+					} else {
+						return stateFn(...args)
+					}
 				}]
 			}
 

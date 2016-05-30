@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 
-import {getLogger as LoggerFactory} from 'typelogger'
+import {getLogger as LoggerFactory, ILogger} from 'typelogger'
 import * as ImmutableGlobal from 'immutable'
 
 /**
@@ -11,6 +11,7 @@ import * as ImmutableGlobal from 'immutable'
 declare global {
 	var getLogger:typeof LoggerFactory
 	var Immutable:typeof ImmutableGlobal
+	var log:ILogger
 }
 
 

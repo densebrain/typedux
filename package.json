@@ -60,6 +60,7 @@
     "run-sequence": "^1.2.0",
     "semver": "^5.1.0",
     "sinon": "^1.17.4",
-    "typescript": "^1.9.0-dev.20160519-1.0"
+    "typeproject": "^1.0.19",
+    "typescript": "^1.9.0-dev.20160516"
   }
 }
