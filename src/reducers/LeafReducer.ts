@@ -3,6 +3,16 @@
 
 import {ActionMessage} from "../actions"
 
+/**
+ * Check object shape to see if
+ * its a valid ILeafReducer
+ *
+ * @param o
+ * @returns {boolean}
+ */
+export function isLeafReducer(o:any):o is ILeafReducer<any,any> {
+	return (o.leaf && o.defaultState)
+}
 
 /**
  * S - type of State
