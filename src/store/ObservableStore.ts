@@ -131,11 +131,11 @@ export class ObservableStore<S extends State> implements Store<S> {
 
 			this.pendingTick = null;
 			this.observers.forEach((listener) => {
-				log.info('notifying', listener)
+				//log.info('notifying', listener)
 
-				if (!listener.onChange(state)) {
-					log.debug('state change was ignored by',listener)
-				}
+				listener.onChange(state)
+				// 	log.debug('state change was ignored by',listener)
+
 			})
 		})
 	}
