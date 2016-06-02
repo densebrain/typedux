@@ -11,7 +11,6 @@ import * as ImmutableGlobal from 'immutable'
 declare global {
 	var getLogger:typeof LoggerFactory
 	var Immutable:typeof ImmutableGlobal
-	var log:ILogger
 }
 
 
