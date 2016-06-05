@@ -23,7 +23,7 @@ export abstract class ActionFactory<S extends any,M extends ActionMessage<S>> {
 	 * @param stateType
 	 */
 	constructor(stateType:{new(): S}) {
-		log.info(`Created action factory with state type: ${stateType.name}`)
+		log.debug(`Created action factory with state type: ${stateType.name}`)
 		this.stateType = stateType
 	}
 

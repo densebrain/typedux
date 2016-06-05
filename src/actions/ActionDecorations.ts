@@ -81,7 +81,7 @@ export function Action(options:ActionOptions = {}) {
 			// If no reducers are passed in the map directly to state
 			let finalReducers = (reducers) ? [...reducers] : []
 			if (finalReducers.length === 0) {
-				log.info('Creating mapped handler', propertyKey)
+				log.debug('Creating mapped handler', propertyKey)
 				finalReducers = [(state:S, message:M):S => {
 					let stateFn = state[propertyKey]
 					if (!stateFn)

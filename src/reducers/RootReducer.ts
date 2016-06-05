@@ -4,10 +4,6 @@ import * as Immutable from 'immutable'
 import {State} from './State'
 import {ActionMessage} from "../actions"
 import {ILeafReducer} from './LeafReducer'
-//import DocumentationReducer from "./DocumentationReducer"
-
-
-
 
 const log = getLogger(__filename)
 
@@ -78,7 +74,7 @@ class RootReducer {
 
 						stateChangeDetected = stateChangeDetected || reducerState !== newReducerState
 						reducerState = newReducerState
-						log.debug("State change detected",stateChangeDetected)
+						//log.debug("State change detected",stateChangeDetected)
 					}
 
 					// First check the reducer itself
@@ -109,7 +105,7 @@ class RootReducer {
 			}
 		})
 
-		log.info('Has changed after all reducers',hasChanged,'states equal',nextState === state)
+		log.debug('Has changed after all reducers',hasChanged,'states equal',nextState === state)
 		return hasChanged ? nextState : state
 	}
 }

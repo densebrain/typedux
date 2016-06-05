@@ -64,7 +64,7 @@ export class ObservableStore<S extends State> implements Store<S> {
 		)
 
 		this.subscribe(() => {
-			log.info('State changed - SCHEDULE NOTIFY')
+			log.debug('State changed - SCHEDULE NOTIFY')
 			this.scheduleNotification()
 		})
 	}
@@ -127,11 +127,11 @@ export class ObservableStore<S extends State> implements Store<S> {
 
 		this.pendingTick = nextTick(() => {
 			let state = this.getState();
-			//log.info('Store updated',state === this.lastState);
+			//log.debug('Store updated',state === this.lastState);
 
 			this.pendingTick = null;
 			this.observers.forEach((listener) => {
-				//log.info('notifying', listener)
+				//log.debug('notifying', listener)
 
 				listener.onChange(state)
 				// 	log.debug('state change was ignored by',listener)
