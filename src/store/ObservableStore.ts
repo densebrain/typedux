@@ -48,8 +48,9 @@ export class ObservableStore<S extends State> implements Store<S> {
 		return new ObservableStore(leafReducers,enhancer)
 	}
 
+	public rootReducer:RootReducer
+	
 	private observers:StateObserver[] = []
-	private rootReducer:RootReducer
 	private rootReducerFn
 	private store
 	private pendingTick
