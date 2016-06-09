@@ -1,4 +1,4 @@
-import 'reflect-metadata'
+//import 'reflect-metadata'
 
 import {getLogger as LoggerFactory, ILogger} from 'typelogger'
 import * as ImmutableGlobal from 'immutable'
@@ -15,8 +15,9 @@ declare global {
 
 
 // Export globals
-Object.assign(global as any,{
-	getLogger: LoggerFactory,
+const g = global as any
+Object.assign(g,{
+	getLogger: g.getLogger || LoggerFactory,
 	Immutable: ImmutableGlobal
 })
 

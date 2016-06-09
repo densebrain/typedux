@@ -5,7 +5,6 @@ import {ActionMessage} from './ActionTypes'
 import {Action} from './ActionDecorations'
 import {getStoreStateProvider,getStoreDispatchProvider} from './Actions'
 
-
 /**
  * Base class for action implementations for a given state
  *

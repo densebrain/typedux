@@ -1,4 +1,4 @@
-import 'reflect-metadata'
+//import 'reflect-metadata'
 import {getLogger} from 'typelogger'
 const log = getLogger(__filename)
 
@@ -13,9 +13,9 @@ type ProxyMap = {[key:string]:VariableProxy<any>}
 const proxies:ProxyMap = {}
 
 export class ActionRouter {
-	
+
 	private actionFactories = []
-	
+
 	constructor(...actionFactories) {
 		this.actionFactories.push(...actionFactories)
 	}

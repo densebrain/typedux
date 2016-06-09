@@ -1,4 +1,4 @@
-import 'reflect-metadata'
+//import 'reflect-metadata'
 import '../index'
 import * as sinonGlobal from 'sinon'
 import * as chaiGlobal from 'chai'
