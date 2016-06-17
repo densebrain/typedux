@@ -85,7 +85,12 @@ export abstract class ActionFactory<S extends any,M extends ActionMessage<S>> {
 
 		const leaf = this.leaf()
 
-		return ((leaf) ? state.get(leaf) : state) as S
+		const stateValue = leaf ? state.get(leaf) : state
+		if (stateValue instanceof this.stateType.recordType) {
+			return this.stateType.fromJS(stateValue)
+		} else {
+			return ((leaf) ? state.get(leaf) : state) as S
+		}
 	}
 
 

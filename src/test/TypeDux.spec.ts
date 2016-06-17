@@ -23,9 +23,13 @@ class MockState {
 	str1 = MockStateStr1
 	str2:string
 
+	constructor(props:any = {}) {
+		Object.assign(this,props)
+	}
+
 	mockUpdateFromState(newVal:string) {
 		log.debug('Updating from state reducer')
-		let newState = _.clone(this)
+		let newState = new MockState(this)
 		newState.str2 = newVal
 
 		return newState
@@ -44,6 +48,10 @@ class MockLeafReducer implements ILeafReducer<MockState,MockMessage> {
 
 	leaf():string {
 		return MockKey;
+	}
+
+	prepareState(o:any) {
+		return o
 	}
 
 	defaultState() {

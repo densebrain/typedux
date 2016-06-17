@@ -21,6 +21,9 @@ export function isLeafReducer(o:any):o is ILeafReducer<any,any> {
  */
 export interface ILeafReducer<S extends any,A extends ActionMessage<S>> {
 
+
+
+
 	/**
 	 * The path to the leaf it handles
 	 */
@@ -30,6 +33,15 @@ export interface ILeafReducer<S extends any,A extends ActionMessage<S>> {
 	 * Get the default state
 	 */
 	defaultState():S
+
+
+	/**
+	 * Prepare an object to be used as the state
+	 * for this leaf
+	 *
+	 * @param o
+	 */
+	prepareState(o:any|S):S
 
 	/**
 	 * Handle an incoming action

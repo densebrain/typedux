@@ -23,6 +23,9 @@ function stateTypeGuard(state:any):state is State {
  */
 export type RootReducerErrorHandler = (err:Error,reducer?:ILeafReducer<any,any>) => void
 
+export function toJS(o:any) {
+	return (o.toJS) ? o.toJS() : o
+}
 
 export class RootReducer {
 
@@ -39,7 +42,8 @@ export class RootReducer {
 		let state = Immutable.Map<string,any>({})
 
 		this.reducers.forEach((reducer) => {
-			state = state.set(reducer.leaf(), reducer.defaultState())
+			const defaultState = reducer.defaultState()
+			state = state.set(reducer.leaf(), toJS(defaultState))
 		})
 
 		return state
@@ -63,8 +67,13 @@ export class RootReducer {
 			let nextState = state.withMutations((tempState) => {
 				for (let reducer of this.reducers) {
 					const leaf = reducer.leaf()
-					// Get Current state
-					const startReducerState = tempState.get(leaf)
+
+					// Get Current RAW state
+					const rawLeafState = tempState.get(leaf)
+
+					// Shape it for the reducer
+					const startReducerState = reducer.prepareState(rawLeafState)
+
 					let reducerState = startReducerState
 					let stateChangeDetected = false
 					try {
@@ -109,7 +118,7 @@ export class RootReducer {
 					}
 
 					if (stateChangeDetected) {
-						tempState.set(leaf, reducerState)
+						tempState.set(leaf, toJS(reducerState))
 						hasChanged = true
 					}
 				}
@@ -120,13 +129,13 @@ export class RootReducer {
 
 		} catch (err) {
 			log.error('Error bubbled to root reducer',err)
-			
+
 			// If error handler exists then use it
 			if (this.onError) {
 				this.onError && this.onError(err)
 				return state
 			}
-			
+
 			// Otherwise throw
 			throw err
 		}
