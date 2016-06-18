@@ -34,6 +34,10 @@ class MockState {
 
 		return newState
 	}
+
+	toJS() {
+		return this
+	}
 }
 
 /**
@@ -53,6 +57,7 @@ class MockLeafReducer implements ILeafReducer<MockState,MockMessage> {
 	prepareState(o:any) {
 		return o
 	}
+
 
 	defaultState() {
 		return new MockState()
