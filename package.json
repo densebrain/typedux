@@ -10,7 +10,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/densebrian/typedux.git"
+        "url": "git+https://github.com/densebrain/typedux.git"
     },
     "keywords": [
         "redux",
@@ -20,9 +20,9 @@
     "author": "Jonathan Glanz",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/densebrian/typedux/issues"
+        "url": "https://github.com/densebrain/typedux/issues"
     },
-    "homepage": "https://github.com/densebrian/typedux#readme",
+    "homepage": "https://github.com/densebrain/typedux#readme",
     "dependencies": {
         "browser-next-tick": "^1.1.0",
         "immutable": "^3.8.1",
