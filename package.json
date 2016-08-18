@@ -60,7 +60,7 @@
     "run-sequence": "^1.2.0",
     "semver": "^5.1.0",
     "sinon": "^1.17.4",
-    "typeproject": "^1.0.19",
+    "typeproject": "^1.1.2",
     "typescript": ">=2.0.0"
   }
 }
