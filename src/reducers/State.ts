@@ -1,4 +1,4 @@
-import * as Immutable from 'immutable'
+//import * as Immutable from 'immutable'
 
 
 
@@ -10,6 +10,7 @@ export interface StateConstructor<T> {
 	new(o:any):T
 }
 
+//export interface State extends Immutable.Map<string,any> {
 export interface State {
 
 }

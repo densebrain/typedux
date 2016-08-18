@@ -112,7 +112,7 @@ export class RootReducer<S extends State> {
 						 *
 						 * @param newReducerState
 						 */
-						function checkReducerStateChange(newReducerState) {
+						const checkReducerStateChange = (newReducerState) => {
 							if (!newReducerState)
 								throw new Error(`New reducer state is null for leaf ${leaf}`)
 
