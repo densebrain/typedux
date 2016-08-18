@@ -2,7 +2,7 @@ import {installMockStoreProvider,createMockStore} from './mocks/TestHelpers'
 import {RootReducer,ILeafReducer} from '../reducers'
 import {ActionMessage, ActionFactory, Action, ActionReducer} from '../actions'
 import {getLogger} from 'typelogger'
-import {Map,Record} from 'Immutable'
+import {Map,Record} from 'immutable'
 
 const log = getLogger(__filename)
 
