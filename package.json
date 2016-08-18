@@ -61,6 +61,6 @@
     "semver": "^5.1.0",
     "sinon": "^1.17.4",
     "typeproject": "^1.0.19",
-    "typescript": "^2.1.0-dev.20160805"
+    "typescript": ">=2.0.0"
   }
 }
