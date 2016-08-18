@@ -1,12 +1,15 @@
+
+
 /**
  * Responsible for observing
  * and notifying store listeners
  * with provided paths
  */
 
-import {getLogger} from 'typelogger'
+
 import {isArray} from '../util'
 import {State} from '../reducers'
+import {getLogger} from 'typelogger'
 
 const log = getLogger(__filename)
 
@@ -35,8 +38,6 @@ export class StateObserver {
 	constructor(path:string | string[],private handler) {
 		this.keyPath = path ? ((isArray(path)) ? path : path.split('.')) : []
 	}
-
-
 
 	onChange(state:State):boolean {
 		const newValue = getNewValue(state,this.keyPath)

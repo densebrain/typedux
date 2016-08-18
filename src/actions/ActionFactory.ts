@@ -1,19 +1,22 @@
-const log = getLogger(__filename)
+
 
 import {Enumerable,SelfTyped} from '../util'
 import {ActionMessage} from './ActionTypes'
 import {Action} from './ActionDecorations'
 import {getStoreStateProvider,getStoreDispatchProvider} from './Actions'
+import {getLogger} from 'typelogger'
+import {Reducer, State} from '../reducers'
+const log = getLogger(__filename)
 
 /**
  * Base class for action implementations for a given state
  *
  */
-export abstract class ActionFactory<S extends any,M extends ActionMessage<S>> {
+export abstract class ActionFactory<S extends State,M extends ActionMessage<S>> {
 
 	private _dispatcher:Function
 	private _getState:Function
-	stateType
+	stateType:any
 
 	/**
 	 * Create a new action factory that consumes and produces a specific
@@ -121,18 +124,23 @@ export abstract class ActionFactory<S extends any,M extends ActionMessage<S>> {
 	 * @param reducers
 	 * @param data
 	 * @param args
-	 * @returns {ActionMessage}
+	 * @returns {*|({leaf: string, type: string, reducers: Reducer<any, ActionMessage<any>>[], stateType: any}&{}&{args: Array})|any}
+	 * @param leaf
 	 */
-	newMessage(type:string, reducers = [],args = [], data = {}):M {
-		const messageObject = {
+	newMessage(
+		leaf:string,
+		type:string,
+		reducers:Reducer<S,ActionMessage<S>>[] = [],
+		args:any[] = [],
+		data = {}
+	):M {
+		return Object.assign({
+			leaf,
 			type,
 			reducers,
+			args,
 			stateType: this.stateType
-		} as M
-
-		Object.assign(messageObject, data,{args})
-
-		return messageObject
+		},data) as any
 	}
 
 	/**

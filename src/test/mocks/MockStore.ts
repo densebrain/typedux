@@ -1,3 +1,4 @@
+import {getLogger} from 'typelogger'
 import {Middleware,Store,Reducer,applyMiddleware,Unsubscribe,Action} from 'redux'
 import {isFunction} from '../../util'
 

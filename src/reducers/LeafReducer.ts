@@ -32,7 +32,7 @@ export interface ILeafReducer<S extends any,A extends ActionMessage<S>> {
 	/**
 	 * Get the default state
 	 */
-	defaultState():S
+	defaultState(o?:any):S
 
 
 	/**

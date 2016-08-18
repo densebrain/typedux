@@ -1,9 +1,11 @@
 import {getLogger} from 'typelogger'
 import {Reducer as ReduxReducer,Action as ReduxAction} from 'redux'
-import * as Immutable from 'immutable'
 import {State} from './State'
-import {ActionMessage} from "../actions"
+import {getAction,ActionMessage} from "../actions"
 import {ILeafReducer} from './LeafReducer'
+import {Map,Record} from 'immutable'
+import {isFunction} from '../util'
+import {getStoreStateProvider} from '../actions/Actions'
 
 const log = getLogger(__filename)
 
@@ -13,60 +15,85 @@ const log = getLogger(__filename)
  *
  * @param state
  * @returns {boolean}
+ * @param rootStateType
  */
-function stateTypeGuard(state:any):state is State {
-	return (state instanceof Immutable.Map)
+function stateTypeGuard(state:any,rootStateType = null):state is Map<string,any> {
+	return (Map.isMap(state) && (rootStateType == null || state instanceof rootStateType))
 }
+
 
 /**
  * Error handler type for root reducer
  */
 export type RootReducerErrorHandler = (err:Error,reducer?:ILeafReducer<any,any>) => void
 
-export function toJS(o:any) {
-	return (o.toJS) ? o.toJS() : o
-}
-
-export class RootReducer {
+export class RootReducer<S extends State> {
 
 	private reducers:ILeafReducer<any,ActionMessage<any>>[] = []
 
 	public onError:RootReducerErrorHandler
 
-	constructor(...reducers:ILeafReducer<any,any>[]) {
+	constructor(private rootStateType:{new():S} = null,...reducers:ILeafReducer<any,any>[]) {
 		this.reducers.push(...reducers)
 	}
 
 
-	defaultState():State {
-		let state = Immutable.Map<string,any>({})
+	defaultState(defaultStateValue:any = null):S {
+		
+		// Create the default state
+		let state = this.rootStateType ?
+			
+			// if provided
+			new (this.rootStateType as any)(defaultStateValue || {}) :
+			
+			// otherwise create map
+			Map<string,any>(defaultStateValue || {})
+
+		if (!Map.isMap(state) && !(state instanceof Record)) {
+			throw new Error('Even custom rootStateTypes MUST extends ImmutableJS record or map')
+		}
 
 		this.reducers.forEach((reducer) => {
-			const defaultState = reducer.defaultState()
-			state = state.set(reducer.leaf(), toJS(defaultState))
+			const leafDefaultStateValue = defaultStateValue && defaultStateValue[reducer.leaf()]
+			const leafDefaultState = reducer.defaultState(leafDefaultStateValue || {})
+			// if (leafDefaultState.set && leafDefaultStateValue) {
+			// 	Object.keys(leafDefaultStateValue)
+			// 		.forEach(key => leafDefaultState.set(key,leafDefaultStateValue[key]))
+			// }
+			state = state.set(reducer.leaf(), leafDefaultState)
 		})
 
-		return state
+
+
+		return state as any
 	}
 
-	makeGenericHandler<S extends State>():ReduxReducer<S> {
+	makeGenericHandler():ReduxReducer<S> {
 		return (state:S,action:ReduxAction):S => {
 			return this.handle(state,action as ActionMessage<any>) as S
 		}
 	}
 
-	handle(state:State,action:ActionMessage<any>):State {
+	handle(state:State,action:ActionMessage<any>):S {
 		try {
 			let hasChanged = false
-
+			
+			// Guard state type as immutable
 			if (!state || !stateTypeGuard(state)) {
 				state = this.defaultState()
 				hasChanged = true
 			}
-
-			let nextState = state.withMutations((tempState) => {
+			
+			const stateMap = state as Map<string,any>
+			
+			// Iterate leafs and execute actions
+			let nextState = stateMap.withMutations((tempState) => {
 				for (let reducer of this.reducers) {
 					const leaf = reducer.leaf()
+					if (action.leaf && action.leaf !== leaf)
+						continue
+
+					const actionReg = getAction(leaf,action.type)
 
 					// Get Current RAW state
 					const rawLeafState = tempState.get(leaf)
@@ -76,6 +103,7 @@ export class RootReducer {
 
 					let reducerState = startReducerState
 					let stateChangeDetected = false
+
 					try {
 						log.debug('Action type supported', leaf, action.type)
 
@@ -100,13 +128,35 @@ export class RootReducer {
 							reducerState)
 
 						// Now iterate the reducers on the message
-						if (action.reducers) {
+						if (action.reducers && action.reducers.length) {
 							action.reducers.forEach((actionReducer) => {
 								if (action.stateType && reducerState instanceof action.stateType)
 									checkReducerStateChange(actionReducer(reducerState, action))
 							})
 						}
 
+						if (actionReg && actionReg.options.isReducer) {
+							const reducerFn = actionReg.action(null,...action.args)
+							if (!reducerFn || !isFunction(reducerFn))
+								throw new Error(`Action reducer did not return a function: ${actionReg.type}`)
+
+							log.info('Calling action reducer: ',actionReg.type)
+							checkReducerStateChange(reducerFn(reducerState,getStoreStateProvider()))
+						}
+
+						if (isFunction(reducer[action.type])) {
+							checkReducerStateChange(reducer[action.type](reducerState,...action.args))
+						}
+						//NOTE: Removed in favor of new @ActionReducer
+						// else if (isFunction(reducerState[action.type])) {
+						// 	log.debug('Called reducer directly on state function',action.type)
+						// 	const reducerFn = makeMappedReducerFn(action.type,action.args)
+						// 	checkReducerStateChange(reducerFn(reducerState,action))
+						//
+						// 	// const
+						// 	// log.debug('Creating mapped handler', propertyKey)
+						// 	// finalReducers = [makeMappedReducerFn<S,M>(propertyKey,args)]
+						// }
 
 					} catch (err) {
 						log.error(`Error occurred on reducer leaf ${leaf}`, err)
@@ -118,14 +168,14 @@ export class RootReducer {
 					}
 
 					if (stateChangeDetected) {
-						tempState.set(leaf, toJS(reducerState))
+						tempState.set(leaf, reducerState)
 						hasChanged = true
 					}
 				}
 			})
 
 			log.debug('Has changed after all reducers', hasChanged, 'states equal', nextState === state)
-			return hasChanged ? nextState : state
+			return (hasChanged ? nextState : state) as S
 
 		} catch (err) {
 			log.error('Error bubbled to root reducer',err)
@@ -133,7 +183,7 @@ export class RootReducer {
 			// If error handler exists then use it
 			if (this.onError) {
 				this.onError && this.onError(err)
-				return state
+				return state as S
 			}
 
 			// Otherwise throw

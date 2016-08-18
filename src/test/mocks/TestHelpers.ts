@@ -2,7 +2,7 @@ import {Reducer} from 'redux'
 import * as Immutable from 'immutable'
 import {configureMockStore,MockStore} from './MockStore'
 import {setStoreProvider} from '../../actions'
-
+import {getLogger} from 'typelogger'
 const log = getLogger(__filename)
 
 /**

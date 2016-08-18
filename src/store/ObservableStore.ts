@@ -1,5 +1,8 @@
-import RootReducer from "../reducers/RootReducer";
+import {getLogger} from 'typelogger'
 const log = getLogger(__filename)
+
+import RootReducer from "../reducers/RootReducer"
+
 
 // Vendor
 import {
@@ -11,56 +14,50 @@ import {
 	StoreEnhancer
 } from 'redux'
 
-import {ActionMessage} from '../actions'
+import {nextTick} from '../util'
 import {State,ILeafReducer} from '../reducers'
-
-// RADS
-import {VariableProxy,nextTick} from '../util'
 import StateObserver from './StateObserver'
-
 
 /**
  * Manage the redux store for RADS
  */
 export class ObservableStore<S extends State> implements Store<S> {
 
-	private createRootReducer(...leafReducers:ILeafReducer<any,any>[]) {
-		this.rootReducer = new RootReducer(...leafReducers)
-		this.rootReducerFn = this.rootReducer.makeGenericHandler()
-
-		// <A extends ActionMessage<any>>(state:S,action:A):S => {
-		//
-		// 	return ((this.rootReducer) ?
-		// 		this.rootReducer.handle(state,action) :
-		// 		null) as S
-		// }
-	}
-
 	/**
 	 * Factory method for creating a new observable store
 	 *
 	 * @param leafReducers
 	 * @param enhancer
-	 * @returns {ObservableStore<State>}
+	 * @returns {ObservableStore<any>}
+	 * @param rootStateType
+	 * @param defaultStateValue
 	 */
-	static createObservableStore(leafReducers:ILeafReducer<any,any>[],enhancer:StoreEnhancer<any> = null):ObservableStore<State> {
-
-		return new ObservableStore(leafReducers,enhancer)
+	static createObservableStore<S extends State>(
+		leafReducers:ILeafReducer<any,any>[],
+		enhancer:StoreEnhancer<any> = null,
+		rootStateType:{new():S} = null,
+		defaultStateValue:any = null
+	):ObservableStore<State> {
+		return new ObservableStore(leafReducers,enhancer,rootStateType,defaultStateValue)
 	}
 
-	public rootReducer:RootReducer
-	
+
+	public rootReducer:RootReducer<S>
 	private observers:StateObserver[] = []
 	private rootReducerFn
 	private store
 	private pendingTick
 
-	constructor(leafReducers:ILeafReducer<any,any>[],enhancer:StoreEnhancer<S> = null) {
+	constructor(
+		leafReducers:ILeafReducer<any,any>[],
+		enhancer:StoreEnhancer<S> = null,
+		public rootStateType:{new():S} = null,
+		public defaultStateValue:any = null) {
 
 		this.createRootReducer(...leafReducers)
 		this.store = createStore(
 			this.rootReducerFn,
-			this.rootReducer.defaultState(),
+			this.rootReducer.defaultState(defaultStateValue),
 			enhancer
 		)
 
@@ -68,6 +65,19 @@ export class ObservableStore<S extends State> implements Store<S> {
 			log.debug('State changed - SCHEDULE NOTIFY')
 			this.scheduleNotification()
 		})
+	}
+
+	/**
+	 * Create a new root reducer
+	 *
+	 * @param leafReducers
+	 * @returns {any}
+	 */
+	private createRootReducer(...leafReducers:ILeafReducer<any,any>[]) {
+		this.rootReducer = new RootReducer(this.rootStateType,...leafReducers)
+		this.rootReducerFn = this.rootReducer.makeGenericHandler()
+
+		return this.rootReducerFn
 	}
 
 	/**
@@ -85,22 +95,9 @@ export class ObservableStore<S extends State> implements Store<S> {
 	 * Update the reducers
 	 */
 	replaceReducers(...leafReducers:ILeafReducer<any,any>[]):void {
-		this.rootReducerFn = this.createRootReducer(...leafReducers)
-		this.store.replaceReducer(this.rootReducerFn)
+		const rootReducerFn = this.createRootReducer(...leafReducers)
+		this.store.replaceReducer(rootReducerFn)
 	}
-
-	/**
-	 * Enable hot replace
-	 */
-	enableHot() {
-		// if (module.hot) {
-		// 	// Enable Webpack hot module replacement for reducers
-		// 	module.hot.accept('core/reducers/RootReducer', () => {
-		// 		this.replaceReducers()
-		// 	})
-		// }
-	}
-
 
 	subscribe(listener:()=>void):Unsubscribe {
 		return this.getReduxStore().subscribe(listener);
@@ -118,26 +115,28 @@ export class ObservableStore<S extends State> implements Store<S> {
 		return this.getReduxStore().getState();
 	}
 
+	/**
+	 * Dispatch typed message
+	 *
+	 * @param action
+	 * @returns {A|undefined|IAction}
+	 */
 	dispatch<A extends ReduxAction>(action:A):A {
 		return this.getReduxStore().dispatch(action)
 	}
 
 
+	/**
+	 * Schedule notifications to go out on next tick
+	 */
 	scheduleNotification() {
 		if (this.pendingTick) return;
 
 		this.pendingTick = nextTick(() => {
 			let state = this.getState();
-			//log.debug('Store updated',state === this.lastState);
 
 			this.pendingTick = null;
-			this.observers.forEach((listener) => {
-				//log.debug('notifying', listener)
-
-				listener.onChange(state)
-				// 	log.debug('state change was ignored by',listener)
-
-			})
+			this.observers.forEach((listener) => listener.onChange(state))
 		})
 	}
 
