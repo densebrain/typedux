@@ -6,7 +6,8 @@
   "typings": "dist/index.d.ts",
   "scripts": {
     "test": "gulp test",
-    "test:tag:publish": "gulp test && gulp release-tag && npm publish"
+    "test:tag:publish": "gulp test && gulp release-tag && npm publish",
+    "publish-patch": "npm version patch && git push --tags"
   },
   "repository": {
     "type": "git",
