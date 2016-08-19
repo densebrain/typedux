@@ -1,12 +1,12 @@
 
-const log = getLogger(__filename)
-
 import {isFunction} from '../util'
 import {ActionMessage} from './ActionTypes'
 import {Reducer} from '../reducers'
 import {ActionFactory} from './ActionFactory'
-import {isRecordObject} from 'typemutant'
+import {executeActionChain, registerAction, getStoreStateProvider, IActionRegistration} from './Actions'
 
+import {getLogger} from 'typelogger'
+const log = getLogger(__filename)
 
 /**
  * Dispatch an action to the redux store
@@ -18,22 +18,21 @@ import {isRecordObject} from 'typemutant'
  * @param error
  */
 
-
 export type ActionOptions = {
+	isPromise?:boolean
+	isReducer?:boolean
+	factory?:any
 	reducers?:Reducer<any,any>[]
 	mapped?:string[]
 }
 
-
 /**
- * Method decorator for actions
+ * Decorate an action with options provided
  *
  * @param options
- * @returns {function(ActionFactory<S, M>, string, PropertyDescriptor): {value: (function(...[any]): any)}}
- * @constructor
+ * @returns {(target:ActionFactory<S, M>, propertyKey:string, descriptor:TypedPropertyDescriptor<any>)=>TypedPropertyDescriptor<any>}
  */
-export function Action(options:ActionOptions = {}) {
-
+function decorateAction(options:ActionOptions = {}) {
 	/**
 	 * Decoration used on each instance
 	 */
@@ -64,41 +63,61 @@ export function Action(options:ActionOptions = {}) {
 		}
 
 
+		let reg:IActionRegistration = null
 
 		// Override the default method
-		descriptor.value = function (...args:any[]) {
+		descriptor.value = function (...preArgs:any[]) {
+			return executeActionChain(reg,(...args) => {
 
-			// Grab the current dispatcher
-			const dispatcher = this.dispatcher
+				// Grab the current dispatcher
+				const dispatcher = this.dispatcher
 
-			let data:any = (actionCreator) ? actionCreator.apply(this, args) : {}
-
-			// If we got a function/thunk/promise - return it
-			if (isFunction(data))
-				return dispatcher(data)
+				let data:any = (actionCreator && !options.isReducer) ?
+					actionCreator.apply(this, args) :
+					{}
 
 
-			// If data not returned or this is Mapped - then
-			// loop mapped args
-			if (argNames) {
-				data = mapArgs(args)
-			}
 
-			// If no reducers are passed in the map directly to state
-			let finalReducers = (reducers) ? [...reducers] : []
-			if (finalReducers.length === 0) {
-				log.debug('Creating mapped handler', propertyKey)
-				finalReducers = [makeMappedReducerFn<S,M>(propertyKey,args)]
-			}
+				// If PROMISE function then call it and return it
+				if (options.isPromise) {
+					return data(dispatcher,getStoreStateProvider())
+				}
 
-			// Create the action message -> Dispatch
-			const message = this.newMessage(propertyKey, finalReducers,args, data)
-			const dispatchResult = dispatcher(message)
-			// if (dispatchResult instanceof Promise)
-			// 	return dispatchResult
+				// If we got a function/thunk - return it
+				if (isFunction(data))
+					return dispatcher(data)
 
-			return message
+
+				// If data not returned or this is Mapped - then
+				// loop mapped args
+				if (argNames) {
+					data = mapArgs(args)
+				}
+
+				// If no reducers are passed in the map directly to state
+				let finalReducers = (reducers) ? [...reducers] : []
+
+				// Create the action message -> Dispatch
+				const message = this.newMessage(this.leaf(),propertyKey, finalReducers,args, data)
+				const dispatchResult = dispatcher(message)
+
+				return message
+			},...preArgs)
 		}
+
+		/**
+		 * If this is a reducer function, then
+		 * register the actual action
+		 */
+		const actionFn = (options.isReducer) ? actionCreator : descriptor.value
+
+		reg = registerAction(
+			target.constructor,
+			target.leaf ? target.leaf() : '__typedux',
+			propertyKey,
+			actionFn,
+			options
+		)
 
 		return descriptor
 
@@ -106,28 +125,37 @@ export function Action(options:ActionOptions = {}) {
 }
 
 /**
- * Create a simple mapped reducer fn
+ * An action that returns a reducer function
  *
- * @param propertyKey
- * @param args
- * @returns {function(S, M): S}
+ * @param options
+ * @returns {(target:ActionFactory<S, M>, propertyKey:string, descriptor:TypedPropertyDescriptor<any>)=>TypedPropertyDescriptor<any>}
+ * @constructor
  */
-function makeMappedReducerFn<S,M>(propertyKey:string,args) {
-	return (state:S, message:M):S => {
-		let stateFn = state[propertyKey]
-		if (!stateFn)
-			throw new Error(`Unable to find mapped reduce function on state ${propertyKey}`)
-
-		if (isRecordObject(state)) {
-			const newState = state.withMutation(tempState => {
-				tempState[propertyKey](...args)
-				return tempState
-			})
-
-			return  ((newState === (state as any)) ? state : newState) as S
-
-		} else {
-			return stateFn(...args)
-		}
-	}
+export function ActionReducer(options:ActionOptions = {}) {
+	return decorateAction(Object.assign({},options,{isReducer:true}))
 }
+
+
+
+/**
+ * Action that returns a promise factory function
+ *
+ * @param options
+ * @returns {(target:ActionFactory<S, M>, propertyKey:string, descriptor:TypedPropertyDescriptor<any>)=>TypedPropertyDescriptor<any>}
+ * @constructor
+ */
+export function ActionPromise(options:ActionOptions = {}) {
+	return decorateAction(Object.assign({},options,{isPromise:true}))
+}
+
+/**
+ * Method decorator for actions
+ *
+ * @param options
+ * @returns {function(ActionFactory<S, M>, string, PropertyDescriptor): {value: (function(...[any]): any)}}
+ * @constructor
+ */
+export function Action(options:ActionOptions = {}) {
+	return decorateAction(options)
+}
+

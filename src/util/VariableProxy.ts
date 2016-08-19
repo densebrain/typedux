@@ -1,11 +1,11 @@
 import {isFunction,getProperty} from "./index"
-
+import {getLogger} from 'typelogger'
 const log = getLogger(__filename)
 
 /**
  * A reloadable proxy between a target object
  * and the end consumer.
- * 
+ *
  * Implemented specifically for hot loading
  */
 export class VariableProxy<T> {

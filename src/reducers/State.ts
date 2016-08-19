@@ -1,6 +1,15 @@
 import * as Immutable from 'immutable'
 
+
+
 /**
- * Store State 
+ * Store State
  */
-export type State = Immutable.Map<string,any>
+export interface StateConstructor<T> {
+	new():T
+	new(o:any):T
+}
+
+export interface State {
+
+}

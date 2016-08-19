@@ -1,12 +1,13 @@
 {
   "name": "typedux",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Slightly adjusted Redux (awesome by default) for TS with immutablejs built in",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
     "test": "gulp test",
-    "test:tag:publish": "gulp test && gulp release-tag && npm publish"
+    "test:tag:publish": "gulp test && gulp release-tag && npm publish",
+    "publish-patch": "npm version patch && git push --tags"
   },
   "repository": {
     "type": "git",
@@ -29,19 +30,17 @@
     "redux": "^3.5.2",
     "reflect-metadata": "^0.1.3",
     "source-map-support": "^0.4.0",
-    "typelogger": "^1.0.2",
-    "typemutant": "^0.1.0"
+    "typelogger": "^1.0.2"
   },
   "devDependencies": {
-		"babel-plugin-add-module-exports": "^0.2.1",
-		"babel-preset-es2015-native-modules": "^6.6.0",
-		"babel-preset-react": "^6.5.0",
-
-		"babel-core": "^6.9.0",
+    "babel-core": "^6.9.0",
+    "babel-plugin-add-module-exports": "^0.2.1",
     "babel-plugin-transform-runtime": "^6.9.0",
     "babel-preset-es2015": "^6.9.0",
+    "babel-preset-es2015-native-modules": "^6.6.0",
+    "babel-preset-react": "^6.5.0",
     "babel-preset-stage-0": "^6.5.0",
-    "babel-register": "^6.9.0",
+    "babel-register": "^6.11.6",
     "chai": "^3.5.0",
     "del": "^2.2.0",
     "glob": "^7.0.3",
@@ -58,16 +57,10 @@
     "merge2": "^1.0.2",
     "mocha": "^2.4.5",
     "mocha-junit-reporter": "^1.11.1",
-    "react": "^15.0.2",
-    "react-dom": "^15.0.2",
-    "react-redux": "^4.4.5",
-    "redux-devtools": "^3.3.1",
-    "redux-devtools-dock-monitor": "^1.1.1",
-    "redux-devtools-inspector": "^0.5.3",
     "run-sequence": "^1.2.0",
     "semver": "^5.1.0",
     "sinon": "^1.17.4",
     "typeproject": "^1.0.19",
-    "typescript": "^1.9.0-dev.20160601-1.0"
+    "typescript": ">=2.0.0"
   }
 }

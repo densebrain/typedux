@@ -1,15 +1,14 @@
 import {installMockStoreProvider,createMockStore} from './mocks/TestHelpers'
 import {RootReducer,ILeafReducer} from '../reducers'
-import {ActionMessage,ActionFactory,Action} from '../actions'
-import * as _ from 'lodash'
+import {ActionMessage, ActionFactory, Action, ActionReducer} from '../actions'
+import {getLogger} from 'typelogger'
+import {Map,Record} from 'Immutable'
 
 const log = getLogger(__filename)
 
 installMockStoreProvider()
 
-function makeRootReducer(...leafReducers) {
-	return new RootReducer(...leafReducers)
-}
+
 
 function getDefaultState(reducer) {
 	return reducer.handle(null,{type:'@INIT'})
@@ -18,37 +17,37 @@ function getDefaultState(reducer) {
 const MockKey = 'mock'
 const MockStateStr1 = 'my first string'
 
+const MockLeafRecord = Record({
+	str1: MockStateStr1,
+	str2: null
+})
 
-class MockState {
-	str1 = MockStateStr1
+class MockLeafState extends MockLeafRecord {
+	str1:string
 	str2:string
 
 	constructor(props:any = {}) {
+		super(props)
 		Object.assign(this,props)
 	}
+}
 
-	mockUpdateFromState(newVal:string) {
-		log.debug('Updating from state reducer')
-		let newState = new MockState(this)
-		newState.str2 = newVal
 
-		return newState
-	}
+//const MapType = typeof Map<string,any>()
 
-	toJS() {
-		return this
-	}
+function makeRootReducer(...leafReducers) {
+	return new RootReducer(null,...leafReducers)
 }
 
 /**
  * Typed action message
  */
-interface MockMessage extends ActionMessage<MockState> {
+interface MockMessage extends ActionMessage<MockLeafState> {
 
 }
 
 
-class MockLeafReducer implements ILeafReducer<MockState,MockMessage> {
+class MockLeafReducer implements ILeafReducer<MockLeafState,MockMessage> {
 
 	leaf():string {
 		return MockKey;
@@ -60,15 +59,15 @@ class MockLeafReducer implements ILeafReducer<MockState,MockMessage> {
 
 
 	defaultState() {
-		return new MockState()
+		return new MockLeafState()
 	}
 }
 
 // Simple mock factory
-class MockActionFactory extends ActionFactory<MockState,MockMessage> {
+class MockActionFactory extends ActionFactory<Map<string,any>,MockMessage> {
 
 	constructor() {
-		super(MockState)
+		super(MockLeafState)
 	}
 
 	leaf():string {
@@ -77,21 +76,15 @@ class MockActionFactory extends ActionFactory<MockState,MockMessage> {
 
 
 
-	@Action({
-		reducers: [
-			(state:MockState,msg:MockMessage) => {
-				state = new MockState()
-				state.str1 = msg.args[0]
-				return state
-			}
-		]
-	})
+	@ActionReducer()
 	mockUpdate(val:string) {
-
+		return (state:Map<string,any>) => state.set('str1',val)
 	}
 
-	@Action()
-	mockUpdateFromState(newVal:string){}
+	@ActionReducer()
+	mockUpdateFromState(newVal:string) {
+		return (state:Map<string,any>) => state.set('str2', newVal)
+	}
 }
 
 
@@ -106,7 +99,6 @@ describe('#typedux',() => {
 		})
 
 		store.dispatch({type:'@INIT'})
-
 		actions = new MockActionFactory()
 	})
 
