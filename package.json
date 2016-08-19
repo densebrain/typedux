@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
+    "local-install": "rm -Rf node_modules && npm i -g redux && npm link typeproject typelogger redux && npm i && gulp compile && npm link",
     "test": "gulp test",
     "test:tag:publish": "gulp test && gulp release-tag && npm publish",
     "publish-patch": "npm version patch && git push --tags"
