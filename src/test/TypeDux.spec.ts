@@ -2,7 +2,7 @@ import {installMockStoreProvider,createMockStore} from './mocks/TestHelpers'
 import {RootReducer,ILeafReducer} from '../reducers'
 import {ActionMessage, ActionFactory, Action, ActionReducer} from '../actions'
 import {getLogger} from 'typelogger'
-import {Map,Record} from 'Immutable'
+import {Map,Record} from 'immutable'
 
 const log = getLogger(__filename)
 
@@ -17,11 +17,19 @@ function getDefaultState(reducer) {
 const MockKey = 'mock'
 const MockStateStr1 = 'my first string'
 
+/**
+ * Leaf record defines allowed props
+ *
+ * @type {Record.Class}
+ */
 const MockLeafRecord = Record({
 	str1: MockStateStr1,
 	str2: null
 })
 
+/**
+ * Mock leaf state, dumb test state with test props
+ */
 class MockLeafState extends MockLeafRecord {
 	str1:string
 	str2:string

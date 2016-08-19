@@ -1,7 +1,7 @@
 
 import {isFunction} from '../util'
 import {ActionMessage} from './ActionTypes'
-import {Reducer} from '../reducers'
+import {Reducer, State} from '../reducers'
 import {ActionFactory} from './ActionFactory'
 import {executeActionChain, registerAction, getStoreStateProvider, IActionRegistration} from './Actions'
 
@@ -36,7 +36,7 @@ function decorateAction(options:ActionOptions = {}) {
 	/**
 	 * Decoration used on each instance
 	 */
-	return function<S extends any,M extends ActionMessage<S>>(
+	return function<S extends State,M extends ActionMessage<S>>(
 		target:ActionFactory<S,M>,
 		propertyKey:string,
 		descriptor:TypedPropertyDescriptor<any>
