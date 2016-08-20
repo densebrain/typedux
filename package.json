@@ -7,6 +7,8 @@
   "scripts": {
     "test": "gulp test",
     "test:tag:publish": "gulp test && gulp release-tag && npm publish",
+    "local-install": "npm i -g redux && npm link typeproject typelogger redux && npm i && npm link",
+    "compile-watch": "gulp compile-watch",
     "publish-patch": "npm version patch && git push --tags"
   },
   "repository": {
