@@ -40,6 +40,7 @@ export class RootReducer<S extends State> {
 
 	defaultState(defaultStateValue:any = null):S {
 		
+		
 		// Create the default state
 		let state = this.rootStateType ?
 			
@@ -54,7 +55,11 @@ export class RootReducer<S extends State> {
 		}
 
 		this.reducers.forEach((reducer) => {
-			const leafDefaultStateValue = defaultStateValue && defaultStateValue[reducer.leaf()]
+			const leafDefaultStateValue = defaultStateValue &&
+				(defaultStateValue.get ?
+					defaultStateValue.get(reducer.leaf()) :
+					defaultStateValue[reducer.leaf()])
+			
 			const leafDefaultState = reducer.defaultState(leafDefaultStateValue || {})
 			// if (leafDefaultState.set && leafDefaultStateValue) {
 			// 	Object.keys(leafDefaultStateValue)
@@ -80,7 +85,7 @@ export class RootReducer<S extends State> {
 			
 			// Guard state type as immutable
 			if (!state || !stateTypeGuard(state)) {
-				state = this.defaultState()
+				state = this.defaultState(state)
 				hasChanged = true
 			}
 			

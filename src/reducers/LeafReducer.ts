@@ -54,7 +54,6 @@ export interface ILeafReducer<S extends any,A extends ActionMessage<S>> {
 	 * Handle an error occurence
 	 *
 	 * @param state
-	 * @param type
 	 * @param action
 	 * @param error
 	 */

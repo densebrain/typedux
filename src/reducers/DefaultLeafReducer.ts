@@ -25,8 +25,8 @@ export class DefaultLeafReducer<S extends any,A extends ActionMessage<S>> implem
 		return this._leaf;
 	}
 
-	defaultState():S {
-		return new (this._stateType)();
+	defaultState(o:any):S {
+		return new (this._stateType as any)(o);
 	}
 
 }
