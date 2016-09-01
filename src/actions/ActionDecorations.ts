@@ -98,7 +98,13 @@ function decorateAction(options:ActionOptions = {}) {
 				let finalReducers = (reducers) ? [...reducers] : []
 
 				// Create the action message -> Dispatch
-				const message = this.newMessage(this.leaf(),propertyKey, finalReducers,args, data)
+				const message = this.newMessage(
+					this.leaf(),
+					propertyKey,
+					finalReducers,
+					args,
+					data
+				)
 				const dispatchResult = dispatcher(message)
 
 				return message

@@ -3,9 +3,10 @@
 import {Enumerable,SelfTyped} from '../util'
 import {ActionMessage} from './ActionTypes'
 import {Action} from './ActionDecorations'
-import {getStoreStateProvider,getStoreDispatchProvider} from './Actions'
+import {getStoreStateProvider,getStoreDispatchProvider,makeLeafActionType} from './Actions'
 import {getLogger} from 'typelogger'
 import {Reducer, State} from '../reducers'
+
 const log = getLogger(__filename)
 
 /**
@@ -127,6 +128,7 @@ export abstract class ActionFactory<S extends State,M extends ActionMessage<S>> 
 	 * @returns {*|({leaf: string, type: string, reducers: Reducer<any, ActionMessage<any>>[], stateType: any}&{}&{args: Array})|any}
 	 * @param leaf
 	 */
+	
 	newMessage(
 		leaf:string,
 		type:string,
@@ -136,13 +138,14 @@ export abstract class ActionFactory<S extends State,M extends ActionMessage<S>> 
 	):M {
 		return Object.assign({
 			leaf,
-			type,
+			type: makeLeafActionType(this.leaf(),type),
 			reducers,
 			args,
 			stateType: this.stateType
 		},data) as any
 	}
-
+	
+	
 	/**
 	 * setError action applies to all states
 	 *

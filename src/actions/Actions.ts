@@ -117,10 +117,31 @@ export function executeActionChain(reg:IActionRegistration,action:Function,...ar
 
 export type ActionFactoryDecorator<T> = (factory:{new():T}) => T
 
-export function registerAction(actionFactory:any,leaf:string,type:string,action:Function,options:ActionOptions) {
+/**
+ * Create a fully qualified action type
+ *
+ * @param leaf
+ * @param type
+ *
+ * @returns {string}
+ */
+export function makeLeafActionType(leaf:string,type:string) {
+	return type.indexOf('.') > -1 ? type : `${leaf}.${type}`
+}
+
+/**
+ * Register an action from a decoration usually
+ *
+ * @param actionFactory
+ * @param leaf
+ * @param type
+ * @param action
+ * @param options
+ */
+export function registerAction(actionFactory:any,leaf:string,type:string,action:Function,options:ActionOptions):IActionRegistration {
 	const reg = {
 		type,
-		fullName: `${leaf}:${type}`,
+		fullName: makeLeafActionType(leaf,type),
 		leaf,
 		options,
 		actionFactory,
@@ -141,7 +162,14 @@ export function registerAction(actionFactory:any,leaf:string,type:string,action:
 }
 
 
-export function getAction(leaf:string,name:string):IActionRegistration {
-	return registeredActions[`${leaf}:${name}`]
+/**
+ * Retrieve a registered leaf action
+ *
+ * @param leaf
+ * @param type
+ * @returns {IActionRegistration}
+ */
+export function getAction(leaf:string,type:string):IActionRegistration {
+	return registeredActions[makeLeafActionType(leaf,type)]
 }
 

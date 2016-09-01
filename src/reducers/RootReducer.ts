@@ -55,6 +55,7 @@ export class RootReducer<S extends State> {
 		}
 
 		this.reducers.forEach((reducer) => {
+			log.info(`Default state for leaf: ${reducer.leaf()}`)
 			const leafDefaultStateValue = defaultStateValue &&
 				(defaultStateValue.get ?
 					defaultStateValue.get(reducer.leaf()) :
@@ -98,16 +99,19 @@ export class RootReducer<S extends State> {
 					if (action.leaf && action.leaf !== leaf)
 						continue
 
-					const actionReg = getAction(leaf,action.type)
+					const
+						// Get the action registration
+						actionReg = getAction(leaf,action.type),
 
-					// Get Current RAW state
-					const rawLeafState = tempState.get(leaf)
+						// Get Current RAW state
+						rawLeafState = tempState.get(leaf),
 
-					// Shape it for the reducer
-					const startReducerState = reducer.prepareState(rawLeafState)
+						// Shape it for the reducer
+						startReducerState = reducer.prepareState(rawLeafState)
 
-					let reducerState = startReducerState
-					let stateChangeDetected = false
+					let
+						reducerState = startReducerState,
+						stateChangeDetected = false
 
 					try {
 						log.debug('Action type supported', leaf, action.type)
@@ -142,8 +146,10 @@ export class RootReducer<S extends State> {
 
 						if (actionReg && actionReg.options.isReducer) {
 							const reducerFn = actionReg.action(null,...action.args)
-							if (!reducerFn || !isFunction(reducerFn))
+							if (!reducerFn || !isFunction(reducerFn)) {
+								//noinspection ExceptionCaughtLocallyJS
 								throw new Error(`Action reducer did not return a function: ${actionReg.type}`)
+							}
 
 							log.info('Calling action reducer: ',actionReg.type)
 							checkReducerStateChange(reducerFn(reducerState,getStoreStateProvider()))
