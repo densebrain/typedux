@@ -30,12 +30,10 @@ export type ActionOptions = {
  * Decorate an action with options provided
  *
  * @param options
- * @returns {(target:ActionFactory<S, M>, propertyKey:string, descriptor:TypedPropertyDescriptor<any>)=>TypedPropertyDescriptor<any>}
  */
 function decorateAction(options:ActionOptions = {}) {
-	/**
-	 * Decoration used on each instance
-	 */
+	
+	// Actual decorator is returned
 	return function<S extends State,M extends ActionMessage<S>>(
 		target:ActionFactory<S,M>,
 		propertyKey:string,
@@ -105,7 +103,9 @@ function decorateAction(options:ActionOptions = {}) {
 					args,
 					data
 				)
-				const dispatchResult = dispatcher(message)
+				
+				// Dispatch the message
+				dispatcher(message)
 
 				return message
 			},...preArgs)
