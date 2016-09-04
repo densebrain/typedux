@@ -138,6 +138,7 @@ export function makeLeafActionType(leaf:string,type:string) {
  * @param action
  * @param options
  */
+
 export function registerAction(actionFactory:any,leaf:string,type:string,action:Function,options:ActionOptions):IActionRegistration {
 	const reg = {
 		type,

@@ -5,10 +5,9 @@
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "local-install": "rm -Rf node_modules && npm i -g redux && npm link typeproject typelogger redux && npm i && gulp compile && npm link",
+    "local-install": "npm i -g redux && npm link typeproject typelogger redux && npm i && npm link",
     "test": "gulp test",
     "test:tag:publish": "gulp test && gulp release-tag && npm publish",
-    "local-install": "npm i -g redux && npm link typeproject typelogger redux && npm i && npm link",
     "compile-watch": "gulp compile-watch",
     "publish-patch": "npm version patch && git push --tags"
   },
@@ -63,6 +62,7 @@
     "run-sequence": "^1.2.0",
     "semver": "^5.1.0",
     "sinon": "^1.17.4",
+    "source-map-loader": "^0.1.5",
     "typeproject": "^1.1.2",
     "typescript": ">=2.0.0"
   }

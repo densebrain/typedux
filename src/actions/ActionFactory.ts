@@ -129,6 +129,7 @@ export abstract class ActionFactory<S extends State,M extends ActionMessage<S>> 
 	 * @param leaf
 	 */
 	
+	
 	newMessage(
 		leaf:string,
 		type:string,
