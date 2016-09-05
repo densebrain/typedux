@@ -6,6 +6,7 @@ import {ILeafReducer} from './LeafReducer'
 import {Map,Record} from 'immutable'
 import {isFunction} from '../util'
 import {getStoreStateProvider} from '../actions/Actions'
+
 import {INTERNAL_ACTIONS, INTERNAL_ACTION} from "../Constants"
 import * as _get from 'lodash/get'
 

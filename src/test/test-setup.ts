@@ -1,3 +1,5 @@
+require('babel-polyfill')
+
 import '../index'
 import * as sinonGlobal from 'sinon'
 import * as chaiGlobal from 'chai'

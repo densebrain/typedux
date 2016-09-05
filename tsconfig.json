@@ -20,7 +20,7 @@
 		"inlineSourceMap": true,
 		"jsx": "react",
 		"baseUrl": "./",
-		"outDir": "dist",
+		"outDir": "./dist",
 		"typeRoots": [
 			"./node_modules/@types",
 			"./typings"
