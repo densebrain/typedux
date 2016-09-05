@@ -1,6 +1,6 @@
 import {ILeafReducer} from './LeafReducer'
 import {ActionMessage} from '../actions'
-
+import {isString,isFunction} from '../util'
 
 
 export class DefaultLeafReducer<S extends any,A extends ActionMessage<S>> implements ILeafReducer<S,A> {
@@ -27,6 +27,18 @@ export class DefaultLeafReducer<S extends any,A extends ActionMessage<S>> implem
 
 	defaultState(o:any):S {
 		return new (this._stateType as any)(o);
+	}
+	
+	equals(o) {
+		const otherLeaf = isString(o) ? o :
+			(o && isFunction(o.leaf)) ? o.leaf() :
+				null
+		
+		return (otherLeaf && otherLeaf === o.leaf())
+	}
+	
+	valueOf() {
+		return this.leaf()
 	}
 
 }

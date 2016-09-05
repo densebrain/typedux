@@ -7,7 +7,9 @@ import {getStoreStateProvider,getStoreDispatchProvider,makeLeafActionType} from 
 import {getLogger} from 'typelogger'
 import {Reducer, State} from '../reducers'
 
-const log = getLogger(__filename)
+const
+	uuid = require('node-uuid'),
+	log = getLogger(__filename)
 
 /**
  * Base class for action implementations for a given state
@@ -121,6 +123,7 @@ export abstract class ActionFactory<S extends State,M extends ActionMessage<S>> 
 	 * Create a new action message object that
 	 * fits the shape defined by the generic M
 	 *
+	 * @param id
 	 * @param type
 	 * @param reducers
 	 * @param data
@@ -131,6 +134,7 @@ export abstract class ActionFactory<S extends State,M extends ActionMessage<S>> 
 	
 	
 	newMessage(
+		id:string,
 		leaf:string,
 		type:string,
 		reducers:Reducer<S,ActionMessage<S>>[] = [],
@@ -138,6 +142,7 @@ export abstract class ActionFactory<S extends State,M extends ActionMessage<S>> 
 		data = {}
 	):M {
 		return Object.assign({
+			id: id || uuid.v4(),
 			leaf,
 			type: makeLeafActionType(this.leaf(),type),
 			reducers,

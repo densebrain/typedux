@@ -15,6 +15,17 @@ export function isFunction(o:any):o is Function {
 	return typeof o === 'function'
 }
 
+/**
+ * is string
+ *
+ * @param o
+ * @returns {boolean}
+ */
+export function isString(o:any):o is String {
+	return typeof o === 'string'
+}
+
+
 export function isPromise(o:any):o is Promise<any> {
 	return o instanceof Promise || (o && isFunction(o.then))
 }

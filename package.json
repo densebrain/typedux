@@ -27,10 +27,11 @@
   },
   "homepage": "https://github.com/densebrain/typedux#readme",
   "dependencies": {
-    "reflect-metadata": "^0.1.3",
-    "immutable": "^3.8.1",
-    "redux": "^3.5.2",
     "browser-next-tick": "^1.1.0",
+    "immutable": "^3.8.1",
+    "node-uuid": "^1.4.7",
+    "redux": "^3.5.2",
+    "reflect-metadata": "^0.1.3",
     "source-map-support": "^0.4.0",
     "typelogger": "^1.0.2"
   },

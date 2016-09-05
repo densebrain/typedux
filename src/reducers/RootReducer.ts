@@ -7,7 +7,9 @@ import {Map,Record} from 'immutable'
 import {isFunction} from '../util'
 import {getStoreStateProvider} from '../actions/Actions'
 
-const log = getLogger(__filename)
+const
+	ActionIdCacheMax = 500,
+	log = getLogger(__filename)
 
 /**
  * Ensure the state we get back is still
@@ -27,17 +29,53 @@ function stateTypeGuard(state:any,rootStateType = null):state is Map<string,any>
  */
 export type RootReducerErrorHandler = (err:Error,reducer?:ILeafReducer<any,any>) => void
 
+/**
+ * RootReducer for typedux apps
+ *
+ * Maps leaf reducers and decorated reducers
+ * to the appropriate state functions
+ */
 export class RootReducer<S extends State> {
 
+	// Internal list of all leaf reducers
 	private reducers:ILeafReducer<any,ActionMessage<any>>[] = []
-
+	
+	// handled actions ids to avoid duplication
+	private handledActionIds = []
+	
+	/**
+	 * onError ref, allows an error handler to
+	 * be assigned to the reducer
+	 */
 	public onError:RootReducerErrorHandler
-
+	
+	
+	/**
+	 * Create reducer
+	 *
+	 * @param rootStateType - type of root state, must be immutable map or record
+	 * @param reducers - list of all child reducers
+	 */
 	constructor(private rootStateType:{new():S} = null,...reducers:ILeafReducer<any,any>[]) {
-		this.reducers.push(...reducers)
+		const leafs = []
+		reducers.forEach(reducer => {
+			const leaf = reducer.leaf()
+			if (leafs.includes(leaf))
+				return
+			
+			leafs.push(leaf)
+			this.reducers.push(reducer)
+		})
+		
 	}
-
-
+	
+	
+	/**
+	 * Create default state
+	 *
+	 * @param defaultStateValue - if provided then its used as base for inflation
+	 * @returns {State}
+	 */
 	defaultState(defaultStateValue:any = null):S {
 		
 		
@@ -73,14 +111,40 @@ export class RootReducer<S extends State> {
 
 		return state as any
 	}
-
+	
+	/**
+	 * Create a generic handler for dispatches
+	 *
+	 * @returns {(state:S, action:ReduxAction)=>S}
+	 */
 	makeGenericHandler():ReduxReducer<S> {
 		return (state:S,action:ReduxAction):S => {
 			return this.handle(state,action as ActionMessage<any>) as S
 		}
 	}
-
-	handle(state:State,action:ActionMessage<any>):S {
+	
+	/**
+	 * Handle action message
+	 *
+	 * @param state
+	 * @param action
+	 * @returns {State}
+	 */
+	handle(state:S,action:ActionMessage<any>):S {
+		
+		// Check if action has already been processed
+		if (action.id && this.handledActionIds.includes(action.id)) {
+			if (typeof console !== 'undefined' && console.trace)
+				console.trace(`Duplicate action received: ${action.leaf}/${action.type}, ${action.id}`,action)
+			return state as S
+		}
+		
+		// Push action id to the handled list
+		if (action.id) {
+			this.handledActionIds.unshift(action.id)
+			if (this.handledActionIds.length > ActionIdCacheMax)
+				this.handledActionIds.length = ActionIdCacheMax
+		}
 		try {
 			let hasChanged = false
 			
@@ -90,7 +154,7 @@ export class RootReducer<S extends State> {
 				hasChanged = true
 			}
 			
-			const stateMap = state as Map<string,any>
+			const stateMap:Map<string,any> = state as any
 			
 			// Iterate leafs and execute actions
 			let nextState = stateMap.withMutations((tempState) => {
@@ -185,7 +249,7 @@ export class RootReducer<S extends State> {
 				}
 			})
 
-			log.debug('Has changed after all reducers', hasChanged, 'states equal', nextState === state)
+			log.debug('Has changed after all reducers', hasChanged, 'states equal', (nextState as any) === state)
 			return (hasChanged ? nextState : state) as S
 
 		} catch (err) {
@@ -203,6 +267,7 @@ export class RootReducer<S extends State> {
 	}
 }
 
+// Export the RootReducer class as the default
 export default RootReducer
 
 // export default (state:any,action:any):any => {

@@ -5,7 +5,11 @@ import {Store,Dispatch} from 'redux'
 import {State} from '../reducers'
 import {getLogger} from 'typelogger'
 import {ActionOptions} from './ActionDecorations'
-const log = getLogger(__filename)
+
+
+const
+	uuid = require('node-uuid'),
+	log = getLogger(__filename)
 
 // Internal type definition for
 // function that gets the store state
@@ -100,19 +104,33 @@ export function addActionInterceptor(interceptor:IActionInterceptor) {
 	}
 }
 
-function executeActionInterceptor(index:number,reg:IActionRegistration,action:Function,args:any[]) {
+function executeActionInterceptor(
+	index:number,
+	reg:IActionRegistration,
+	actionId:string,
+	action:Function,
+	args:any[]
+) {
 	if (actionInterceptors.length > index) {
 		return actionInterceptors[index](reg,() => {
-			return executeActionInterceptor(index + 1,reg,action,args)
+			return executeActionInterceptor(
+				index + 1,
+				reg,
+				actionId,
+				action,
+				args
+			)
 		},...args)
 	} else {
-		return action(...args)
+		return action(actionId,...args)
 	}
 }
 
-export function executeActionChain(reg:IActionRegistration,action:Function,...args:any[]) {
-
-	return executeActionInterceptor(0,reg,action,args)
+export function executeActionChain(reg:IActionRegistration,actionFn:Function,...args:any[]) {
+	
+	const actionId = uuid.v4()
+	
+	return executeActionInterceptor(0,reg,actionId,actionFn,args)
 }
 
 export type ActionFactoryDecorator<T> = (factory:{new():T}) => T

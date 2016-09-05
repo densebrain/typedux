@@ -65,7 +65,7 @@ function decorateAction(options:ActionOptions = {}) {
 
 		// Override the default method
 		descriptor.value = function (...preArgs:any[]) {
-			return executeActionChain(reg,(...args) => {
+			return executeActionChain(reg,(id,...args) => {
 
 				// Grab the current dispatcher
 				const dispatcher = this.dispatcher
@@ -97,6 +97,7 @@ function decorateAction(options:ActionOptions = {}) {
 
 				// Create the action message -> Dispatch
 				const message = this.newMessage(
+					id,
 					this.leaf(),
 					propertyKey,
 					finalReducers,
