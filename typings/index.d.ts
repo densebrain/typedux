@@ -1,7 +1,9 @@
-import {getLogger as LoggerFactory} from 'typelogger'
-
-declare namespace NodeJS {
-	interface Global {
-		getLogger:typeof LoggerFactory
-	}
-}
+/// <reference path="globals/chai/index.d.ts" />
+/// <reference path="globals/mocha/index.d.ts" />
+/// <reference path="globals/node/index.d.ts" />
+/// <reference path="globals/react-dom/index.d.ts" />
+/// <reference path="globals/react/index.d.ts" />
+/// <reference path="globals/redux-devtools-dock-monitor/index.d.ts" />
+/// <reference path="globals/redux-devtools/index.d.ts" />
+/// <reference path="globals/sinon/index.d.ts" />
+/// <reference path="custom/webpack-env/index.d.ts" />

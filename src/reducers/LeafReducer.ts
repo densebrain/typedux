@@ -42,7 +42,14 @@ export interface ILeafReducer<S extends any,A extends ActionMessage<S>> {
 	 * @param o
 	 */
 	prepareState(o:any|S):S
-
+	
+	/**
+	 * Optional init function coverage
+	 *
+	 * @param state
+	 */
+	init?:(state:S) => S
+	
 	/**
 	 * Handle an incoming action
 	 * @param state

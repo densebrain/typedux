@@ -93,7 +93,12 @@ export function setStoreProvider(newDispatch:DispatchState|Store<State>,newGetSt
 }
 
 
-
+/**
+ * Add an interceptor
+ *
+ * @param interceptor
+ * @returns {()=>undefined}
+ */
 export function addActionInterceptor(interceptor:IActionInterceptor) {
 	actionInterceptors.push(interceptor)
 
@@ -104,6 +109,16 @@ export function addActionInterceptor(interceptor:IActionInterceptor) {
 	}
 }
 
+/**
+ * Execute an interceptor at a specific index
+ *
+ * @param index
+ * @param reg
+ * @param actionId
+ * @param action
+ * @param args
+ * @returns {any}
+ */
 function executeActionInterceptor(
 	index:number,
 	reg:IActionRegistration,
@@ -126,11 +141,16 @@ function executeActionInterceptor(
 	}
 }
 
+/**
+ * Execute a given action chain
+ *
+ * @param reg
+ * @param actionFn
+ * @param args
+ * @returns {any|any}
+ */
 export function executeActionChain(reg:IActionRegistration,actionFn:Function,...args:any[]) {
-	
-	const actionId = uuid.v4()
-	
-	return executeActionInterceptor(0,reg,actionId,actionFn,args)
+	return executeActionInterceptor(0,reg,uuid.v4(),actionFn,args)
 }
 
 export type ActionFactoryDecorator<T> = (factory:{new():T}) => T

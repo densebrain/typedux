@@ -2,6 +2,7 @@
 	"compilerOptions": {
 		"target": "es5",
 		"lib": [
+			"es6",
 			"es7",
 			"es2015",
 			"es2016",
@@ -20,15 +21,14 @@
 		"jsx": "react",
 		"baseUrl": "./",
 		"outDir": "dist",
-		"paths": {
-			"typedux": ["./src/index"],
-			"typedux/*": ["./src/*"]
-		}
+		"typeRoots": [
+			"./node_modules/@types",
+			"./typings"
+		]
+		
 	},
 	"exclude": [
 		"node_modules",
-		"typings/main.d.ts",
-		"typings/main",
 		"dist"
 	]
 }

@@ -27,8 +27,10 @@
   },
   "homepage": "https://github.com/densebrain/typedux#readme",
   "dependencies": {
+    "@types/lodash": "^4.14.34",
     "browser-next-tick": "^1.1.0",
     "immutable": "^3.8.1",
+    "lodash": "^4.13.1",
     "node-uuid": "^1.4.7",
     "redux": "^3.5.2",
     "reflect-metadata": "^0.1.3",
@@ -56,7 +58,6 @@
     "gulp-sourcemaps": "^1.6.0",
     "gulp-typescript": "^2.13.4",
     "gulp-util": "^3.0.7",
-    "lodash": "^4.13.1",
     "merge2": "^1.0.2",
     "mocha": "^2.4.5",
     "mocha-junit-reporter": "^1.11.1",

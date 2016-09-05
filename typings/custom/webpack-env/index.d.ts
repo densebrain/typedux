@@ -7,13 +7,16 @@
  * Webpack module API - variables and global functions available inside modules
  */
 
-declare namespace __WebpackModuleApi {
-	interface RequireContext {
-		keys(): string[];
-		<T>(id: string): T;
-		resolve(id: string): string;
-	}
+interface RequireContext {
+	id:string;
+	keys(): string[];
+	<T>(id: string): T;
+	resolve(id: string): string;
+}
 
+declare namespace __WebpackModuleApi {
+	
+	
 	interface RequireFunction {
 		/**
 		 * Returns the exports from a dependency. The call is sync. No request to the server is fired. The compiler ensures that the dependency is available.
@@ -51,7 +54,7 @@ declare namespace __WebpackModuleApi {
 			[id: string]: any;
 		}
 	}
-
+	
 	interface Module {
 		exports: any;
 		require(id: string): any;
@@ -63,7 +66,7 @@ declare namespace __WebpackModuleApi {
 		hot: Hot;
 	}
 	type ModuleId = string|number;
-
+	
 	interface Hot {
 		/**
 		 * Accept code updates for the specified dependencies. The callback is called when dependencies were replaced.
@@ -163,11 +166,11 @@ declare namespace __WebpackModuleApi {
 		 * @param callback
 		 */
 		removeStatusHandler(callback: (status: string) => void): void;
-
+		
 		active: boolean;
 		data: {};
 	}
-
+	
 	interface AcceptOptions {
 		/**
 		 * If true the update process continues even if some modules are not accepted (and would bubble to the entry point).
@@ -232,9 +235,9 @@ declare var DEBUG: boolean;
 //declare var module: __WebpackModuleApi.Module;
 
 interface NodeRequire  extends NodeRequireFunction, __WebpackModuleApi.RequireFunction {
-
+	
 }
 
 interface NodeModule extends __WebpackModuleApi.Module {
-
+	
 }

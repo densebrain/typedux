@@ -2,20 +2,20 @@
   "name": "typedux",
   "version": false,
   "dependencies": {},
-  "ambientDependencies": {
-    "node": "registry:dt/node#6.0.0+20160514165920"
+  "globalDependencies": {
+    "node": "registry:dt/node#6.0.0+20160524002506"
   },
-  "ambientDevDependencies": {
-    "chai": "registry:dt/chai#3.4.0+20160317120654",
-    "mocha": "registry:dt/mocha#2.2.5+20160317120654",
+  "globalDevDependencies": {
+    "chai": "registry:dt/chai#3.4.0+20160601211834",
+    "mocha": "registry:env/mocha#2.2.5+20160723033700",
     "react": "registry:dt/react#0.14.0+20160423065914",
     "react-dom": "registry:dt/react-dom#0.14.0+20160412154040",
     "redux-devtools": "registry:dt/redux-devtools#3.0.0+20151215130854",
-    "redux-devtools-dock-monitor": "registry:dt/redux-devtools-dock-monitor#1.0.1+20151216103641"
+    "redux-devtools-dock-monitor": "registry:dt/redux-devtools-dock-monitor#1.0.1+20151216103641",
+    "sinon": "registry:dt/sinon#1.16.0+20160517064723"
   },
   "devDependencies": {
     "chai": "registry:npm/chai#3.5.0+20160415060238",
-    "lodash": "registry:npm/lodash#4.0.0+20160416211519",
     "sinon": "registry:npm/sinon#1.16.0+20160427193336"
   }
 }

@@ -6,6 +6,8 @@ import {ILeafReducer} from './LeafReducer'
 import {Map,Record} from 'immutable'
 import {isFunction} from '../util'
 import {getStoreStateProvider} from '../actions/Actions'
+import {INTERNAL_ACTIONS, INTERNAL_ACTION} from "../Constants"
+import * as _get from 'lodash/get'
 
 const
 	ActionIdCacheMax = 500,
@@ -159,27 +161,25 @@ export class RootReducer<S extends State> {
 			// Iterate leafs and execute actions
 			let nextState = stateMap.withMutations((tempState) => {
 				for (let reducer of this.reducers) {
-					const leaf = reducer.leaf()
-					if (action.leaf && action.leaf !== leaf)
-						continue
-
 					const
-						// Get the action registration
-						actionReg = getAction(leaf,action.type),
-
+						// Get the reducer leaf
+						leaf = reducer.leaf(),
+						
 						// Get Current RAW state
 						rawLeafState = tempState.get(leaf),
-
+						
 						// Shape it for the reducer
 						startReducerState = reducer.prepareState(rawLeafState)
-
+					
 					let
 						reducerState = startReducerState,
 						stateChangeDetected = false
-
+					
 					try {
-						log.debug('Action type supported', leaf, action.type)
-
+						
+						
+						
+						
 						/**
 						 * Check the returned state from every handler for changes
 						 *
@@ -188,26 +188,39 @@ export class RootReducer<S extends State> {
 						const checkReducerStateChange = (newReducerState) => {
 							if (!newReducerState)
 								throw new Error(`New reducer state is null for leaf ${leaf}`)
-
-
+							
+							
 							stateChangeDetected = stateChangeDetected || reducerState !== newReducerState
 							reducerState = newReducerState
 							//log.debug("State change detected",stateChangeDetected)
 						}
+						
+						// Check internal actions
+						if (INTERNAL_ACTIONS.includes(action.type)) {
+							log.info(`Sending init event to ${leaf} - internal action received ${action.type}`)
+							
+							if (INTERNAL_ACTION.INIT === action.type && reducer.init)
+								checkReducerStateChange(reducer.init(startReducerState))
+						}
+						
+						// Check leaf of reducer and action to see if this reducer handles the supplied action
+						if (action.leaf && action.leaf !== leaf)
+							continue
+						
+						// Get the action registration
+						const actionReg = getAction(leaf,action.type)
+						
+						log.debug('Action type supported', leaf, action.type)
 
 						// First check the reducer itself
-						checkReducerStateChange((reducer.handle) ?
-							reducer.handle(reducerState, action) :
-							reducerState)
+						if (reducer.handle)
+							checkReducerStateChange(reducer.handle(reducerState, action))
 
 						// Now iterate the reducers on the message
-						if (action.reducers && action.reducers.length) {
-							action.reducers.forEach((actionReducer) => {
-								if (action.stateType && reducerState instanceof action.stateType)
-									checkReducerStateChange(actionReducer(reducerState, action))
-							})
-						}
-
+						if (action.stateType && reducerState instanceof action.stateType)
+							_get(action,'reducers',[]).forEach((actionReducer) =>
+									checkReducerStateChange(actionReducer(reducerState, action)))
+						
 						if (actionReg && actionReg.options.isReducer) {
 							const reducerFn = actionReg.action(null,...action.args)
 							if (!reducerFn || !isFunction(reducerFn)) {
