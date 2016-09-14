@@ -5,7 +5,7 @@ import {Store,Dispatch} from 'redux'
 import {State} from '../reducers'
 import {getLogger} from 'typelogger'
 import {ActionOptions} from './ActionDecorations'
-
+import _cloneDeep = require('lodash/cloneDeep')
 
 const
 	uuid = require('node-uuid'),
@@ -212,3 +212,7 @@ export function getAction(leaf:string,type:string):IActionRegistration {
 	return registeredActions[makeLeafActionType(leaf,type)]
 }
 
+
+export function getAllActions() {
+	return _cloneDeep(registeredActions)
+}

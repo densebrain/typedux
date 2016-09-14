@@ -16,7 +16,8 @@ import {
 
 import {nextTick} from '../util'
 import {State,ILeafReducer} from '../reducers'
-import StateObserver from './StateObserver'
+import StateObserver,{ TStateChangeHandler } from './StateObserver'
+
 
 /**
  * Manage the redux store for RADS
@@ -155,7 +156,7 @@ export class ObservableStore<S extends State> implements Store<S> {
 	 * @param handler
 	 * @returns {function()} unsubscribe observer
 	 */
-	observe(path:string|string[], handler) {
+	observe(path:string|string[], handler:TStateChangeHandler) {
 		let observer = new StateObserver(path,handler)
 		this.observers.push(observer)
 

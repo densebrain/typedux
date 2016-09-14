@@ -1,4 +1,5 @@
 import {getLogger} from 'typelogger'
+
 import {Reducer as ReduxReducer,Action as ReduxAction} from 'redux'
 import {State} from './State'
 import {getAction,ActionMessage} from "../actions"
@@ -81,22 +82,42 @@ export class RootReducer<S extends State> {
 	 */
 	defaultState(defaultStateValue:any = null):S {
 		
+		const defaultStateTypeName = _.get(defaultStateValue,'prototype.name',_.get(defaultStateValue,'prototype.constructor.name','NULL!'))
 		
+		//log.info(`Default STATE value (type=${typeof defaultStateValue},name=${defaultStateTypeName})`,defaultStateValue)
 		// Create the default state
-		let state = this.rootStateType ?
-			
-			// if provided
-			new (this.rootStateType as any)(defaultStateValue || {}) :
-			
-			// otherwise create map
-			Map<string,any>(defaultStateValue || {})
+		
+		const loadState = () =>{
+			try {
+				return this.rootStateType ?
+					
+					// if provided
+					new (this.rootStateType as any)(defaultStateValue || {}) :
+					
+					(Map.isMap(defaultStateValue) || defaultStateValue instanceof Record) ?
+						defaultStateValue :
+						
+						// otherwise create map
+						Map<string,any>(defaultStateValue || {})
+			} catch (err) {
+				log.error(`Failed to load state (using default state=${!!defaultStateValue})`,err)
+				if (defaultStateValue) {
+					defaultStateValue = null
+					return loadState()
+				}
+				throw err
+					
+			}
+		}
+		
+		let state = loadState()
 
 		if (!Map.isMap(state) && !(state instanceof Record)) {
 			throw new Error('Even custom rootStateTypes MUST extends ImmutableJS record or map')
 		}
 
 		this.reducers.forEach((reducer) => {
-			log.info(`Default state for leaf: ${reducer.leaf()}`)
+			//log.info(`Default state for leaf: ${reducer.leaf()}`)
 			const leafDefaultStateValue = defaultStateValue &&
 				(defaultStateValue.get ?
 					defaultStateValue.get(reducer.leaf()) :

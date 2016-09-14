@@ -19,7 +19,7 @@
 		"sourceMap": true,
 		"inlineSourceMap": true,
 		"jsx": "react",
-		"baseUrl": "./",
+		"baseUrl": "./src",
 		"outDir": "./dist",
 		"typeRoots": [
 			"./node_modules/@types",

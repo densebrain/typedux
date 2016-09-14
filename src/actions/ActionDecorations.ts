@@ -39,27 +39,28 @@ function decorateAction(options:ActionOptions = {}) {
 		propertyKey:string,
 		descriptor:TypedPropertyDescriptor<any>
 	) {
-		const actionCreator = descriptor.value
-		const {mapped:argNames, reducers} = options
+		const
+			actionCreator = descriptor.value,
+			{mapped:argNames, reducers} = options,
 
 
-		// Build arg mapping function
-		const mapArgs = (!argNames || argNames.length === 0) ? null : (args) => {
-			const data:any = {}
-			if (!argNames || argNames.length !== args.length) {
-				const msg = `Action descriptor for ${propertyKey}, received no method or argNames length did not match arg length - args = ${(args.join(', '))} 
-						- argNames = ${(argNames || []).join(', ')}`
-				log.error(msg, args, argNames, propertyKey, descriptor)
-				throw new Error(msg)
+			// Build arg mapping function
+			mapArgs = (!argNames || argNames.length === 0) ? null : (args) => {
+				const data:any = {}
+				if (!argNames || argNames.length !== args.length) {
+					const msg = `Action descriptor for ${propertyKey}, received no method or argNames length did not match arg length - args = ${(args.join(', '))} 
+							- argNames = ${(argNames || []).join(', ')}`
+					log.error(msg, args, argNames, propertyKey, descriptor)
+					throw new Error(msg)
+				}
+	
+				argNames.forEach((argName, index) => {
+					data[argName] = args[index]
+				})
+	
+				return data
 			}
-
-			argNames.forEach((argName, index) => {
-				data[argName] = args[index]
-			})
-
-			return data
-		}
-
+	
 
 		let reg:IActionRegistration = null
 
@@ -82,7 +83,7 @@ function decorateAction(options:ActionOptions = {}) {
 				}
 
 				// If we got a function/thunk - return it
-				if (isFunction(data))
+				if (isFunction(data) && !options.isReducer)
 					return dispatcher(data)
 
 

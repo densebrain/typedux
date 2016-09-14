@@ -28,14 +28,30 @@ function getNewValue(state:any,keyPath:string[]) {
 	return newValue
 }
 
-export class StateObserver {
+export type TStateChangeHandler = (newValue:any,oldValue:any,observer:StateObserver) => any
 
+export class StateObserver {
+	
+	/**
+	 * Last value received
+	 */
+	private cachedValue
+	
+	/**
+	 * The key path to watch
+	 */
+	private keyPath:string[]
+	
+	/**
+	 * Flags when the observer has been removed
+	 *
+	 * @type {boolean}
+	 */
 	removed:boolean = false
 
-	private cachedValue
-	private keyPath:string[]
+	
 
-	constructor(path:string | string[],private handler) {
+	constructor(path:string | string[],private handler:TStateChangeHandler) {
 		this.keyPath = path ? ((isArray(path)) ? path : path.split('.')) : []
 	}
 
@@ -44,7 +60,9 @@ export class StateObserver {
 
 		// Check for change/diff
 		let cachedValue = this.cachedValue
-		if (newValue === cachedValue) return false
+		
+		if (newValue === cachedValue)
+			return false
 
 		// Update the old ref
 		this.cachedValue = newValue
