@@ -4,9 +4,10 @@ import {ActionMessage} from './ActionTypes'
 import {Reducer, State} from '../reducers'
 import {ActionFactory} from './ActionFactory'
 import {executeActionChain, registerAction, getStoreStateProvider, IActionRegistration} from './Actions'
-
 import {getLogger} from 'typelogger'
-const log = getLogger(__filename)
+
+const
+	log = getLogger(__filename)
 
 /**
  * Dispatch an action to the redux store
@@ -31,7 +32,7 @@ export type ActionOptions = {
  *
  * @param options
  */
-function decorateAction(options:ActionOptions = {}) {
+function actionDecorator(options:ActionOptions = {}) {
 	
 	// Actual decorator is returned
 	return function<S extends State,M extends ActionMessage<S>>(
@@ -140,7 +141,7 @@ function decorateAction(options:ActionOptions = {}) {
  * @constructor
  */
 export function ActionReducer(options:ActionOptions = {}) {
-	return decorateAction(Object.assign({},options,{isReducer:true}))
+	return actionDecorator(Object.assign({},options,{isReducer:true}))
 }
 
 
@@ -153,17 +154,17 @@ export function ActionReducer(options:ActionOptions = {}) {
  * @constructor
  */
 export function ActionPromise(options:ActionOptions = {}) {
-	return decorateAction(Object.assign({},options,{isPromise:true}))
+	return actionDecorator(Object.assign({},options,{isPromise:true}))
 }
 
 /**
  * Method decorator for actions
  *
  * @param options
- * @returns {function(ActionFactory<S, M>, string, PropertyDescriptor): {value: (function(...[any]): any)}}
+ * @returns {(target:ActionFactory<S, M>, propertyKey:string, descriptor:TypedPropertyDescriptor<any>)=>TypedPropertyDescriptor<any>}
  * @constructor
  */
-export function Action(options:ActionOptions = {}) {
-	return decorateAction(options)
+export function ActionThunk(options:ActionOptions = {}) {
+	return actionDecorator(options)
 }
 

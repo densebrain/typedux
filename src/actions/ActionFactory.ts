@@ -2,7 +2,7 @@
 
 import {Enumerable,SelfTyped} from '../util'
 import {ActionMessage} from './ActionTypes'
-import {Action} from './ActionDecorations'
+import {ActionThunk} from './ActionDecorations'
 import {getStoreStateProvider,getStoreDispatchProvider,makeLeafActionType} from './Actions'
 import {getLogger} from 'typelogger'
 import {Reducer, State} from '../reducers'
@@ -157,7 +157,7 @@ export abstract class ActionFactory<S extends State,M extends ActionMessage<S>> 
 	 *
 	 * @param error
 	 */
-	@Action()
+	@ActionThunk()
 	setError(error:Error) {
 
 	}

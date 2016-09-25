@@ -16,14 +16,13 @@
 		"experimentalDecorators": true,
 		"preserveConstEnums": true,
 		"allowSyntheticDefaultImports": true,
-		"sourceMap": true,
 		"inlineSourceMap": true,
 		"jsx": "react",
 		"baseUrl": "./src",
 		"outDir": "./dist",
 		"typeRoots": [
 			"./node_modules/@types",
-			"./typings"
+			"./typings/globals"
 		]
 		
 	},

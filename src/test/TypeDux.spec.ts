@@ -1,6 +1,6 @@
 import {installMockStoreProvider,createMockStore} from './mocks/TestHelpers'
 import {RootReducer,ILeafReducer} from '../reducers'
-import {ActionMessage, ActionFactory, Action, ActionReducer} from '../actions'
+import {ActionMessage, ActionFactory, ActionThunk, ActionReducer} from '../actions'
 import {getLogger} from 'typelogger'
 import {Map,Record} from 'immutable'
 
