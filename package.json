@@ -20,6 +20,11 @@
     "typescript",
     "immutable"
   ],
+  "files": [
+    "dist",
+    "package.json",
+    "README.md"
+  ],
   "author": "Jonathan Glanz",
   "license": "MIT",
   "bugs": {
