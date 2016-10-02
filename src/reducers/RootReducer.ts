@@ -82,8 +82,9 @@ export class RootReducer<S extends State> {
 	 */
 	defaultState(defaultStateValue:any = null):S {
 		
-		const defaultStateTypeName = _.get(defaultStateValue,'prototype.name',_.get(defaultStateValue,'prototype.constructor.name','NULL!'))
-		
+		// const
+		// 	defaultStateTypeName = _.get(defaultStateValue,'prototype.name',_.get(defaultStateValue,'prototype.constructor.name','NULL!'))
+		//
 		//log.info(`Default STATE value (type=${typeof defaultStateValue},name=${defaultStateTypeName})`,defaultStateValue)
 		// Create the default state
 		
@@ -219,7 +220,7 @@ export class RootReducer<S extends State> {
 						
 						// Check internal actions
 						if (INTERNAL_ACTIONS.includes(action.type)) {
-							log.info(`Sending init event to ${leaf} - internal action received ${action.type}`)
+							log.debug(`Sending init event to ${leaf} - internal action received ${action.type}`)
 							
 							if (INTERNAL_ACTION.INIT === action.type && reducer.init)
 								checkReducerStateChange(reducer.init(startReducerState))
@@ -250,7 +251,7 @@ export class RootReducer<S extends State> {
 								throw new Error(`Action reducer did not return a function: ${actionReg.type}`)
 							}
 
-							log.info('Calling action reducer: ',actionReg.type)
+							log.debug(`Calling action reducer: ${actionReg.fullName}`)
 							checkReducerStateChange(reducerFn(reducerState,getStoreStateProvider()))
 						}
 
