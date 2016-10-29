@@ -1,5 +1,6 @@
 import {getLogger} from 'typelogger'
-const log = getLogger(__filename)
+import {Map} from 'immutable'
+
 
 import RootReducer from "../reducers/RootReducer"
 
@@ -17,12 +18,19 @@ import {
 import {nextTick} from '../util'
 import {State,ILeafReducer} from '../reducers'
 import StateObserver,{ TStateChangeHandler } from './StateObserver'
+import { DefaultLeafReducer } from "../reducers/DefaultLeafReducer"
+import { INTERNAL_KEY } from "../Constants"
+import { InternalState } from "../internal/InternalState"
+import { TRootState } from "../reducers/State"
+import { ActionMessage } from "../actions/ActionTypes"
+
+const log = getLogger(__filename)
 
 
 /**
  * Manage the redux store for RADS
  */
-export class ObservableStore<S extends State> implements Store<S> {
+export class ObservableStore<S extends TRootState> implements Store<S> {
 
 	/**
 	 * Factory method for creating a new observable store
@@ -33,16 +41,26 @@ export class ObservableStore<S extends State> implements Store<S> {
 	 * @param rootStateType
 	 * @param defaultStateValue
 	 */
-	static createObservableStore<S extends State>(
+	static createObservableStore<S extends TRootState>(
 		leafReducers:ILeafReducer<any,any>[],
 		enhancer:StoreEnhancer<any> = null,
 		rootStateType:{new():S} = null,
 		defaultStateValue:any = null
-	):ObservableStore<State> {
+	):ObservableStore<S> {
 		return new ObservableStore(leafReducers,enhancer,rootStateType,defaultStateValue)
 	}
-
-
+	
+	/**
+	 * Create a internal reducer
+	 *
+	 * @returns {DefaultLeafReducer<InternalState, ActionMessage<InternalState>>}
+	 */
+	static makeInternalReducer() {
+		return DefaultLeafReducer.makeLeafReducer(INTERNAL_KEY,InternalState)
+	}
+	
+	
+	
 	public rootReducer:RootReducer<S>
 	private observers:StateObserver[] = []
 	private rootReducerFn
@@ -80,7 +98,9 @@ export class ObservableStore<S extends State> implements Store<S> {
 
 		return this.rootReducerFn
 	}
-
+	
+	
+	
 	/**
 	 * Retrieve the redux store under everything
 	 *
@@ -90,13 +110,18 @@ export class ObservableStore<S extends State> implements Store<S> {
 		return this.store;
 	}
 
-
+	
 
 	/**
 	 * Update the reducers
 	 */
 	replaceReducers(...leafReducers:ILeafReducer<any,any>[]):void {
-		const rootReducerFn = this.createRootReducer(...leafReducers)
+		const
+			rootReducerFn = this.createRootReducer(
+				ObservableStore.makeInternalReducer(),
+				...leafReducers
+			)
+		
 		this.store.replaceReducer(rootReducerFn)
 	}
 
@@ -116,6 +141,10 @@ export class ObservableStore<S extends State> implements Store<S> {
 		return this.getReduxStore().getState();
 	}
 
+	getInternalState():InternalState {
+		return this.getState().get(INTERNAL_KEY) as InternalState
+	}
+	
 	/**
 	 * Dispatch typed message
 	 *

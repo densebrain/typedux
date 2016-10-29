@@ -51,8 +51,9 @@ function mockStoreFactory(middlewares:Middleware[]):MockStoreFactory {
 				},
 
 				dispatch<A extends Action>(action:A):A {
+					
 					actions.push(action);
-
+					
 					const newStoreState = (storeReducer) ?
 						storeReducer(storeState,action) :
 						storeState

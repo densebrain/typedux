@@ -4,20 +4,14 @@ import {ActionMessage} from './ActionTypes'
 import {Reducer, State} from '../reducers'
 import {ActionFactory} from './ActionFactory'
 import {executeActionChain, registerAction, getStoreStateProvider, IActionRegistration} from './Actions'
+
 import {getLogger} from 'typelogger'
+import { ActionTracker } from "./ActionTracker"
 
 const
 	log = getLogger(__filename)
 
-/**
- * Dispatch an action to the redux store
- *
- * @param dispatch to use
- * @param type of the action to create
- * @param data to add to action
- * @returns {any}
- * @param error
- */
+
 
 export type ActionOptions = {
 	isPromise?:boolean
@@ -25,6 +19,36 @@ export type ActionOptions = {
 	factory?:any
 	reducers?:Reducer<any,any>[]
 	mapped?:string[]
+}
+
+
+/**
+ * Action factory provider
+ */
+export type TActionFnProvider<T> = (...args:any[]) => (dispatch,getState) => T
+
+/**
+ * Action reducer provider
+ */
+export type TActionReducerProvider<S> = (...args:any[]) => (state:S) => S
+
+
+/**
+ * Action provider
+ */
+export type TActionProvider<T,S> = TActionFnProvider<T>|TActionReducerProvider<S>
+
+/**
+ * Wrap action function so compiler allows it
+ *
+ * @param fn
+ * @returns {any}
+ * @constructor
+ */
+export function Promised<T>(fn:(...args:any[]) => T):Promise<T> {
+	return ((...args:any[]) => {
+		return fn(...args)
+	}) as any
 }
 
 /**
@@ -70,22 +94,22 @@ function actionDecorator(options:ActionOptions = {}) {
 			return executeActionChain(reg,(id,...args) => {
 
 				// Grab the current dispatcher
-				const dispatcher = this.dispatcher
+				const
+					{dispatcher} = this
 
-				let data:any = (actionCreator && !options.isReducer) ?
-					actionCreator.apply(this, args) :
-					{}
+				let
+					data:any = (actionCreator && !options.isReducer) ?
+						actionCreator.apply(this, args) :
+						{}
 
 
 
-				// If PROMISE function then call it and return it
-				if (options.isPromise) {
-					return data(dispatcher,getStoreStateProvider())
+				// If PROMISE/THUNK function then call it and return it
+				if (isFunction(data) && !options.isReducer) {
+					return new ActionTracker(id,this.leaf(),propertyKey,data,dispatcher,getStoreStateProvider()).promise
 				}
-
-				// If we got a function/thunk - return it
-				if (isFunction(data) && !options.isReducer)
-					return dispatcher(data)
+				
+					
 
 
 				// If data not returned or this is Mapped - then

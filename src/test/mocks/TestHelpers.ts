@@ -37,7 +37,8 @@ export function createMockStore(
 	storeReducers:Reducer<any> = null,
 	onStateChange:(newState:any) => void = null
 ) {
-	const newMockStore = mockStore(getState,storeReducers,onStateChange)
+	const
+		newMockStore = mockStore(getState,storeReducers,onStateChange)
 
 	// Globally override the default dispatch
 	setStoreProvider(newMockStore)

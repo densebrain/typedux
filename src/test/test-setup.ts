@@ -17,7 +17,7 @@ g.config = chaiGlobal.config
 g.assert = chaiGlobal.assert
 g.expect = chaiGlobal.expect
 g.sinon = sinonGlobal
-
+g.Promise = require('bluebird')
 
 export {
 

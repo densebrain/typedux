@@ -1,26 +1,30 @@
 import {installMockStoreProvider,createMockStore} from './mocks/TestHelpers'
 import {RootReducer,ILeafReducer} from '../reducers'
-import {ActionMessage, ActionFactory, ActionThunk, ActionReducer} from '../actions'
+import {ActionMessage, ActionFactory, ActionReducer} from '../actions'
+
 import {getLogger} from 'typelogger'
 import {Map,Record} from 'immutable'
+import { ActionThunk, Promised } from "../actions/ActionDecorations"
 
-const log = getLogger(__filename)
+import Promise from "../util/PromiseConfig"
+import { ObservableStore } from "../store/ObservableStore"
+import { getStoreInternalState } from "../actions/Actions"
+
+const
+	log = getLogger(__filename)
 
 installMockStoreProvider()
-
-
 
 function getDefaultState(reducer) {
 	return reducer.handle(null,{type:'@INIT'})
 }
 
-const MockKey = 'mock'
-const MockStateStr1 = 'my first string'
+const
+	MockKey = 'mock',
+	MockStateStr1 = 'my first string'
 
 /**
  * Leaf record defines allowed props
- *
- * @type {Record.Class}
  */
 const MockLeafRecord = Record({
 	str1: MockStateStr1,
@@ -36,12 +40,11 @@ class MockLeafState extends MockLeafRecord {
 
 	constructor(props:any = {}) {
 		super(props)
+		
 		Object.assign(this,props)
 	}
 }
 
-
-//const MapType = typeof Map<string,any>()
 
 function makeRootReducer(...leafReducers) {
 	return new RootReducer(null,...leafReducers)
@@ -72,7 +75,7 @@ class MockLeafReducer implements ILeafReducer<MockLeafState,MockMessage> {
 }
 
 // Simple mock factory
-class MockActionFactory extends ActionFactory<Map<string,any>,MockMessage> {
+class MockActionFactory extends ActionFactory<MockLeafState,MockMessage> {
 
 	constructor() {
 		super(MockLeafState)
@@ -93,20 +96,51 @@ class MockActionFactory extends ActionFactory<Map<string,any>,MockMessage> {
 	mockUpdateFromState(newVal:string) {
 		return (state:Map<string,any>) => state.set('str2', newVal)
 	}
+	
+	@ActionThunk()
+	mockThunk() {
+		return Promised((dispatch,getState) => {
+			return Promise.delay(1000).then(() => "mock")
+		})
+	}
+	
+	@ActionThunk()
+	mockThunkError() {
+		return Promised((dispatch,getState) => {
+			return Promise.delay(1000).then(() => {
+				throw new Error('MockThunkErrorTest')
+			})
+		})
+	}
 }
 
 
-describe('#typedux',() => {
-	let reducer = null, leafReducer = null, store = null, actions = null
+describe('#typedux', function() {
+	this.timeout(10000)
+	
+	let
+		reducer:RootReducer<any>,
+		leafReducer:ILeafReducer<any,any>,
+		store = null,
+		actions:MockActionFactory
 
 	beforeEach(() => {
 		leafReducer = new MockLeafReducer()
-		reducer = makeRootReducer(leafReducer)
-		store = createMockStore(getDefaultState(reducer),reducer.makeGenericHandler(),(data) => {
-			log.info('on state change',data)
+		
+		// ROOT REDUCER
+		reducer = makeRootReducer(ObservableStore.makeInternalReducer(),leafReducer)
+		
+		// STORE
+		store = createMockStore(
+			getDefaultState(reducer),
+			reducer.makeGenericHandler(),(data) => {
+			log.debug('on state change',data)
 		})
 
+		// INIT
 		store.dispatch({type:'@INIT'})
+		
+		// ACTIONS
 		actions = new MockActionFactory()
 	})
 
@@ -130,8 +164,10 @@ describe('#typedux',() => {
 	})
 
 	it('Uses state reducers too',() => {
-		let state = store.getState()
-		let mockState = actions.state
+		let
+			state = store.getState(),
+			mockState = actions.state
+		
 		expect(mockState.str2).not.to.be.exist
 
 		const str2Update = 'my new str2'
@@ -140,6 +176,56 @@ describe('#typedux',() => {
 		let mockStateAfter = actions.state
 		expect(mockStateAfter.str2).to.equal(str2Update)
 		expect(mockStateAfter.str2).not.to.equal(mockState.str2)
+	})
+	
+	it('Promises action',() => {
+		const
+			
+			// FUNCTION TEST
+			thunkPromise = actions.mockThunk().then((result) => {
+				expect(result).to.equal('mock')
+				
+				return Promise
+					.delay(1000).then(() => {
+						const
+							internalState = getStoreInternalState()
+						
+						expect(internalState.hasPendingActions).to.equal(false)
+						expect(internalState.totalActionCount).to.equal(1)
+						expect(internalState.pendingActionCount).to.equal(0)
+					})
+			}),
+			
+			// TRACKING TEST
+			pendingPromise = Promise.delay(300).then(() => {
+				expect(getStoreInternalState().hasPendingActions).to.equal(true)
+				expect(getStoreInternalState().pendingActionCount).to.equal(1)
+			})
+			
+			
+		
+		return pendingPromise.then(() => thunkPromise)
+			
+	})
+	
+	it('Promises action Exception',() => {
+		return actions.mockThunkError()
+			.then((result) => {
+				throw new Error(`Thunk should not resolve, - should reject`)
+			})
+			.catch(err => {
+				expect(err instanceof Error).to.equal(true)
+				
+				return Promise.delay(1000).then(() => {
+					
+					const
+						internalState = getStoreInternalState()
+					
+					expect(internalState.pendingActionCount).to.equal(0)
+					
+				})
+			})
+			
 	})
 
 })

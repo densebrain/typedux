@@ -7,9 +7,16 @@ import {getStoreStateProvider,getStoreDispatchProvider,makeLeafActionType} from 
 import {getLogger} from 'typelogger'
 import {Reducer, State} from '../reducers'
 
+
+
 const
 	uuid = require('node-uuid'),
 	log = getLogger(__filename)
+
+
+export interface IActionFactoryConstructor<S> {
+	new ():ActionFactory<S,ActionMessage<S>>
+}
 
 /**
  * Base class for action implementations for a given state
@@ -42,7 +49,8 @@ export abstract class ActionFactory<S extends State,M extends ActionMessage<S>> 
 	 * @returns {T}
 	 */
 
-	static newWithDispatcher<T extends ActionFactory<any,any>>(actionClazz:SelfTyped<T>, newDispatcher:Function, newGetState?:Function):T {
+	static newWithDispatcher<S,A extends ActionFactory<S,ActionMessage<S>>>
+	(actionClazz:{new ():A}, newDispatcher:Function, newGetState?:Function):A {
 		return (new actionClazz()).withDispatcher(newDispatcher, newGetState)
 	}
 

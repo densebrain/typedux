@@ -5,10 +5,15 @@ import {Store,Dispatch} from 'redux'
 import {State} from '../reducers'
 import {getLogger} from 'typelogger'
 import {ActionOptions} from './ActionDecorations'
-import _cloneDeep = require('lodash/cloneDeep')
+import { makeId } from "../util/IdGenerator"
+import { InternalState } from "../internal/InternalState"
+import { INTERNAL_KEY } from "../Constants"
+import { TRootState } from "../reducers/State"
+
+// const
+// 	_cloneDeep = require('lodash.cloneDeep')
 
 const
-	uuid = require('node-uuid'),
 	log = getLogger(__filename)
 
 // Internal type definition for
@@ -66,6 +71,15 @@ export function getStoreStateProvider():GetStoreState {
  */
 export function getStoreDispatchProvider():DispatchState {
 	return dispatch
+}
+
+/**
+ * Get the stores internal state
+ *
+ * @returns {GetStoreState|any}
+ */
+export function getStoreInternalState():InternalState {
+	return getStoreState && (getStoreState() as TRootState).get(INTERNAL_KEY) as any
 }
 
 /**
@@ -150,7 +164,7 @@ function executeActionInterceptor(
  * @returns {any|any}
  */
 export function executeActionChain(reg:IActionRegistration,actionFn:Function,...args:any[]) {
-	return executeActionInterceptor(0,reg,uuid.v4(),actionFn,args)
+	return executeActionInterceptor(0,reg,makeId(),actionFn,args)
 }
 
 export type ActionFactoryDecorator<T> = (factory:{new():T}) => T
@@ -214,5 +228,5 @@ export function getAction(leaf:string,type:string):IActionRegistration {
 
 
 export function getAllActions() {
-	return _cloneDeep(registeredActions)
+	return registeredActions // _cloneDeep(registeredActions)
 }

@@ -9,7 +9,8 @@ import {isFunction} from '../util'
 import {getStoreStateProvider} from '../actions/Actions'
 
 import {INTERNAL_ACTIONS, INTERNAL_ACTION} from "../Constants"
-import * as _get from 'lodash/get'
+const
+	_get = require('lodash.get')
 
 const
 	ActionIdCacheMax = 500,
@@ -200,9 +201,6 @@ export class RootReducer<S extends State> {
 					
 					try {
 						
-						
-						
-						
 						/**
 						 * Check the returned state from every handler for changes
 						 *
@@ -235,15 +233,17 @@ export class RootReducer<S extends State> {
 						
 						log.debug('Action type supported', leaf, action.type)
 
-						// First check the reducer itself
+						// CHECK REDUCER.HANDLE
 						if (reducer.handle)
 							checkReducerStateChange(reducer.handle(reducerState, action))
 
-						// Now iterate the reducers on the message
+						// ActionMessage.reducers PROVIDED
 						if (action.stateType && reducerState instanceof action.stateType)
 							_get(action,'reducers',[]).forEach((actionReducer) =>
 									checkReducerStateChange(actionReducer(reducerState, action)))
 						
+						
+						// IF @ActionReducer REGISTERED
 						if (actionReg && actionReg.options.isReducer) {
 							const reducerFn = actionReg.action(null,...action.args)
 							if (!reducerFn || !isFunction(reducerFn)) {
@@ -255,20 +255,11 @@ export class RootReducer<S extends State> {
 							checkReducerStateChange(reducerFn(reducerState,getStoreStateProvider()))
 						}
 
+						// CHECK ACTUAL REDUCER FOR SUPPORT
 						if (isFunction(reducer[action.type])) {
 							checkReducerStateChange(reducer[action.type](reducerState,...action.args))
 						}
-						//NOTE: Removed in favor of new @ActionReducer
-						// else if (isFunction(reducerState[action.type])) {
-						// 	log.debug('Called reducer directly on state function',action.type)
-						// 	const reducerFn = makeMappedReducerFn(action.type,action.args)
-						// 	checkReducerStateChange(reducerFn(reducerState,action))
-						//
-						// 	// const
-						// 	// log.debug('Creating mapped handler', propertyKey)
-						// 	// finalReducers = [makeMappedReducerFn<S,M>(propertyKey,args)]
-						// }
-
+						
 					} catch (err) {
 						log.error(`Error occurred on reducer leaf ${leaf}`, err)
 						if (reducer.handleError) {
