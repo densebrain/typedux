@@ -28,6 +28,19 @@ function stateTypeGuard(state:any,rootStateType = null):state is Map<string,any>
 	return (Map.isMap(state) && (rootStateType == null || state instanceof rootStateType))
 }
 
+/**
+ * Get leaf value
+ *
+ * @param rootValue
+ * @param leaf
+ * @returns {any|T|undefined|V|string|IDBRequest}
+ */
+function getLeafValue(rootValue,leaf:string) {
+	return rootValue &&
+		(rootValue.get ?
+			rootValue.get(leaf) :
+			rootValue[leaf])
+}
 
 /**
  * Error handler type for root reducer
@@ -83,12 +96,7 @@ export class RootReducer<S extends State> {
 	 */
 	defaultState(defaultStateValue:any = null):S {
 		
-		// const
-		// 	defaultStateTypeName = _.get(defaultStateValue,'prototype.name',_.get(defaultStateValue,'prototype.constructor.name','NULL!'))
-		//
-		//log.info(`Default STATE value (type=${typeof defaultStateValue},name=${defaultStateTypeName})`,defaultStateValue)
-		// Create the default state
-		
+		// CREATE LOAD FN
 		const loadState = () =>{
 			try {
 				return this.rootStateType ?
@@ -112,25 +120,26 @@ export class RootReducer<S extends State> {
 			}
 		}
 		
-		let state = loadState()
+		
+		// LOAD THE STATE AND VERIFY IT IS Immutable.Map/Record
+		let
+			state = loadState()
 
 		if (!Map.isMap(state) && !(state instanceof Record)) {
 			throw new Error('Even custom rootStateTypes MUST extends ImmutableJS record or map')
 		}
 
-		this.reducers.forEach((reducer) => {
-			//log.info(`Default state for leaf: ${reducer.leaf()}`)
-			const leafDefaultStateValue = defaultStateValue &&
-				(defaultStateValue.get ?
-					defaultStateValue.get(reducer.leaf()) :
-					defaultStateValue[reducer.leaf()])
+		// ITERATE REDUCERS & CREATE LEAF STATES
+		this.reducers.forEach(reducer => {
 			
-			const leafDefaultState = reducer.defaultState(leafDefaultStateValue || {})
-			// if (leafDefaultState.set && leafDefaultStateValue) {
-			// 	Object.keys(leafDefaultStateValue)
-			// 		.forEach(key => leafDefaultState.set(key,leafDefaultStateValue[key]))
-			// }
-			state = state.set(reducer.leaf(), leafDefaultState)
+			const
+				leaf = reducer.leaf(),
+				leafDefaultState = getLeafValue(defaultStateValue,leaf)
+			
+			state = state.set(
+				leaf,
+				reducer.defaultState(leafDefaultState || {})
+			)
 		})
 
 

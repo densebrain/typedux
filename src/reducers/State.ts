@@ -3,7 +3,7 @@ import {Map} from 'immutable'
 
 
 export interface IStateConstructor<T> {
-	new (...args:any[]):T
+	new (o?:any):T
 	fromJS(o:any):T
 }
 

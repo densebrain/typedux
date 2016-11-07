@@ -11,15 +11,18 @@ import {isArray} from '../util'
 import {State} from '../reducers'
 import {getLogger} from 'typelogger'
 
-const log = getLogger(__filename)
+const
+	log = getLogger(__filename)
 
-function getNewValue(state:any,keyPath:string[]) {
+function getNewValue(state:any,keyPath:Array<string|number>) {
 	let newValue = state
 
 	for (let key of keyPath) {
 		if (!newValue) break
 
-		let tempValue = (newValue.get) ? newValue.get(key) : null
+		let
+			tempValue = (newValue.get) ? newValue.get(key) : null
+		
 		newValue = tempValue || newValue[key]
 
 		//(this.keyPath.length > 0) ? state.getIn(this.keyPath) : state
@@ -40,7 +43,7 @@ export class StateObserver {
 	/**
 	 * The key path to watch
 	 */
-	private keyPath:string[]
+	private keyPath:Array<string|number>
 	
 	/**
 	 * Flags when the observer has been removed
@@ -51,7 +54,7 @@ export class StateObserver {
 
 	
 
-	constructor(path:string | string[],private handler:TStateChangeHandler) {
+	constructor(path:string | Array<string|number>,private handler:TStateChangeHandler) {
 		this.keyPath = path ? ((isArray(path)) ? path : path.split('.')) : []
 	}
 
