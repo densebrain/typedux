@@ -10,7 +10,7 @@ import {Reducer, State} from '../reducers'
 
 
 const
-	uuid = require('node-uuid'),
+	uuid = require('uuid'),
 	log = getLogger(__filename)
 
 
