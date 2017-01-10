@@ -42,7 +42,6 @@ export type TActionProvider<T,S> = TActionFnProvider<T>|TActionReducerProvider<S
  * Wrap action function so compiler allows it
  *
  * @param fn
- * @returns {any}
  * @constructor
  */
 export function Promised<T>(fn:(...args:any[]) => T):Promise<T> {
