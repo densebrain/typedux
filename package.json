@@ -34,7 +34,7 @@
   "homepage": "https://github.com/densebrain/typedux#readme",
   "peerDependencies": {
     "immutable": "^3.8.1",
-    "redux": "^3.5.2",
+    "redux": "^3.6.0",
     "reflect-metadata": "^0.1.3"
   },
   "dependencies": {
