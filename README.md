@@ -87,7 +87,7 @@ class ExampleActionFactory extends ActionFactory<ExampleLeafState,ExampleLeafMes
     }
   
     /**
-    * Reducers (if you dont know what a reducer is checkout the redux docs)
+    * Reducers (if you don't know what a reducer is checkout the redux docs)
     * are super easy, annotate ActionReducer and return a function that takes state  
 		 */
   	@ActionReducer()
