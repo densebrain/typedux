@@ -10,7 +10,6 @@
     "compile": "tsc --project tsconfig.json",
     "compile:watch": "tsc --project tsconfig.json --watch",
     "test": "npm run compile && ./node_modules/.bin/mocha --require dist/test/test-setup dist/test/TypeDux.spec.js",
-    "publish": "npm run test && npm publish",
     "publish:patch": "npm version patch && git push --tags"
   },
   "repository": {
