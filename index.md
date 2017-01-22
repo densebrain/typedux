@@ -114,7 +114,7 @@ class ExampleActionFactory extends ActionFactory<ExampleLeafState,ExampleLeafMes
 
 __NOTE: ALL ACTION FACTORIES AND DECORATIONS MUST BE LOADED BEFORE CREATING THE STORE__
 
-```
+```javascript
 
 const store = ObservableStore.createObservableStore(
 
