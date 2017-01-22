@@ -28,7 +28,7 @@ npm i --save typdux
 
 ## Getting Started
 
-###  Create a leaf state and message (message is optional, only for typescript and can be any)
+1.  Create a leaf state and message (message is optional, only for typescript and can be any)
 
 ```
 
@@ -110,7 +110,7 @@ class ExampleActionFactory extends ActionFactory<ExampleLeafState,ExampleLeafMes
 }
 ```
 
-###  Create the store
+2.  Create the store
 
 __NOTE: ALL ACTION FACTORIES AND DECORATIONS MUST BE LOADED BEFORE CREATING THE STORE__
 
@@ -129,7 +129,7 @@ const store = ObservableStore.createObservableStore(
 )
 ```
 
-###  Observe store keys and leafs
+3.  Observe store keys and leafs
 
 ```
 
