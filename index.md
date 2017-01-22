@@ -29,7 +29,7 @@ npm i --save typdux
 ## Getting Started
 
 1.  Create a leaf state and message (message is optional, only for typescript and can be any)
-```javascript
+```
 //Typescript
 
 import * as Immutable from 'immutable'
@@ -65,7 +65,7 @@ interface ExampleMessage extends ActionMessage<ExampleLeafState> {
 
 ```
 2.  Create an `ActionFactory`
-```javascript
+```
 //Typescript
 import {ActionFactory,ActionReducer,ActionThunk} from 'typedux'
 
@@ -113,7 +113,7 @@ class ExampleActionFactory extends ActionFactory<ExampleLeafState,ExampleLeafMes
 
 __NOTE: ALL ACTION FACTORIES AND DECORATIONS MUST BE LOADED BEFORE CREATING THE STORE__
 
-```javascript
+```
 // Typescript
 const store = ObservableStore.createObservableStore(
 
@@ -129,7 +129,7 @@ const store = ObservableStore.createObservableStore(
 ```
 
 4.  Observe store keys and leafs
-```javascript
+```
 
 // Create an observer
 const unsub = store.observe(['exampleLeafKey','str1'],(newStr1,oldStr1) => {
