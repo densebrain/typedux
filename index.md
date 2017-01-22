@@ -1,5 +1,3 @@
-# TypeDux / Redux / ReTyped
-
 A leaf based TypeScript 2 Immutable wrapper around REDUX - all decoration driven
 
 To start, like everyone else, I love the benefits of an immutable functional paradigm, but the overhead of
