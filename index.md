@@ -64,9 +64,9 @@ interface ExampleMessage extends ActionMessage<ExampleLeafState> {
 }
 
 ```
-###  Create an `ActionFactory`
+2.  Create an `ActionFactory`
 
-```
+```typescript
 
 import {ActionFactory,ActionReducer,ActionThunk} from 'typedux'
 
@@ -110,7 +110,7 @@ class ExampleActionFactory extends ActionFactory<ExampleLeafState,ExampleLeafMes
 }
 ```
 
-2.  Create the store
+3.  Create the store
 
 __NOTE: ALL ACTION FACTORIES AND DECORATIONS MUST BE LOADED BEFORE CREATING THE STORE__
 
@@ -129,7 +129,7 @@ const store = ObservableStore.createObservableStore(
 )
 ```
 
-3.  Observe store keys and leafs
+4.  Observe store keys and leafs
 
 ```
 
