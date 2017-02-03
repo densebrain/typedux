@@ -10,7 +10,7 @@ import {Reducer, State} from '../reducers'
 
 
 const
-	uuid = require('node-uuid'),
+	uuid = require('uuid/v4'),
 	log = getLogger(__filename)
 
 
@@ -136,7 +136,6 @@ export abstract class ActionFactory<S extends State,M extends ActionMessage<S>> 
 	 * @param reducers
 	 * @param data
 	 * @param args
-	 * @returns {*|({leaf: string, type: string, reducers: Reducer<any, ActionMessage<any>>[], stateType: any}&{}&{args: Array})|any}
 	 * @param leaf
 	 */
 	
@@ -150,7 +149,7 @@ export abstract class ActionFactory<S extends State,M extends ActionMessage<S>> 
 		data = {}
 	):M {
 		return Object.assign({
-			id: id || uuid.v4(),
+			id: id || uuid(),
 			leaf,
 			type: makeLeafActionType(this.leaf(),type),
 			reducers,

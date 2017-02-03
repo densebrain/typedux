@@ -45,9 +45,9 @@
     "lodash.clone": "^4.5.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.get": "^4.4.2",
-    "node-uuid": "^1.4.7",
     "source-map-support": "^0.4.0",
-    "typelogger": "^1.0.24"
+    "typelogger": "^1.0.24",
+    "uuid": "^3.0.1"
   },
   "devDependencies": {
     "@types/bluebird": "^3.0.35",
