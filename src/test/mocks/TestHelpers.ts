@@ -11,9 +11,9 @@ const log = getLogger(__filename)
  * framework
  */
 export function installMockStoreProvider() {
-	setStoreProvider((...args:any[]) => {
+	setStoreProvider(((...args:any[]) => {
 		log.info('MOCK DISPATCH OVERRIDE')
-	}, () => {return Immutable.Map<any,any>()})
+	}) as any, () => {return Immutable.Map<any,any>()})
 }
 
 
