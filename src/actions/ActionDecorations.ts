@@ -5,7 +5,7 @@ import {Reducer, State} from '../reducers'
 import {ActionFactory} from './ActionFactory'
 import {executeActionChain, registerAction, getStoreStateProvider, IActionRegistration} from './Actions'
 
-import {getLogger} from 'typelogger'
+import {getLogger} from "typelogger"
 import { ActionTracker } from "./ActionTracker"
 
 const
@@ -58,7 +58,7 @@ export function Promised<T>(fn:(...args:any[]) => T):Promise<T> {
 function actionDecorator(options:ActionOptions = {}) {
 	
 	// Actual decorator is returned
-	return function<S extends State,M extends ActionMessage<S>>(
+	return function<S extends State<any>,M extends ActionMessage<S>>(
 		target:ActionFactory<S,M>,
 		propertyKey:string,
 		descriptor:TypedPropertyDescriptor<any>

@@ -1,9 +1,16 @@
+import DumbReducer from "../reducers/DumbReducer"
+
+require("source-map-support").install()
+
+import {isFunction, isString} from "../util"
+import {getValue} from 'typeguard'
+
 import {installMockStoreProvider,createMockStore} from './mocks/TestHelpers'
-import {RootReducer,ILeafReducer} from '../reducers'
+import {RootReducer, ILeafReducer, State, Reducer} from '../reducers'
 import {ActionMessage, ActionFactory, ActionReducer} from '../actions'
 
 import {getLogger} from 'typelogger'
-import {Map,Record} from 'immutable'
+
 import { ActionThunk, Promised } from "../actions/ActionDecorations"
 
 import Promise from "../util/PromiseConfig"
@@ -23,31 +30,42 @@ const
 	MockKey = 'mock',
 	MockStateStr1 = 'my first string'
 
-/**
- * Leaf record defines allowed props
- */
-const MockLeafRecord = Record({
-	str1: MockStateStr1,
-	str2: null
-})
 
 /**
  * Mock leaf state, dumb test state with test props
  */
-class MockLeafState extends MockLeafRecord {
-	str1:string
+class MockLeafState implements State<any> {
+	type = MockLeafState
+	
+	str1:string = MockStateStr1
 	str2:string
 
 	constructor(props:any = {}) {
-		super(props)
+		
 		
 		Object.assign(this,props)
 	}
 }
 
-
-function makeRootReducer(...leafReducers) {
+/**
+ * Make root reducer
+ *
+ * @param {ILeafReducer<any, any>} leafReducers
+ * @returns {RootReducer<State<any>>}
+ */
+function makeRootReducer(...leafReducersOrStates:Array<ILeafReducer<any,any>|State<string>>) {
+	let
+		leafReducers = leafReducersOrStates.filter(it => isFunction(getValue(() => (it as any).leaf))) as Array<ILeafReducer<any,any>>,
+		leafStates = leafReducersOrStates.filter(it => !isFunction(getValue(() => (it as any).leaf)) && isString(getValue(() => (it as any).type))) as Array<State<string>>
+	
+	leafReducers = [...leafReducers, ...leafStates.map(state => new DumbReducer(state))]
+	
 	return new RootReducer(null,...leafReducers)
+}
+
+interface IMockState extends State<string> {
+	type: string
+	[key:string]:any
 }
 
 /**
@@ -57,22 +75,22 @@ interface MockMessage extends ActionMessage<MockLeafState> {
 
 }
 
-
-class MockLeafReducer implements ILeafReducer<MockLeafState,MockMessage> {
-
-	leaf():string {
-		return MockKey;
-	}
-
-	prepareState(o:any) {
-		return o
-	}
-
-
-	defaultState() {
-		return new MockLeafState()
-	}
-}
+//
+// class MockLeafReducer implements ILeafReducer<MockLeafState,MockMessage> {
+//
+// 	leaf():string {
+// 		return MockKey;
+// 	}
+//
+// 	prepareState(o:any) {
+// 		return o
+// 	}
+//
+//
+// 	defaultState() {
+// 		return new MockLeafState()
+// 	}
+// }
 
 // Simple mock factory
 class MockActionFactory extends ActionFactory<MockLeafState,MockMessage> {
@@ -89,12 +107,12 @@ class MockActionFactory extends ActionFactory<MockLeafState,MockMessage> {
 
 	@ActionReducer()
 	mockUpdate(val:string) {
-		return (state:Map<string,any>) => state.set('str1',val)
+		return (state:IMockState) => ({...state, str1: val})
 	}
 
 	@ActionReducer()
 	mockUpdateFromState(newVal:string) {
-		return (state:Map<string,any>) => state.set('str2', newVal)
+		return (state:Map<string,any>) => ({...state, str2: newVal})
 	}
 	
 	@ActionThunk()
@@ -125,7 +143,7 @@ describe('#typedux', function() {
 		actions:MockActionFactory
 
 	beforeEach(() => {
-		leafReducer = new MockLeafReducer()
+		[leafReducer] = ObservableStore.makeSimpleReducers({type: MockKey, str1: MockStateStr1})//new MockLeafReducer()
 		
 		// ROOT REDUCER
 		reducer = makeRootReducer(ObservableStore.makeInternalReducer(),leafReducer)

@@ -1,6 +1,4 @@
 
-import {Map} from 'immutable'
-
 
 export interface IStateConstructor<T> {
 	new (o?:any):T
@@ -9,9 +7,10 @@ export interface IStateConstructor<T> {
 
 
 
-//export interface State extends Immutable.Map<string,any> {
-export interface State {
 
+export interface State<T> {
+	type:T
+	[key:string]:any
 }
 
-export type TRootState = Map<string,Map<string,any>>
+export type TRootState = State<string> & {[key:string]:{[key:string]:any}}

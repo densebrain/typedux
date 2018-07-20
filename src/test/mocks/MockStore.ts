@@ -1,5 +1,5 @@
-import {getLogger} from 'typelogger'
-import {Middleware,Store,Reducer,applyMiddleware,Unsubscribe,Action} from 'redux'
+import {getLogger} from "typelogger"
+import {Middleware,Store,Reducer,applyMiddleware,Unsubscribe,Action} from "redux"
 import {isFunction} from '../../util'
 
 /**
@@ -93,7 +93,7 @@ function mockStoreFactory(middlewares:Middleware[]):MockStoreFactory {
 		}
 
 		if (middlewares.length) {
-			const addMiddleware = applyMiddleware(...middlewares)(makeStore)
+			const addMiddleware = applyMiddleware(...middlewares)(makeStore as any)
 			return addMiddleware(storeReducer,fromState) as any
 		} else {
 			return makeStore()

@@ -1,31 +1,23 @@
 
-import {Record,Map} from 'immutable'
+
 import { IPendingAction } from "../actions/ActionTracker"
+import {State} from "../reducers"
 
 
 /**
  * State interface
  */
-export interface IInternalState {
-	pendingActions:Map<string,IPendingAction>
+export interface IInternalState extends State<any> {
+	pendingActions:{[id:string]:IPendingAction}
 	totalActionCount:number
 	pendingActionCount:number
 	hasPendingActions: boolean
 }
 
 
-/**
- * Internal state record
- */
-export const InternalStateRecord = Record({
-	pendingActions:Map<string,IPendingAction>(),
-	totalActionCount: 0,
-	pendingActionCount: 0,
-	hasPendingActions: false
-} as IInternalState)
 
 
-export class InternalState extends InternalStateRecord {
+export class InternalState implements IInternalState {
 	
 	/**
 	 * Deserialize
@@ -42,36 +34,34 @@ export class InternalState extends InternalStateRecord {
 			{pendingActions = {}} = o
 		
 		
-		return state.set(
-			'pendingActions',
-			Map.isMap(pendingActions) ? pendingActions : Map(pendingActions)
-		)
+		return Object.assign(state, {pendingActions})
 	}
-	
 	
 	/**
 	 * Create a new internal state
 	 */
-	constructor() {
-		super()
+	constructor(o:any = {}) {
+		Object.assign(this,o)
 	}
+	
+	type = InternalState
 	
 	/**
 	 * All pending actions
 	 */
-	pendingActions:Map<string,IPendingAction>
+	pendingActions:{[id:string]:IPendingAction} = {}
 	
-	totalActionCount:number
+	totalActionCount:number = 0
 	
-	pendingActionCount:number
+	pendingActionCount:number = 0
 	
-	hasPendingActions:boolean
+	hasPendingActions:boolean = false
 	
 	/**
 	 * Returns empty object - can not be serialized
 	 */
 	toJS() {
-		return {}
+		return this
 	}
 	
 	

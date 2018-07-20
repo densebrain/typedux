@@ -48,9 +48,6 @@ export class DefaultLeafReducer<S extends any,A extends ActionMessage<S>> implem
 	constructor(private _leaf:string,private _stateType:IStateConstructor<S>) {
 	}
 
-	prepareState(o:any|S):S {
-		return (o instanceof this._stateType) ? o : DefaultLeafReducer.stateFromJS(this._stateType,o)
-	}
 
 	stateType() {
 		return this._stateType

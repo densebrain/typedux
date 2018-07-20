@@ -1,9 +1,9 @@
 
 
 
-import {Store,Dispatch} from 'redux'
+import {Store,Dispatch} from "redux"
 import {State} from '../reducers'
-import {getLogger} from 'typelogger'
+import {getLogger} from "typelogger"
 import {ActionOptions} from './ActionDecorations'
 import { makeId } from "../util/IdGenerator"
 import { InternalState } from "../internal/InternalState"
@@ -18,8 +18,8 @@ const
 
 // Internal type definition for
 // function that gets the store state
-export type GetStoreState = () => State
-export type DispatchState = Dispatch<State>
+export type GetStoreState = () => State<any>
+export type DispatchState = Dispatch<State<any>>
 
 export interface IActionRegistration {
 	paramTypes?:any[]
@@ -79,7 +79,7 @@ export function getStoreDispatchProvider():DispatchState {
  * @returns {GetStoreState|any}
  */
 export function getStoreInternalState():InternalState {
-	return getStoreState && (getStoreState() as TRootState).get(INTERNAL_KEY) as any
+	return getStoreState && (getStoreState() as TRootState)[INTERNAL_KEY] as any
 }
 
 /**
@@ -88,14 +88,14 @@ export function getStoreInternalState():InternalState {
  * @param newDispatch
  * @param newGetState
  */
-export function setStoreProvider(newDispatch:DispatchState|Store<State>,newGetState?:GetStoreState) {
+export function setStoreProvider(newDispatch:DispatchState|Store<State<any>>,newGetState?:GetStoreState) {
 	if (newGetState) {
 		dispatch = newDispatch as DispatchState
 		getStoreState = newGetState
-	} else if (<Store<State>>newDispatch) {
+	} else if (newDispatch) {
 
 		// Cast the guarded type
-		const newStore = <Store<State>>newDispatch
+		const newStore = newDispatch as Store<any>
 
 		// Set and bind
 		dispatch = newStore.dispatch.bind(newDispatch)

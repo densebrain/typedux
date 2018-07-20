@@ -1,5 +1,5 @@
 import {getLogger} from 'typelogger'
-import {Map} from 'immutable'
+
 
 
 import RootReducer from "../reducers/RootReducer"
@@ -15,7 +15,8 @@ import {
 	StoreEnhancer
 } from 'redux'
 
-import {nextTick} from '../util'
+import {getValue} from 'typeguard'
+import {isFunction, isString, nextTick} from '../util'
 import {State,ILeafReducer} from '../reducers'
 import StateObserver,{ TStateChangeHandler } from './StateObserver'
 import { DefaultLeafReducer } from "../reducers/DefaultLeafReducer"
@@ -23,6 +24,7 @@ import { INTERNAL_KEY } from "../Constants"
 import { InternalState } from "../internal/InternalState"
 import { TRootState } from "../reducers/State"
 import { ActionMessage } from "../actions/ActionTypes"
+import DumbReducer from "../reducers/DumbReducer"
 
 const log = getLogger(__filename)
 
@@ -42,12 +44,30 @@ export class ObservableStore<S extends TRootState> implements Store<S> {
 	 * @param defaultStateValue
 	 */
 	static createObservableStore<S extends TRootState>(
-		leafReducers:ILeafReducer<any,any>[],
+		leafReducersOrStates:Array<ILeafReducer<any,any>|State<string>>,
 		enhancer:StoreEnhancer<any> = null,
 		rootStateType:{new():S} = null,
 		defaultStateValue:any = null
 	):ObservableStore<S> {
+		let
+			leafReducers = leafReducersOrStates.filter(it => isFunction(getValue(() => (it as any).leaf))) as Array<ILeafReducer<any,any>>,
+			leafStates = leafReducersOrStates.filter(it => !isFunction(getValue(() => (it as any).leaf)) && isString(getValue(() => (it as any).type))) as Array<State<string>>
+		
+		leafReducers = [...leafReducers, ...leafStates.map(state => new DumbReducer(state))]
+		
 		return new ObservableStore(leafReducers,enhancer,rootStateType,defaultStateValue)
+	}
+	
+	/**
+	 * Create simple reducers
+	 *
+	 * @param {string | State<string>} statesOrKeys
+	 * @returns {Array<State<string>>}
+	 */
+	static makeSimpleReducers(...statesOrKeys:Array<string|State<string>>):Array<ILeafReducer<State<string>,any>> {
+		return statesOrKeys
+			.map(state => isString(state) ? {type:state} : state as State<string>)
+			.map(state => new DumbReducer(state))
 	}
 	
 	/**
@@ -142,7 +162,7 @@ export class ObservableStore<S extends TRootState> implements Store<S> {
 	}
 
 	getInternalState():InternalState {
-		return this.getState().get(INTERNAL_KEY) as InternalState
+		return this.getState()[INTERNAL_KEY] as InternalState
 	}
 	
 	/**

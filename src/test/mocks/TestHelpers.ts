@@ -1,5 +1,5 @@
 import {Reducer} from 'redux'
-import * as Immutable from 'immutable'
+
 import {configureMockStore,MockStore} from './MockStore'
 import {setStoreProvider} from '../../actions'
 import {getLogger} from 'typelogger'
@@ -13,7 +13,7 @@ const log = getLogger(__filename)
 export function installMockStoreProvider() {
 	setStoreProvider(((...args:any[]) => {
 		log.info('MOCK DISPATCH OVERRIDE')
-	}) as any, () => {return Immutable.Map<any,any>()})
+	}) as any, () => {return { type: "MOCK" }})
 }
 
 
@@ -22,7 +22,7 @@ const mockStore = configureMockStore()
 /**
  * In testing any of these types can be provided as a state
  */
-export type TestStateType = Function | void | Immutable.Map<string,any>
+export type TestStateType = Function | void
 
 /**
  * Create a mock store for the sake of testing

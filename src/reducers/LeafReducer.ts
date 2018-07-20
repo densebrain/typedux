@@ -34,15 +34,6 @@ export interface ILeafReducer<S extends any,A extends ActionMessage<S>> {
 	 */
 	defaultState(o?:any):S
 
-
-	/**
-	 * Prepare an object to be used as the state
-	 * for this leaf
-	 *
-	 * @param o
-	 */
-	prepareState(o:any|S):S
-	
 	/**
 	 * Optional init function coverage
 	 *

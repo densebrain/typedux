@@ -4,7 +4,7 @@ import {Enumerable,SelfTyped} from '../util'
 import {ActionMessage} from './ActionTypes'
 import {ActionThunk} from './ActionDecorations'
 import {getStoreStateProvider,getStoreDispatchProvider,makeLeafActionType} from './Actions'
-import {getLogger} from 'typelogger'
+import {getLogger} from "typelogger"
 import {Reducer, State} from '../reducers'
 
 
@@ -14,7 +14,7 @@ const
 	log = getLogger(__filename)
 
 
-export interface IActionFactoryConstructor<S> {
+export interface IActionFactoryConstructor<S extends State<any>> {
 	new ():ActionFactory<S,ActionMessage<S>>
 }
 
@@ -22,7 +22,7 @@ export interface IActionFactoryConstructor<S> {
  * Base class for action implementations for a given state
  *
  */
-export abstract class ActionFactory<S extends State,M extends ActionMessage<S>> {
+export abstract class ActionFactory<S extends State<any>,M extends ActionMessage<S>> {
 
 	private _dispatcher:Function
 	private _getState:Function
@@ -49,7 +49,7 @@ export abstract class ActionFactory<S extends State,M extends ActionMessage<S>> 
 	 * @returns {T}
 	 */
 
-	static newWithDispatcher<S,A extends ActionFactory<S,ActionMessage<S>>>
+	static newWithDispatcher<S extends State<any>,A extends ActionFactory<S,ActionMessage<S>>>
 	(actionClazz:{new ():A}, newDispatcher:Function, newGetState?:Function):A {
 		return (new actionClazz()).withDispatcher(newDispatcher, newGetState)
 	}
@@ -98,13 +98,13 @@ export abstract class ActionFactory<S extends State,M extends ActionMessage<S>> 
 		if (!state) return null
 
 		const leaf = this.leaf()
-
-		const stateValue = leaf ? state.get(leaf) : state
-		if (this.stateType.recordType && stateValue instanceof this.stateType.recordType) {
-			return this.stateType.fromJS(stateValue)
-		} else {
-			return ((leaf) ? state.get(leaf) : state) as S
-		}
+		return ((leaf) ? state[leaf] : state) as S
+		// const stateValue = leaf ? state[leaf] : state
+		// if (this.stateType.recordType && stateValue instanceof this.stateType.recordType) {
+		// 	return this.stateType.fromJS(stateValue)
+		// } else {
+		//
+		// }
 	}
 
 

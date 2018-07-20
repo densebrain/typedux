@@ -8,11 +8,9 @@ import { INTERNAL_KEY } from "../Constants"
 import { ActionReducer } from "../actions/ActionDecorations"
 import { IPendingAction, ActionStatus } from "../actions/ActionTracker"
 
-//noinspection ES6UnusedImports - NOTE: because type is exported
-import {Map} from 'immutable'
 
 const
-	_clone = require('lodash.clone')
+	_clone = require('lodash').clone
 
 export class InternalActionFactory extends ActionFactory<InternalState,ActionMessage<InternalState>> {
 	
@@ -26,30 +24,34 @@ export class InternalActionFactory extends ActionFactory<InternalState,ActionMes
 	
 	@ActionReducer()
 	setPendingAction(action:IPendingAction) {
-		return (state:InternalState) => state.withMutations((newState:InternalState) => {
+		return (state:InternalState) => {
 			
 			let
-				{pendingActions} = newState,
+				newState = new InternalState(state),
+				pendingActions = {...newState.pendingActions},
+				pendingAction = pendingActions[action.id],
 				isFinished = action.status >= ActionStatus.Finished
 			
 			
-			if (!isFinished && !pendingActions.has(action.id)) {
-				newState.set('totalActionCount', newState.totalActionCount + 1)
-				newState.set('pendingActionCount', newState.pendingActionCount + 1)
-			} else if (isFinished && pendingActions.has(action.id)) {
-				newState.set('pendingActionCount',newState.pendingActionCount - 1)
+			if (!isFinished && !pendingAction) {
+				newState.totalActionCount++
+				newState.pendingActionCount++
+			} else if (isFinished && pendingActions[action.id]) {
+				newState.pendingActionCount--
 			}
 			
-			newState.set('hasPendingActions',newState.pendingActionCount > 0)
+			newState.hasPendingActions = newState.pendingActionCount > 0
 			
-			pendingActions = !isFinished ?
-				pendingActions.set(action.id,_clone(action)) :
-				pendingActions.remove(action.id)
+			if (!isFinished) {
+				pendingActions[action.id] = _clone(action)
+			} else {
+				delete pendingActions[action.id]
+			}
 			
-			newState.set('pendingActions',pendingActions)
+			newState.pendingActions = pendingActions
 			
 			return newState
-		}) as InternalState
+		}
 	}
 	
 }
