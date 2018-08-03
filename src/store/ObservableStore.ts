@@ -51,9 +51,10 @@ export class ObservableStore<S extends TRootState> implements Store<S> {
 	):ObservableStore<S> {
 		let
 			leafReducers = leafReducersOrStates.filter(it => isFunction(getValue(() => (it as any).leaf))) as Array<ILeafReducer<any,any>>,
-			leafStates = leafReducersOrStates.filter(it => !isFunction(getValue(() => (it as any).leaf)) && isString(getValue(() => (it as any).type))) as Array<State<string>>
+			leafStates = leafReducersOrStates.filter(it => !isFunction(getValue(() => (it as any).leaf)) && isString(getValue(() => (it as any).type))) as Array<State<string>>,
+			otherReducers = leafReducersOrStates.filter(it => isFunction(it)) as Array<ILeafReducer<any,any>>
 		
-		leafReducers = [...leafReducers, ...leafStates.map(state => new DumbReducer(state))]
+		leafReducers = [...otherReducers,...leafReducers, ...leafStates.map(state => new DumbReducer(state))]
 		
 		return new ObservableStore(leafReducers,enhancer,rootStateType,defaultStateValue)
 	}
