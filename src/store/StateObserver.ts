@@ -59,7 +59,7 @@ export class StateObserver {
 	}
 
 	onChange(state:State<any>):boolean {
-		const newValue = getNewValue(state,this.keyPath)
+		const newValue = this.keyPath.length ? getNewValue(state,this.keyPath) : state
 
 		// Check for change/diff
 		let cachedValue = this.cachedValue
@@ -70,7 +70,7 @@ export class StateObserver {
 		// Update the old ref
 		this.cachedValue = newValue
 
-		log.debug(`Path ${this.keyPath.join(',')} changed, to`,newValue,'from',cachedValue)
+		//log.debug(`Path ${this.keyPath.join(',')} changed, to`,newValue,'from',cachedValue)
 		this.handler(newValue,cachedValue,this)
 		return true
 	}
