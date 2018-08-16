@@ -198,7 +198,7 @@ export class RootReducer<S extends State<any>> {
 						
 						
 						stateChangeDetected = stateChangeDetected || !isEqualShallow(reducerState, newReducerState)
-						reducerState = {...newReducerState}
+						reducerState = _.clone(newReducerState)
 						//log.debug("State change detected",stateChangeDetected)
 					}
 					
