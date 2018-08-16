@@ -6,7 +6,7 @@ import {ActionThunk} from './ActionDecorations'
 import {getStoreStateProvider,getStoreDispatchProvider,makeLeafActionType} from './Actions'
 import {getLogger} from "typelogger"
 import {Reducer, State} from '../reducers'
-
+import {Store} from "redux"
 
 
 const
@@ -125,6 +125,19 @@ export abstract class ActionFactory<S extends State<any>,M extends ActionMessage
 		instance._getState = newGetState
 		return instance
 
+	}
+	
+	/**
+	 * Set the store for action factory
+	 *
+	 * @param newStore
+	 */
+	setStore(newStore:Store<State<any>>) {
+		const dispatch = newStore.dispatch.bind(newStore)
+		const getStoreState = newStore.getState.bind(newStore)
+		
+		this._dispatcher = dispatch
+		this._getState = getStoreState
 	}
 
 	/**

@@ -99,10 +99,9 @@ export class ObservableStore<S extends TRootState> implements Store<S> {
 			enhancer
 		)
 		
-		this.subscribe(() => {
-			log.debug('State changed - SCHEDULE NOTIFY')
+		this.subscribe(() =>
 			this.scheduleNotification()
-		})
+		)
 	}
 	
 	/**
