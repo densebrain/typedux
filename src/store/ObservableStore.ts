@@ -28,6 +28,10 @@ import DumbReducer from "../reducers/DumbReducer"
 const log = getLogger(__filename)
 
 
+export interface IObserverCleaner {
+	():void
+}
+
 /**
  * Manage the redux store for RADS
  */
@@ -201,11 +205,11 @@ export class ObservableStore<S extends TRootState> implements Store<S> {
 	 * @param handler
 	 * @returns {function()} unsubscribe observer
 	 */
-	observe(path:string | string[], handler:TStateChangeHandler) {
+	observe(path:string | string[], handler:TStateChangeHandler):IObserverCleaner {
 		let observer = new StateObserver(path, handler)
 		this.observers.push(observer)
 		
-		const removeObserver:any = () => {
+		const removeObserver:IObserverCleaner = () => {
 			if (observer.removed) {
 				log.debug("Already removed this observer", observer);
 				return;
@@ -223,7 +227,6 @@ export class ObservableStore<S extends TRootState> implements Store<S> {
 			observer.removed = true
 		}
 		
-		removeObserver.observer = observer
 		return removeObserver
 		
 		
