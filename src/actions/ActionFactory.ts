@@ -74,7 +74,7 @@ export abstract class ActionFactory<S extends State<any>,M extends ActionMessage
 	get dispatcher():Function {
 		const dispatch = getStoreDispatchProvider()
 
-		if (!dispatch) {
+		if (!this._dispatcher && !dispatch) {
 			throw new Error("Global dispatcher must be set before any actions occur")
 		}
 
