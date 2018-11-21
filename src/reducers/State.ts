@@ -17,11 +17,11 @@ export type TRootState = State<string> & {[key:string]:{[key:string]:any}}
 
 /**
  * Function to patch an existing state
- * 
+ *
  * @param {S} state
  * @param patches
  * @returns {S}
  */
-export function patchState<S extends State<any>>(state:S,...patches:Array<any>):S {
+export function patchState<S extends State<any>, SP extends Partial<S>>(state:S,...patches:Array<SP>):S {
 		return Object.assign(_.clone(state),...patches)
 }
