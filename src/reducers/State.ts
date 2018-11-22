@@ -1,6 +1,7 @@
 import * as _ from 'lodash'
 
-export interface IStateConstructor<T> {
+export interface IStateConstructor<K, T extends State<K>> {
+	Key:string
 	new (o?:any):T
 	fromJS(o:any):T
 }

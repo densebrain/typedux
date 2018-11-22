@@ -7,7 +7,7 @@ import {State} from "../reducers"
 /**
  * State interface
  */
-export interface IInternalState extends State<any> {
+export interface IInternalState extends State<string> {
 	pendingActions:{[id:string]:IPendingAction}
 	totalActionCount:number
 	pendingActionCount:number
@@ -18,6 +18,8 @@ export interface IInternalState extends State<any> {
 
 
 export class InternalState implements IInternalState {
+	
+	static Key = "InternalState"
 	
 	/**
 	 * Deserialize
@@ -44,7 +46,7 @@ export class InternalState implements IInternalState {
 		Object.assign(this,o)
 	}
 	
-	type = InternalState
+	type = "InternalState"
 	
 	/**
 	 * All pending actions

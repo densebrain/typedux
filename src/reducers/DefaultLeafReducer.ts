@@ -1,13 +1,13 @@
 import {ILeafReducer} from './LeafReducer'
 import {ActionMessage} from '../actions'
 import {isString,isFunction} from '../util'
-import { IStateConstructor } from "./State"
+import {IStateConstructor, State} from "./State"
 
 
 /**
  * Leaf reducer
  */
-export class DefaultLeafReducer<S extends any,A extends ActionMessage<S>> implements ILeafReducer<S,A> {
+export class DefaultLeafReducer<K, S extends State<K>, StateType extends IStateConstructor<K,S>, A extends ActionMessage<S>> implements ILeafReducer<S,A> {
 	
 	/**
 	 * Inflate from js
@@ -30,14 +30,17 @@ export class DefaultLeafReducer<S extends any,A extends ActionMessage<S>> implem
 	 * @param stateType
 	 * @returns {AnonLeafReducer}
 	 */
-	static makeLeafReducer<StateType>(leaf:string,stateType:IStateConstructor<StateType>):DefaultLeafReducer<StateType,ActionMessage<StateType>> {
-		class AnonLeafReducer extends DefaultLeafReducer<StateType,ActionMessage<StateType>> {
+	static makeLeafReducer<K,S extends State<K>, StateType extends IStateConstructor<K,S>>(
+		leaf:string,
+		stateType:StateType
+	):DefaultLeafReducer<K,S,StateType,ActionMessage<S>> {
+		class AnonLeafReducer extends DefaultLeafReducer<K, S, StateType, ActionMessage<S>> {
 			
 			constructor() {
 				super(leaf,stateType)
 			}
 			
-			defaultState(o:any):StateType {
+			defaultState(o:any):S {
 				return stateType.fromJS(o);
 			}
 		}
@@ -45,7 +48,7 @@ export class DefaultLeafReducer<S extends any,A extends ActionMessage<S>> implem
 		return new AnonLeafReducer()
 	}
 
-	constructor(private _leaf:string,private _stateType:IStateConstructor<S>) {
+	constructor(private _leaf:string,private _stateType:StateType) {
 	}
 
 
