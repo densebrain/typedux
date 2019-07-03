@@ -40,14 +40,14 @@ export class ObservableStore<S extends TRootState> implements Store<S> {
 	/**
 	 * Factory method for creating a new observable store
 	 *
-	 * @param leafReducers
 	 * @param enhancer
-	 * @returns {ObservableStore<any>}
+	 * @returns {ObservableStore<S>}
 	 * @param rootStateType
 	 * @param defaultStateValue
+	 * @param leafReducersOrStates
 	 */
 	static createObservableStore<S extends TRootState>(
-		leafReducersOrStates:Array<ILeafReducer<any, any> | State<string>>,
+		leafReducersOrStates:Array<ILeafReducer<any, any> | State<string> | Function>,
 		enhancer:StoreEnhancer<any> = null,
 		rootStateType:{ new():S } = null,
 		defaultStateValue:any = null
