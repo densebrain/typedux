@@ -261,20 +261,20 @@ export class ObservableStore<S extends State<string>> implements Store<S> {
   }
   
   getValueAtPath<T>(state:S, keyPath:Array<string | number>):T {
-    let newValue = _get(state, keyPath)
-    
-    for (let key of keyPath) {
-      if (!newValue) break
-      
-      let
-        tempValue = (newValue.get) ? newValue.get(key) : null
-      
-      newValue = tempValue || newValue[key]
-      
-      //(this.keyPath.length > 0) ? state.getIn(this.keyPath) : state
-    }
-    
-    return newValue as any
+    return _get(state, keyPath)
+    //
+    // for (let key of keyPath) {
+    //   if (!newValue) break
+    //
+    //   let
+    //     tempValue = (newValue.get) ? newValue.get(key) : null
+    //
+    //   newValue = tempValue || newValue[key]
+    //
+    //   //(this.keyPath.length > 0) ? state.getIn(this.keyPath) : state
+    // }
+    //
+    // return newValue as any
   }
   
   private observable = ():Observable<S> => {
