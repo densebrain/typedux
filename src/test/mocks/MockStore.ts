@@ -35,12 +35,53 @@ function mockStoreFactory(middlewares:Middleware[]):MockStoreFactory {
 
 		function makeStore() {
 			let actions = []
-
+			
+			function subscribe(listener:() => void):Unsubscribe {
+				return () => {
+					//unsubscribe
+				};
+			}
+			
+			function getState():any {
+				return storeState
+			}
+			
+			function observable() {
+				const outerSubscribe = subscribe
+				return {
+					/**
+					 * The minimal observable subscription method.
+					 * @param {Object} observer Any object that can be used as an observer.
+					 * The observer object should have a `next` method.
+					 * @returns {subscription} An object with an `unsubscribe` method that can
+					 * be used to unsubscribe the observable from the store, and prevent further
+					 * emission of values from the observable.
+					 */
+					subscribe(observer) {
+						if (typeof observer !== 'object' || observer === null) {
+							throw new TypeError('Expected the observer to be an object.')
+						}
+						
+						function observeState() {
+							if (observer.next) {
+								observer.next(getState())
+							}
+						}
+						
+						observeState()
+						const unsubscribe = outerSubscribe(observeState)
+						return { unsubscribe }
+					},
+					
+					[Symbol.observable]() {
+						return this
+					}
+				}
+			}
+			
 			const store:MockStore<any> = {
 
-				getState():any {
-					return storeState
-				},
+				getState,
 
 				setState(newState) {
 					storeState = newState
@@ -72,17 +113,17 @@ function mockStoreFactory(middlewares:Middleware[]):MockStoreFactory {
 					actions = [];
 				},
 
-				subscribe(listener:() => void):Unsubscribe {
-					return () => {
-						//unsubscribe
-					};
-				},
+				subscribe,
 
 				getReducer() {
 					return storeReducer
 				},
 				replaceReducer(newReducer:Reducer<any>) {
 					storeReducer = newReducer
+				},
+				
+				[Symbol.observable]() {
+					return observable()
 				}
 			}
 

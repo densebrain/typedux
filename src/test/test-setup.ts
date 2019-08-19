@@ -1,4 +1,4 @@
-require('babel-polyfill')
+//import "@babel/polyfill"
 
 //import '../index'
 import * as sinonGlobal from 'sinon'
@@ -6,10 +6,10 @@ import * as chaiGlobal from 'chai'
 
 
 declare global {
-	var sinon: typeof sinonGlobal
-	var expect: typeof chaiGlobal.expect
-	var assert: typeof chaiGlobal.assert
-	var config:any
+	const sinon: typeof sinonGlobal
+	const expect: typeof chaiGlobal.expect
+	const assert: typeof chaiGlobal.assert
+	const config:any
 }
 
 const g = global as any
