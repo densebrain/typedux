@@ -1,4 +1,3 @@
-import {State} from "reducers"
 
 import * as _ from 'lodash'
 import {isNumber} from "typeguard"
