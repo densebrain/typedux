@@ -34,10 +34,10 @@ function continueSelectorChain<
   keyPath:Array<string | number> = []
 ): PropChainType<S,T,SelectorChainDataAccessor<S,T>> {//SelectorChainType<S,T> {
   keyPath = keyPath || []
-  return continuePropertyChain<S,T,SelectorChainCallback<S,T>, SelectorChainDataAccessor<S,T>>(
+  return continuePropertyChain(
     state,data, keyPath,
     (getter: (state: S) => T, keyPath: Array<string | number>) =>
-      () => (state: S) => getter(state)
+      (state: S) => getter(state)
     
   )
   
