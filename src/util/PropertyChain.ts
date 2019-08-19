@@ -18,7 +18,7 @@ type Defined<T> = Exclude<T, undefined>;
  * `PropChainObjectWrapper` gives TypeScript visibility into the properties of
  * an `PropChainType` object at compile-time.
  */
-type PropChainObjectWrapper<S, T, DataAccessor> = { [K in keyof T]-?:PropChainType<S, T[K], DataAccessor> };
+type PropChainObjectWrapper<S, T> = { [K in keyof T]-?:PropChainType<S, T[K]> };
 
 /**
  * Data accessor interface to dereference the value of the `TSOCType`.
@@ -42,39 +42,39 @@ export interface PropChainDataAccessor<S, T> {
  * without exposing Array methods (it is problematic to attempt to invoke methods during
  * the course of an optional chain traversal).
  */
-export interface PropChainArrayWrapper<S, T extends PropChainCallback<S, T | number>, DataAccessor> {
-  length:PropChainType<S, number, DataAccessor>;
+export interface PropChainArrayWrapper<S, T extends PropChainCallback<S, T | number>> {
+  length:PropChainType<S, number>;
   
-  [K:number]:PropChainType<S, T, DataAccessor>;
+  [K:number]:PropChainType<S, T>;
 }
 
 /**
  * Data accessor interface to dereference the value of an `any` type.
  * @extends PropChainDataAccessor<any>
  */
-export interface PropChainAny<S, DataAccessor =PropChainDataAccessor<S, any>>  {
-  [K:string]:PropChainAny<S, DataAccessor> & DataAccessor // Enable deep traversal of arbitrary props
+export interface PropChainAny<S> extends PropChainDataAccessor<S, any>  {
+  [K:string]:PropChainAny<S> // Enable deep traversal of arbitrary props
 }
 
 /**
  * `PropChainDataWrapper` selects between `PropChainArrayWrapper`, `PropChainObjectWrapper`, and `PropChainDataAccessor`
  * to wrap Arrays, Objects and all other types respectively.
  */
-export type PropChainDataWrapper<S, T, DataAccessor = PropChainDataAccessor<S, T>> =
+export type PropChainDataWrapper<S, T> =
   0 extends (1 & T) // Is T any? (https://stackoverflow.com/questions/49927523/disallow-call-with-any/49928360#49928360)
-    ? (PropChainAny<S> & DataAccessor)
+    ? (PropChainAny<S> & PropChainDataAccessor<S, T>)
     : T extends any[] // Is T array-like?
-    ? PropChainArrayWrapper<S, T[number], DataAccessor>
+    ? PropChainArrayWrapper<S, T[number]>
     : T extends object // Is T object-like?
-      ? PropChainObjectWrapper<S, T, DataAccessor>
-      : DataAccessor
+      ? PropChainObjectWrapper<S, T>
+      : PropChainDataAccessor<S, T>
 
 /**
  * An object that supports optional chaining
  */
-export type PropChainType<S, T, DataAccessor = PropChainDataAccessor<S, T>> =
-  (DataAccessor
-    & PropChainDataWrapper<S, NonNullable<T>, DataAccessor>)
+export type PropChainType<S, T> =
+  (PropChainDataAccessor<S, T>
+    & PropChainDataWrapper<S, NonNullable<T>>)
 //| PropChainOnFinish<Callback>
 
 
@@ -83,26 +83,43 @@ export type PropChainCallback<S, T> = (getter:(state:S) => T, keyPath:Array<stri
 export type PropChainOnFinish<S, T, Callback extends PropChainCallback<S, T>> =
   ReturnType<Callback> extends ((...args:infer P) => (infer R)) ? ((...args:P) => R) : never
 
+//
+// export interface PropChainContinuation<
+//   S,
+//   T,
+//   Callback
+//   > {
+//   (
+//     state:S,
+//     data:T,
+//     keyPath?:Array<string | number> | undefined,
+//     callback?: Callback | undefined,
+//     continuation?: PropChainContinuation<S,T,Callback> | undefined
+//   ):PropChainType<S, T>
+// }
 
 export function continuePropertyChain<
   S,
   T,
-  Callback = PropChainCallback<S,T>,
-  DataAccessor = PropChainDataAccessor<S,T>
+  Callback,
+  DataAccessor
+  //Continuation extends PropChainContinuation<S,T,Callback> =
 >(
   state:S,
   data:T,
   keyPath:Array<string | number> = [],
-  callback: Callback = undefined
-):PropChainType<S, T,DataAccessor> {
+  //callback: Callback = undefined,
+  //continuation: PropChainContinuation<S,T,Callback> | undefined = undefined
+):PropChainType<S, T> {
   keyPath = keyPath || []
-  //continuation = continuation || continuePropertyChain as ChainContinuation
   
+  
+  // noinspection DuplicatedCode
   return (new Proxy(
-    (overrideCallback = callback) => {
+    (overrideCallback: PropChainCallback<S,T>) => {
       
       // TRACK FIRST PROP ACCESS
-      const firstGet = [...keyPath.map(() => true)]
+      const firstGet = keyPath.map(() => true)
       
       // CHECK IF KEY SHOULD BE NUMBER
       function resolveKey(value, key, index) {
@@ -127,20 +144,15 @@ export function continuePropertyChain<
       return overrideCallback(getter, keyPath)
     },
     {
-      // get: <
-      //   Key extends (string | number),
-      //   PropType extends (Key extends keyof T ? T[Key] : never)
-      // >(target, key: Key) => {
       get: (target, key) => {
-        return (continuePropertyChain(state, undefined, [...keyPath, key as any], callback))
+        return continuePropertyChain(state, undefined, [...keyPath, key as any])
       }
     }
-  )) as any//PropChainType<S, T, DataAccessor>
+  )) as PropChainType<S, T>
 }
 
-export function propertyChain<S,
-  T>(
+export function propertyChain<S>(
   state:S
 ):PropChainType<S, S> {
-  return continuePropertyChain(state, state)
+  return continuePropertyChain<S,S,PropChainCallback<S,S>, PropChainDataAccessor<S,S>>(state, state)
 }

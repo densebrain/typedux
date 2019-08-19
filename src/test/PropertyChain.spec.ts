@@ -175,6 +175,8 @@ describe('#selectors', function () {
         ]
       ] as any
     
+    const selector = selectorChain(o).a.b.c()
+    
     for (const [[value, keyPath], testValue, testKeyPath] of propChainTests) {
       //const [value, keyPath] = chain()
       
