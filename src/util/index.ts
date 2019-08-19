@@ -1,5 +1,7 @@
 import {getLogger} from 'typelogger'
 
+export * from "./PropertyChain"
+
 const log = getLogger(__filename)
 
 export * from './VariableProxy'

@@ -7,8 +7,8 @@
     <pass-parent-env>true</pass-parent-env>
     <ui>bdd</ui>
     <extra-mocha-options>--require dist/test/test-setup</extra-mocha-options>
-    <test-kind>TEST_FILE</test-kind>
-    <test-file>$PROJECT_DIR$/dist/test/TypeDux.spec.js</test-file>
+    <test-kind>PATTERN</test-kind>
+    <test-pattern>$PROJECT_DIR$/dist/test/**/*.spec.js</test-pattern>
     <method v="2" />
   </configuration>
 </component>

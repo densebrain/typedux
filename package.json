@@ -9,7 +9,7 @@
     "clean": "rm -Rf dist",
     "compile": "tsc --project tsconfig.json",
     "compile:watch": "tsc --project tsconfig.json --watch",
-    "test": "npm run compile && ./node_modules/.bin/mocha --require dist/test/test-setup dist/test/TypeDux.spec.js",
+    "test": "npm run compile && ./node_modules/.bin/ts-mocha -p tsconfig.json --require dist/test/test-setup dist/test/**/*.spec.js",
     "publish:patch": "npm run compile && npm version patch && git push --tags && npm publish"
   },
   "repository": {
@@ -39,6 +39,7 @@
     "lodash": "^4.17.15",
     "redux": "^4.0.4",
     "reflect-metadata": "^0.1.13",
+    "reselect": "^4.0.0",
     "shallowequal": "^1.1.0",
     "source-map-support": "^0.5.13",
     "symbol-observable": "1.2.0",
@@ -74,6 +75,7 @@
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.7.2",
     "@types/redux": "^3.6.0",
+    "@types/reselect": "^2.2.0",
     "babel-plugin-add-module-exports": "^1.0.2",
     "chai": "^4.2.0",
     "core-js": "^3.2.1",
@@ -85,6 +87,7 @@
     "semver": "^6.3.0",
     "sinon": "^7.4.1",
     "source-map-loader": "^0.2.4",
+    "ts-mocha": "^6.0.0",
     "typescript": "^3.5.3"
   }
 }
