@@ -73,7 +73,7 @@ export class ObservableStore<S extends State<string>> implements Store<S> {
    * @param {string | State<string>} statesOrKeys
    * @returns {Array<State<string>>}
    */
-  static makeSimpleReducers(...statesOrKeys:Array<string | State<string>>):Array<ILeafReducer<State<string>, any>> {
+  static makeSimpleReducers<S extends State<string> = State<string>>(...statesOrKeys:Array<string | State<string>>):Array<ILeafReducer<S, any>> {
     return statesOrKeys
       .map(state => isString(state) ? {type: state} : state as State<string>)
       .map(state => new DumbReducer(state))
