@@ -1,6 +1,6 @@
 {
   "name": "typedux",
-  "version": "2.0.16",
+  "version": "2.0.17",
   "description": "Slightly adjusted Redux (awesome by default) for TS with immutablejs built in",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
