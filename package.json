@@ -5,7 +5,6 @@
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "local-install": "npm i -g redux && npm link typeproject typelogger redux && npm i && npm link",
     "clean": "rm -Rf dist",
     "compile": "tsc --project tsconfig.json",
     "compile:watch": "tsc --project tsconfig.json --watch",
