@@ -82,17 +82,15 @@ export type SelectorChainOnFinish<S, T, Callback extends SelectorChainCallback<S
 
 
 
-export interface SelectorChainDataAccessor<S,T> { (): Selector<S,T> }
-// {
-//   (): Selector<S extends State<any> ? S : never,T>
-// }
+export interface SelectorChainDataAccessor<S,T> {
+  (): Selector<S,T>
+}
+
 export interface SelectorChainCallback<S,T> {
   <T>(getter: (state: S) => T, keyPath: Array<string | number>):
     SelectorChainDataAccessor<S,T>
-    //() => Selector<S extends State<any> ? S : never,T>
 }
 
-//export type SelectorChainType<S,T> = PropChainDataWrapper<S, NonNullable<T>> & SelectorChainDataAccessor<S>
 function continueSelectorChain<
   S,
   T
