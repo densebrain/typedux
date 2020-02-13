@@ -13,8 +13,7 @@ import {
   Action as ReduxAction,
   StoreEnhancer,
   Observable,
-  Observer,
-  AnyAction
+  Observer
 } from "redux"
 import "symbol-observable"
 import {getValue} from "typeguard"
@@ -24,10 +23,9 @@ import StateObserver, {TStateChangeHandler} from "./StateObserver"
 import {DefaultLeafReducer} from "../reducers/DefaultLeafReducer"
 import {INTERNAL_KEY} from "../Constants"
 import {InternalState} from "../internal/InternalState"
+import {TRootState} from "../reducers/State"
 import {ActionMessage} from "../actions/ActionTypes"
 import DumbReducer from "../reducers/DumbReducer"
-import {selectorChain, SelectorChain, Selector} from "../selectors"
-import {get as _get} from "lodash"
 
 const log = getLogger(__filename)
 
@@ -39,7 +37,7 @@ export interface IObserverCleaner {
 /**
  * Manage the redux store for RADS
  */
-export class ObservableStore<S extends State<string>> implements Store<S> {
+export class ObservableStore<S extends TRootState> implements Store<S> {
   
   /**
    * Factory method for creating a new observable store
@@ -50,10 +48,10 @@ export class ObservableStore<S extends State<string>> implements Store<S> {
    * @param defaultStateValue
    * @param leafReducersOrStates
    */
-  static createObservableStore<S extends State<string>>(
+  static createObservableStore<S extends TRootState>(
     leafReducersOrStates:Array<ILeafReducer<any, any> | State<string> | Function>,
     enhancer:StoreEnhancer<any> = null,
-    rootStateType:new() => S = null,
+    rootStateType:{ new():S } = null,
     defaultStateValue:any = null
   ):ObservableStore<S> {
     let
@@ -72,7 +70,7 @@ export class ObservableStore<S extends State<string>> implements Store<S> {
    * @param {string | State<string>} statesOrKeys
    * @returns {Array<State<string>>}
    */
-  static makeSimpleReducers<S extends State<string> = State<string>>(...statesOrKeys:Array<string | State<string>>):Array<ILeafReducer<S, any>> {
+  static makeSimpleReducers(...statesOrKeys:Array<string | State<string>>):Array<ILeafReducer<State<string>, any>> {
     return statesOrKeys
       .map(state => isString(state) ? {type: state} : state as State<string>)
       .map(state => new DumbReducer(state))
@@ -89,23 +87,23 @@ export class ObservableStore<S extends State<string>> implements Store<S> {
   
   
   public rootReducer:RootReducer<S>
-  private observers:Array<StateObserver<S, any>> = []
+  private observers:StateObserver[] = []
   private rootReducerFn
-  private store:Store<S>
+  private store
   private pendingTick
   
   constructor(
     leafReducers:ILeafReducer<any, any>[],
-    enhancer:StoreEnhancer<ObservableStore<S>, unknown> = null,
+    enhancer:StoreEnhancer<S> = null,
     public rootStateType:{ new():S } = null,
     public defaultStateValue:any = null) {
     
     this.createRootReducer(...leafReducers)
-    this.store = createStore<S, AnyAction, ObservableStore<S>, unknown>(
+    this.store = createStore(
       this.rootReducerFn,
       this.rootReducer.defaultState(defaultStateValue),
       enhancer
-    ) as Store<S>
+    )
     
     this.subscribe(() =>
       this.scheduleNotification()
@@ -203,43 +201,17 @@ export class ObservableStore<S extends State<string>> implements Store<S> {
   
   
   /**
-   * Create a new selector from the store's state
-   */
-  selector():SelectorChain<S> {
-    return selectorChain(null as S)
-  }
-  
-  /**
-   * Observe state path for changes
-   *
-   * @param selector
-   * @param handler
-   * @returns {function()} unsubscribe observer
-   */
-  observe<T>(selector:Selector<S, T>, handler:TStateChangeHandler<S, T>):IObserverCleaner
-  
-  /**
    * Observe state path for changes
    *
    * @param path
    * @param handler
    * @returns {function()} unsubscribe observer
    */
-  observe<T = any>(path:string | string[], handler:TStateChangeHandler<S, T>):IObserverCleaner
-  observe<T = any>(pathOrSelector:Selector<S, T> | string | string[], handler:TStateChangeHandler<S, T>):IObserverCleaner {
-    let selector:Selector<S, T>
-    
-    if (isString(pathOrSelector) || Array.isArray(pathOrSelector)) {
-      const keyPath = pathOrSelector ? ((Array.isArray(pathOrSelector)) ? pathOrSelector : pathOrSelector.split('.')) : []
-      selector = (state:S) => this.getValueAtPath<T>(state, keyPath)
-    } else {
-      selector = pathOrSelector
-    }
-    
-    let observer = new StateObserver(selector, handler)
+  observe(path:string | string[], handler:TStateChangeHandler):IObserverCleaner {
+    let observer = new StateObserver(path, handler)
     this.observers.push(observer)
     
-    return () => {
+    const removeObserver:IObserverCleaner = () => {
       if (observer.removed) {
         log.debug("Already removed this observer", observer)
         return
@@ -257,23 +229,9 @@ export class ObservableStore<S extends State<string>> implements Store<S> {
       observer.removed = true
     }
     
-  }
-  
-  getValueAtPath<T>(state:S, keyPath:Array<string | number>):T {
-    return _get(state, keyPath)
-    //
-    // for (let key of keyPath) {
-    //   if (!newValue) break
-    //
-    //   let
-    //     tempValue = (newValue.get) ? newValue.get(key) : null
-    //
-    //   newValue = tempValue || newValue[key]
-    //
-    //   //(this.keyPath.length > 0) ? state.getIn(this.keyPath) : state
-    // }
-    //
-    // return newValue as any
+    return removeObserver
+    
+    
   }
   
   private observable = ():Observable<S> => {
@@ -288,7 +246,7 @@ export class ObservableStore<S extends State<string>> implements Store<S> {
        * be used to unsubscribe the observable from the store, and prevent further
        * emission of values from the observable.
        */
-      subscribe(observer:Observer<S>) {
+      subscribe(observer: Observer<S>) {
         if (typeof observer !== "object" || observer === null) {
           throw new TypeError("Expected the observer to be an object.")
         }
@@ -303,8 +261,8 @@ export class ObservableStore<S extends State<string>> implements Store<S> {
         const unsubscribe = store.subscribe(observeState)
         return {unsubscribe}
       },
-      
-      [Symbol.observable]: store.observable
+	    
+	    [Symbol.observable]: store.observable
     }
   }
   

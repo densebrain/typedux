@@ -18,8 +18,8 @@ const
 
 // Internal type definition for
 // function that gets the store state
-export type GetStoreState<S extends State<string> = any> = () => S
-export type DispatchState<S extends State<string> = any> = Dispatch<S>
+export type GetStoreState = () => State<any>
+export type DispatchState = Dispatch<State<any>>
 
 export interface IActionRegistration {
 	paramTypes?:any[]
@@ -59,7 +59,7 @@ let getStoreState:GetStoreState
  *
  * @returns {GetStoreState}
  */
-export function getStoreStateProvider<S extends State<string> = any>():GetStoreState<S> {
+export function getStoreStateProvider():GetStoreState {
 	return getStoreState
 }
 
@@ -88,7 +88,7 @@ export function getStoreInternalState():InternalState {
  * @param newDispatch
  * @param newGetState
  */
-export function setStoreProvider<S extends State<string> = any>(newDispatch:DispatchState|Store<S>,newGetState?:GetStoreState) {
+export function setStoreProvider(newDispatch:DispatchState|Store<State<any>>,newGetState?:GetStoreState) {
 	if (newGetState) {
 		dispatch = newDispatch as DispatchState
 		getStoreState = newGetState

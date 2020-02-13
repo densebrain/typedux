@@ -163,7 +163,7 @@ describe('#typedux', function() {
 	})
 
 	it('Uses reducers on the action message',() => {
-  
+
 		let state = store.getState()
 		let mockState = actions.state
 		expect(mockState.str1).to.equal(MockStateStr1)
@@ -223,7 +223,7 @@ describe('#typedux', function() {
 			
 		
 		return pendingPromise.then(() => thunkPromise)
-		
+			
 	})
 	
 	it('Promises action Exception',() => {
