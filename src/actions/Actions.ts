@@ -18,8 +18,8 @@ const
 
 // Internal type definition for
 // function that gets the store state
-export type GetStoreState = () => State<any>
-export type DispatchState = Dispatch<State<any>>
+export type GetStoreState<S extends State<any> = State<any>> = () => S
+export type DispatchState<S extends State<any> = State<any>> = Dispatch<S>
 
 export interface IActionRegistration {
 	paramTypes?:any[]
