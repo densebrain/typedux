@@ -42,6 +42,7 @@
       <option name="FORCE_SEMICOLON_STYLE" value="true" />
       <option name="SPACE_AFTER_TYPE_COLON" value="false" />
       <option name="USE_CHAINED_CALLS_GROUP_INDENTS" value="true" />
+      <option name="IMPORT_USE_NODE_RESOLUTION" value="GLOBAL" />
     </TypeScriptCodeStyleSettings>
     <XML>
       <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />

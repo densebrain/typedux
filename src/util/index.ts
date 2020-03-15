@@ -3,7 +3,7 @@ import {getLogger} from 'typelogger'
 const log = getLogger(__filename)
 
 export * from './VariableProxy'
-
+export * from './PropertyChain'
 
 /**
  * Is a given value a function

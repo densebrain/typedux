@@ -1,29 +1,17 @@
-import DumbReducer from "../reducers/DumbReducer"
-
-require("source-map-support").install()
-
-import {isFunction, isString, propertyChain} from "../util"
-import {getValue} from 'typeguard'
-
-import {installMockStoreProvider, createMockStore} from './mocks/TestHelpers'
-import {RootReducer, ILeafReducer, State, Reducer} from '../reducers'
-import {ActionMessage, ActionFactory, ActionReducer} from '../actions'
-
+import "jest"
 import {getLogger} from 'typelogger'
-
-import {ActionThunk, Promised} from "../actions/ActionDecorations"
-
-import Promise from "../util/PromiseConfig"
-import {ObservableStore} from "../store/ObservableStore"
-import {getStoreInternalState} from "../actions/Actions"
+import {propertyChain} from "../util/PropertyChain"
 import {selectorChain} from "../selectors/SelectorChain"
 import {Selector} from "../selectors/SelectorTypes"
+
+
+require("source-map-support").install()
 
 const
   log = getLogger(__filename)
 
 describe('#selectors', function () {
-  this.timeout(10000)
+  jest.setTimeout(10000)
   
   
   it('Selector results in simple selector', () => {
@@ -68,15 +56,15 @@ describe('#selectors', function () {
       //const [value, keyPath] = chain()
       
       log.info("Key path", keyPath, "value", value)
-      expect(value).to.equal(testValue)
-      expect(keyPath).to.deep.equal(testKeyPath)
+      expect(value).toBe(testValue)
+      expect(keyPath).toMatchObject(testKeyPath)
     }
     
     for (const [selector, testValue] of selectorChainTests) {
       //const [value, keyPath] = chain()
       const value = selector(o)
       //log.info("Key path", keyPath, "value", value)
-      expect(value).to.equal(testValue)
+      expect(value).toBe(testValue)
       //expect(keyPath).to.deep.equal(testKeyPath)
     }
     
