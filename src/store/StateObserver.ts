@@ -8,7 +8,7 @@
 
 
 import {State} from '../reducers'
-import {getLogger} from 'typelogger'
+import {getLogger} from '@3fv/logger-proxy'
 import { Selector } from '../selectors';
 
 const

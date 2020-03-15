@@ -4,7 +4,7 @@ import {Reducer, State} from '../reducers'
 import {ActionFactory} from './ActionFactory'
 import {executeActionChain, registerAction, getStoreStateProvider, IActionRegistration} from './Actions'
 
-import {getLogger} from "typelogger"
+import {getLogger} from '@3fv/logger-proxy'
 import {ActionTracker} from "./ActionTracker"
 
 const

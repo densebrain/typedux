@@ -2,7 +2,7 @@ import {Reducer} from 'redux'
 
 import {configureMockStore,MockStore} from './MockStore'
 import {setStoreProvider} from '../../actions'
-import {getLogger} from 'typelogger'
+import {getLogger} from '@3fv/logger-proxy'
 const log = getLogger(__filename)
 
 /**

@@ -3,7 +3,7 @@
 
 import {Store,Dispatch} from "redux"
 import {State} from '../reducers'
-import {getLogger} from "typelogger"
+import {getLogger} from '@3fv/logger-proxy'
 import {ActionOptions} from './ActionDecorations'
 import { makeId } from "../util/IdGenerator"
 import { InternalState } from "../internal/InternalState"

@@ -8,7 +8,7 @@ import {
   PropChainDataWrapper
 } from "../util/PropertyChain"
 import { Selector, InferredSelector } from "./SelectorTypes";
-import { isNumber } from "typeguard";
+import { isNumber } from "@3fv/guard";
 import * as _ from 'lodash'
 
 // export type SelectorChainType<S,T> = Exclude<SelectorChainType<S, T>, SelectorChainDataAccessor<S,T>> & {

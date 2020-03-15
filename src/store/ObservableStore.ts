@@ -1,32 +1,31 @@
-import {getLogger} from "typelogger"
+import {getLogger} from '@3fv/logger-proxy'
 
 
 import RootReducer from "../reducers/RootReducer"
-
-
 // Vendor
 import {
-  Store,
-  createStore,
-  Reducer,
-  Unsubscribe,
   Action as ReduxAction,
-  StoreEnhancer,
+  AnyAction,
+  createStore,
   Observable,
   Observer,
-  AnyAction
+  PreloadedState,
+  Reducer,
+  Store,
+  StoreEnhancer,
+  Unsubscribe
 } from "redux"
 import "symbol-observable"
-import {getValue} from "typeguard"
+import {getValue} from "@3fv/guard"
 import {isFunction, isString, nextTick} from "../util"
-import {State, ILeafReducer} from "../reducers"
+import {ILeafReducer, State} from "../reducers"
 import StateObserver, {TStateChangeHandler} from "./StateObserver"
 import {DefaultLeafReducer} from "../reducers/DefaultLeafReducer"
 import {INTERNAL_KEY} from "../Constants"
 import {InternalState} from "../internal/InternalState"
 import {ActionMessage} from "../actions/ActionTypes"
 import DumbReducer from "../reducers/DumbReducer"
-import {selectorChain, SelectorChain, Selector} from "../selectors"
+import {Selector, SelectorChain, selectorChain} from "../selectors"
 import _get from "lodash/get"
 
 const log = getLogger(__filename)
@@ -103,7 +102,7 @@ export class ObservableStore<S extends State> implements Store<S> {
     this.createRootReducer(...leafReducers)
     this.store = createStore<S, AnyAction, ObservableStore<S>, unknown>(
       this.rootReducerFn,
-      this.rootReducer.defaultState(defaultStateValue),
+      this.rootReducer.defaultState(defaultStateValue) as PreloadedState<S>,
       enhancer
     ) as Store<S>
     

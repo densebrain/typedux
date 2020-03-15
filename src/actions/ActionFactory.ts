@@ -4,7 +4,7 @@ import {Enumerable,SelfTyped} from '../util'
 import {ActionMessage} from './ActionTypes'
 import {ActionThunk} from './ActionDecorations'
 import {getStoreStateProvider,getStoreDispatchProvider,makeLeafActionType} from './Actions'
-import {getLogger} from "typelogger"
+import {getLogger} from '@3fv/logger-proxy'
 import {Reducer, State} from '../reducers'
 import {Store} from "redux"
 

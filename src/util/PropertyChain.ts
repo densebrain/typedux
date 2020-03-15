@@ -1,6 +1,6 @@
 
 import * as _ from 'lodash'
-import {isNumber} from "typeguard"
+import {isNumber} from "@3fv/guard"
 
 /**
  * Copyright (C) 2019-present, Rimeto, LLC.

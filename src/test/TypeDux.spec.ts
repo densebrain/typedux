@@ -1,15 +1,14 @@
+import "source-map-support/register"
+import "jest"
 import DumbReducer from "../reducers/DumbReducer"
-
-require("source-map-support").install()
-
 import {isFunction, isString} from "../util"
-import {getValue} from 'typeguard'
+import {getValue} from '@3fv/guard'
 
 import {installMockStoreProvider,createMockStore} from './mocks/TestHelpers'
 import {RootReducer, ILeafReducer, State, Reducer} from '../reducers'
 import {ActionMessage, ActionFactory, ActionReducer} from '../actions'
 
-import {getLogger} from 'typelogger'
+import {getLogger} from '@3fv/logger-proxy'
 
 import { ActionThunk, Promised } from "../actions/ActionDecorations"
 
@@ -17,13 +16,18 @@ import Promise from "../util/PromiseConfig"
 import { ObservableStore } from "../store/ObservableStore"
 import { getStoreInternalState } from "../actions/Actions"
 
+
 const
 	log = getLogger(__filename)
 
 installMockStoreProvider()
 
 function getDefaultState(reducer) {
-	return reducer.handle(null,{type:'@INIT'})
+	// noinspection TypeScriptValidateJSTypes
+	return reducer.handle(
+		null,
+		{ type:'@INIT' }
+	)
 }
 
 const
@@ -134,7 +138,7 @@ class MockActionFactory extends ActionFactory<MockLeafState,MockMessage> {
 
 
 describe('#typedux', function() {
-	this.timeout(10000)
+	jest.setTimeout(10000)
 	
 	let
 		reducer:RootReducer<any>,
@@ -186,7 +190,7 @@ describe('#typedux', function() {
 			state = store.getState(),
 			mockState = actions.state
 		
-		expect(mockState.str2).not.toBeUndefined()
+		expect(mockState.str2).toBeUndefined()
 
 		const str2Update = 'my new str2'
 		actions.mockUpdateFromState(str2Update)

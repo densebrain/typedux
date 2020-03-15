@@ -2,8 +2,8 @@
   "name": "typedux",
   "version": "2.0.28",
   "description": "Slightly adjusted Redux (awesome by default) for TS",
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "main": "index.js",
+  "typings": "index.d.ts",
   "scripts": {
     "clean": "rm -Rf dist",
     "compile": "tsc --project tsconfig.json",
@@ -18,7 +18,10 @@
   "keywords": [
     "redux",
     "typescript",
-    "immutable"
+    "react",
+    "oneway",
+    "state",
+    "state-machine"
   ],
   "files": [
     "src",
@@ -33,17 +36,18 @@
   },
   "homepage": "https://github.com/densebrain/typedux#readme",
   "dependencies": {
-    "bluebird": "^3.5.5",
+    "@3fv/deferred": "^1.2.1",
+    "@3fv/guard": "^1.0.16",
+    "@3fv/logger-proxy": "^1.0.1",
+    "bluebird": "^3.7.2",
     "browser-next-tick": "^1.1.0",
     "lodash": "^4.17.15",
-    "redux": "^4.0.4",
+    "redux": "^4.0.5",
     "reflect-metadata": "^0.1.13",
     "reselect": "^4.0.0",
     "shallowequal": "^1.1.0",
     "source-map-support": "^0.5.13",
-    "symbol-observable": "1.2.0",
-    "typeguard": "0.0.17",
-    "typelogger": "^1.0.29",
+    "symbol-observable": "^1.2.0",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
@@ -81,6 +85,7 @@
     "run-sequence": "^2.2.1",
     "semver": "^6.3.0",
     "source-map-loader": "^0.2.4",
+    "ts-jest": "^25.2.1",
     "typescript": "^3.8.3"
   }
 }
