@@ -27,7 +27,7 @@ import {InternalState} from "../internal/InternalState"
 import {ActionMessage} from "../actions/ActionTypes"
 import DumbReducer from "../reducers/DumbReducer"
 import {selectorChain, SelectorChain, Selector} from "../selectors"
-import {get as _get} from "lodash"
+import _get from "lodash/get"
 
 const log = getLogger(__filename)
 
@@ -39,7 +39,7 @@ export interface IObserverCleaner {
 /**
  * Manage the redux store for RADS
  */
-export class ObservableStore<S extends State<string>> implements Store<S> {
+export class ObservableStore<S extends State> implements Store<S> {
   
   /**
    * Factory method for creating a new observable store
@@ -50,15 +50,15 @@ export class ObservableStore<S extends State<string>> implements Store<S> {
    * @param defaultStateValue
    * @param leafReducersOrStates
    */
-  static createObservableStore<S extends State<string>>(
-    leafReducersOrStates:Array<ILeafReducer<any, any> | State<string> | Function>,
+  static createObservableStore<S extends State>(
+    leafReducersOrStates:Array<ILeafReducer<any, any> | State | Function>,
     enhancer:StoreEnhancer<any> = null,
     rootStateType:new() => S = null,
     defaultStateValue:any = null
   ):ObservableStore<S> {
     let
       leafReducers = leafReducersOrStates.filter(it => isFunction(getValue(() => (it as any).leaf))) as Array<ILeafReducer<any, any>>,
-      leafStates = leafReducersOrStates.filter(it => !isFunction(getValue(() => (it as any).leaf)) && isString(getValue(() => (it as any).type))) as Array<State<string>>,
+      leafStates = leafReducersOrStates.filter(it => !isFunction(getValue(() => (it as any).leaf)) && isString(getValue(() => (it as any).type))) as Array<State>,
       otherReducers = leafReducersOrStates.filter(it => isFunction(it)) as Array<ILeafReducer<any, any>>
     
     leafReducers = [...otherReducers, ...leafReducers, ...leafStates.map(state => new DumbReducer(state))]
@@ -69,12 +69,12 @@ export class ObservableStore<S extends State<string>> implements Store<S> {
   /**
    * Create simple reducers
    *
-   * @param {string | State<string>} statesOrKeys
-   * @returns {Array<State<string>>}
+   * @param {string | State} statesOrKeys
+   * @returns {Array<State>}
    */
-  static makeSimpleReducers<S extends State<string> = State<string>>(...statesOrKeys:Array<string | State<string>>):Array<ILeafReducer<S, any>> {
+  static makeSimpleReducers<S extends State = State>(...statesOrKeys:Array<string | State>):Array<ILeafReducer<S, any>> {
     return statesOrKeys
-      .map(state => isString(state) ? {type: state} : state as State<string>)
+      .map(state => isString(state) ? {type: state} : state as State)
       .map(state => new DumbReducer(state))
   }
   
@@ -261,19 +261,6 @@ export class ObservableStore<S extends State<string>> implements Store<S> {
   
   getValueAtPath<T>(state:S, keyPath:Array<string | number>):T {
     return _get(state, keyPath)
-    //
-    // for (let key of keyPath) {
-    //   if (!newValue) break
-    //
-    //   let
-    //     tempValue = (newValue.get) ? newValue.get(key) : null
-    //
-    //   newValue = tempValue || newValue[key]
-    //
-    //   //(this.keyPath.length > 0) ? state.getIn(this.keyPath) : state
-    // }
-    //
-    // return newValue as any
   }
   
   private observable = ():Observable<S> => {

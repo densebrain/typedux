@@ -7,7 +7,6 @@
  */
 
 
-import {isArray} from '../util'
 import {State} from '../reducers'
 import {getLogger} from 'typelogger'
 import { Selector } from '../selectors';
@@ -17,21 +16,15 @@ const
 
 
 
-export type TStateChangeHandler<S extends State<string>, T> = (newValue:T,oldValue:T,observer:StateObserver<S, T>) => any
+export type TStateChangeHandler<S extends State, T> = (newValue:T,oldValue:T,observer:StateObserver<S, T>) => any
 
-export class StateObserver<S extends State<string>, T> {
+export class StateObserver<S extends State, T> {
 	
 	/**
 	 * Last value received
 	 */
 	private cachedValue: T | undefined = undefined
 	
-	
-	//private selector: Selector<S,T>
-	/**
-	 * The key path to watch
-	 */
-	//private keyPath:Array<string|number>
 	
 	/**
 	 * Flags when the observer has been removed
