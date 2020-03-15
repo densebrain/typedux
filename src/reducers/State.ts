@@ -9,7 +9,7 @@ export interface IStateConstructor<K, T extends State<K>> {
 
 
 
-export interface State<T = string> {
+export interface State<T> {
 	type:T
 	[key:string]:any
 }
