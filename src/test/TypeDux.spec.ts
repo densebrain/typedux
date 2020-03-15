@@ -166,19 +166,19 @@ describe('#typedux', function() {
 
 		let state = store.getState()
 		let mockState = actions.state
-		expect(mockState.str1).to.equal(MockStateStr1)
+		expect(mockState.str1).toBe(MockStateStr1)
 
 		// Make an update
 		const mockStr1Update = 'my own personal idaho'
 		actions.mockUpdate(mockStr1Update)
 
 		// Ensure state is different
-		expect(store.getState()).not.to.equal(state)
+		expect(store.getState()).not.toBe(state)
 
 		// Make sure the children changed too
 		let mockStateAfter = actions.state
-		expect(mockState).not.to.equal(mockStateAfter)
-		expect(mockStr1Update).to.equal(mockStateAfter.str1)
+		expect(mockState).not.toBe(mockStateAfter)
+		expect(mockStr1Update).toBe(mockStateAfter.str1)
 	})
 
 	it('Uses state reducers too',() => {
@@ -186,14 +186,14 @@ describe('#typedux', function() {
 			state = store.getState(),
 			mockState = actions.state
 		
-		expect(mockState.str2).not.to.be.exist
+		expect(mockState.str2).not.toBeUndefined()
 
 		const str2Update = 'my new str2'
 		actions.mockUpdateFromState(str2Update)
 
 		let mockStateAfter = actions.state
-		expect(mockStateAfter.str2).to.equal(str2Update)
-		expect(mockStateAfter.str2).not.to.equal(mockState.str2)
+		expect(mockStateAfter.str2).toBe(str2Update)
+		expect(mockStateAfter.str2).not.toBe(mockState.str2)
 	})
 	
 	it('Promises action',() => {
@@ -201,23 +201,23 @@ describe('#typedux', function() {
 			
 			// FUNCTION TEST
 			thunkPromise = actions.mockThunk().then((result) => {
-				expect(result).to.equal('mock')
+				expect(result).toBe('mock')
 				
 				return Promise
 					.delay(1000).then(() => {
 						const
 							internalState = getStoreInternalState()
 						
-						expect(internalState.hasPendingActions).to.equal(false)
-						expect(internalState.totalActionCount).to.equal(1)
-						expect(internalState.pendingActionCount).to.equal(0)
+						expect(internalState.hasPendingActions).toBe(false)
+						expect(internalState.totalActionCount).toBe(1)
+						expect(internalState.pendingActionCount).toBe(0)
 					})
 			}),
 			
 			// TRACKING TEST
 			pendingPromise = Promise.delay(300).then(() => {
-				expect(getStoreInternalState().hasPendingActions).to.equal(true)
-				expect(getStoreInternalState().pendingActionCount).to.equal(1)
+				expect(getStoreInternalState().hasPendingActions).toBe(true)
+				expect(getStoreInternalState().pendingActionCount).toBe(1)
 			})
 			
 			
@@ -232,14 +232,14 @@ describe('#typedux', function() {
 				throw new Error(`Thunk should not resolve, - should reject`)
 			})
 			.catch(err => {
-				expect(err instanceof Error).to.equal(true)
+				expect(err instanceof Error).toBe(true)
 				
 				return Promise.delay(1000).then(() => {
 					
 					const
 						internalState = getStoreInternalState()
 					
-					expect(internalState.pendingActionCount).to.equal(0)
+					expect(internalState.pendingActionCount).toBe(0)
 					
 				})
 			})

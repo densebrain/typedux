@@ -43,7 +43,7 @@ export type RootReducerErrorHandler = (err:Error, reducer?:ILeafReducer<any, any
  * Maps leaf reducers and decorated reducers
  * to the appropriate state functions
  */
-export class RootReducer<S extends State<any>> {
+export class RootReducer<S extends State> {
 	
 	// Internal list of all leaf reducers
 	private reducers:ILeafReducer<any, ActionMessage<any>>[] = []

@@ -119,7 +119,7 @@ export class ObservableStore<S extends State> implements Store<S> {
    * @returns {any}
    */
   private createRootReducer(...leafReducers:ILeafReducer<any, any>[]) {
-    this.rootReducer = new RootReducer(this.rootStateType, ...leafReducers)
+    this.rootReducer = new RootReducer<S>(this.rootStateType, ...leafReducers)
     this.rootReducerFn = this.rootReducer.makeGenericHandler()
     
     return this.rootReducerFn

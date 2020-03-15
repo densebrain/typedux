@@ -11,7 +11,7 @@ const
   log = getLogger(__filename)
 
 describe('#selectors', function () {
-  jest.setTimeout(10000)
+  //jest.setTimeout(10000)
   
   
   it('Selector results in simple selector', () => {
