@@ -1,4 +1,4 @@
-import {getLogger} from 'typelogger'
+import {getLogger} from '@3fv/logger-proxy'
 import {InternalActionFactory} from "../internal/InternalActionFactory"
 
 import Promise from '../util/PromiseConfig'

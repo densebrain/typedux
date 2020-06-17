@@ -1,4 +1,4 @@
-import {getLogger} from "typelogger"
+import {getLogger} from '@3fv/logger-proxy'
 
 
 import RootReducer from "../reducers/RootReducer"
@@ -9,13 +9,14 @@ import {
   createStore,
   Observable,
   Observer,
+  PreloadedState,
   Reducer,
   Store,
   StoreEnhancer,
   Unsubscribe
 } from "redux"
 import "symbol-observable"
-import {getValue} from "typeguard"
+import {getValue} from "@3fv/guard"
 import {isFunction, isString, nextTick} from "../util"
 import {ILeafReducer, State} from "../reducers"
 import StateObserver, {TStateChangeHandler} from "./StateObserver"
@@ -101,7 +102,7 @@ export class ObservableStore<S extends State<string>> implements Store<S> {
     this.createRootReducer(...leafReducers)
     this.store = createStore<S, AnyAction, ObservableStore<S>, unknown>(
       this.rootReducerFn,
-      this.rootReducer.defaultState(defaultStateValue),
+      this.rootReducer.defaultState(defaultStateValue) as PreloadedState<S>,
       enhancer
     ) as Store<S>
     
@@ -117,7 +118,7 @@ export class ObservableStore<S extends State<string>> implements Store<S> {
    * @returns {any}
    */
   private createRootReducer(...leafReducers:ILeafReducer<any, any>[]) {
-    this.rootReducer = new RootReducer(this.rootStateType, ...leafReducers)
+    this.rootReducer = new RootReducer<S>(this.rootStateType, ...leafReducers)
     this.rootReducerFn = this.rootReducer.makeGenericHandler()
     
     return this.rootReducerFn
@@ -260,16 +261,16 @@ export class ObservableStore<S extends State<string>> implements Store<S> {
   getValueAtPath<T>(state:S, keyPath:Array<string | number>):T {
     let newValue = _get(state, keyPath)
     
-    for (let key of keyPath) {
-      if (!newValue) break
-      
-      let
-        tempValue = (newValue.get) ? newValue.get(key) : null
-      
-      newValue = tempValue || newValue[key]
-      
-      //(this.keyPath.length > 0) ? state.getIn(this.keyPath) : state
-    }
+    // for (let key of keyPath) {
+    //   if (!newValue) break
+    //
+    //   let
+    //     tempValue = (newValue.get) ? newValue.get(key) : null
+    //
+    //   newValue = tempValue || newValue[key]
+    //
+    //   //(this.keyPath.length > 0) ? state.getIn(this.keyPath) : state
+    // }
     
     return newValue as any
   }
@@ -301,8 +302,8 @@ export class ObservableStore<S extends State<string>> implements Store<S> {
         const unsubscribe = store.subscribe(observeState)
         return {unsubscribe}
       },
-	    
-	    [Symbol.observable]: store.observable
+      
+      [Symbol.observable]: store.observable
     }
   }
   

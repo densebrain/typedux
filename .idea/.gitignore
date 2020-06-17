@@ -1,3 +1,7 @@
 # Project exclude paths
-/.
+dbnavigator.xml
+markdown-exported-files.xml
+markdown-navigator.xml
+misc.xml
+thriftCompiler.xml
 

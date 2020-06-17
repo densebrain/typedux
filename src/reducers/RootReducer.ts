@@ -1,17 +1,16 @@
-import {getLogger} from 'typelogger'
+import {getLogger} from '@3fv/logger-proxy'
 
-import {Reducer as ReduxReducer, Action as ReduxAction} from 'redux'
+import {Action as ReduxAction, Reducer as ReduxReducer} from 'redux'
 import {State} from './State'
-import {getAction, ActionMessage} from "../actions"
+import {ActionMessage, getAction} from "../actions"
 import {ILeafReducer} from './LeafReducer'
 
 import {isFunction} from '../util'
 import {getStoreStateProvider} from '../actions/Actions'
-import * as isEqualShallow from 'shallowequal'
-import {INTERNAL_ACTIONS, INTERNAL_ACTION} from "../Constants"
-
-const
-	_ = require('lodash')
+import isEqualShallow from 'shallowequal'
+import {INTERNAL_ACTION, INTERNAL_ACTIONS} from "../Constants"
+import _get from "lodash/get"
+import _clone from "lodash/clone"
 
 const
 	ActionIdCacheMax = 500,
@@ -23,11 +22,11 @@ const
  *
  * @param rootValue
  * @param leaf
- * @returns {any|T|undefined|V|string|IDBRequest}
+ * @return {any}
  */
-function getLeafValue(rootValue, leaf:string) {
+function getLeafValue<S extends State, K, R = (K extends keyof S ? S[K] : unknown)>(rootValue:Partial<S>, leaf:string):R {
 	return rootValue &&
-		(rootValue.get ?
+		(isFunction(rootValue.get) ?
 			rootValue.get(leaf) :
 			rootValue[leaf])
 }
@@ -90,7 +89,7 @@ export class RootReducer<S extends State<string>> {
 	 * @param defaultStateValue - if provided then its used as base for inflation
 	 * @returns {State}
 	 */
-	defaultState(defaultStateValue:any = null):S {
+	defaultState(defaultStateValue:Partial<S> = null):S {
 		
 		
 		// LOAD THE STATE AND VERIFY IT IS Immutable.Map/Record
@@ -104,7 +103,7 @@ export class RootReducer<S extends State<string>> {
 			.forEach(reducer => {
 				const
 					leaf = reducer.leaf(),
-					leafDefaultState = getLeafValue(defaultStateValue, leaf)
+					leafDefaultState = getLeafValue<S, typeof leaf>(defaultStateValue, leaf)
 				
 				state = {...state, [leaf]: reducer.defaultState(leafDefaultState || {})}
 			})
@@ -151,7 +150,7 @@ export class RootReducer<S extends State<string>> {
 			
 			// Guard state type as immutable
 			if (!state) {
-				state = this.defaultState(state)
+				state = this.defaultState(state) as any
 				hasChanged = true
 			}
 			
@@ -198,7 +197,7 @@ export class RootReducer<S extends State<string>> {
 						
 						
 						stateChangeDetected = stateChangeDetected || !isEqualShallow(reducerState, newReducerState)
-						reducerState = _.clone(newReducerState)
+						reducerState = _clone(newReducerState)
 						//log.debug("State change detected",stateChangeDetected)
 					}
 					
@@ -228,7 +227,7 @@ export class RootReducer<S extends State<string>> {
 					
 					// ActionMessage.reducers PROVIDED
 					if (action.stateType && reducerState instanceof action.stateType) {
-						_.get(action, 'reducers', []).forEach((actionReducer) =>
+						_get(action, 'reducers', []).forEach((actionReducer) =>
 							checkReducerStateChange(actionReducer(reducerState, action)))
 					}
 					

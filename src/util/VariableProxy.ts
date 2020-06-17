@@ -1,5 +1,5 @@
 import {isFunction,getProperty} from "./index"
-import {getLogger} from 'typelogger'
+import {getLogger} from '@3fv/logger-proxy'
 const log = getLogger(__filename)
 
 /**

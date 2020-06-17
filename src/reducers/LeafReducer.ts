@@ -2,6 +2,7 @@
 
 
 import {ActionMessage} from "../actions"
+import { State } from "./State";
 
 /**
  * Check object shape to see if
@@ -19,7 +20,7 @@ export function isLeafReducer(o:any):o is ILeafReducer<any,any> {
  * T - type of actions/enum
  * M - type of message
  */
-export interface ILeafReducer<S extends any,A extends ActionMessage<S>> {
+export interface ILeafReducer<S extends State<any>,A extends ActionMessage<S>> {
 
 
 

@@ -1,7 +1,7 @@
 import {State} from "reducers"
+//import * as _ from 'lodash'
+import {isNumber} from "@3fv/guard"
 
-import * as _ from 'lodash'
-import {isNumber} from "typeguard"
 
 /**
  * Copyright (C) 2019-present, Rimeto, LLC.
@@ -20,7 +20,7 @@ type Defined<T> = Exclude<T, undefined>;
  * an `PropChainType` object at compile-time.
  */
 type PropChainObjectWrapper<S, T, DataAccessor> = { [K in keyof T]-?:PropChainType<S, T[K], DataAccessor> };
-
+//type PropChainObjectWrapper<S, T> = { [K in keyof T]-?:PropChainType<S, T[K]> };
 /**
  * Data accessor interface to dereference the value of the `TSOCType`.
  */
@@ -84,12 +84,27 @@ export type PropChainCallback<S, T> = (getter:(state:S) => T, keyPath:Array<stri
 export type PropChainOnFinish<S, T, Callback extends PropChainCallback<S, T>> =
   ReturnType<Callback> extends ((...args:infer P) => (infer R)) ? ((...args:P) => R) : never
 
+//
+// export interface PropChainContinuation<
+//   S,
+//   T,
+//   Callback
+//   > {
+//   (
+//     state:S,
+//     data:T,
+//     keyPath?:Array<string | number> | undefined,
+//     callback?: Callback | undefined,
+//     continuation?: PropChainContinuation<S,T,Callback> | undefined
+//   ):PropChainType<S, T>
+// }
 
 export function continuePropertyChain<
   S,
   T,
-  Callback = PropChainCallback<S,T>,
-  DataAccessor = PropChainDataAccessor<S,T>
+  Callback extends PropChainCallback<S,T>,
+  DataAccessor extends PropChainDataAccessor<S,T>
+  //Continuation extends PropChainContinuation<S,T,Callback> =
 >(
   state:S,
   data:T,
@@ -100,10 +115,10 @@ export function continuePropertyChain<
   //continuation = continuation || continuePropertyChain as ChainContinuation
   
   return (new Proxy(
-    (overrideCallback = callback) => {
+    (overrideCallback: Callback = callback) => {
       
       // TRACK FIRST PROP ACCESS
-      const firstGet = [...keyPath.map(() => true)]
+      const firstGet = keyPath.map(() => true)
       
       // CHECK IF KEY SHOULD BE NUMBER
       function resolveKey(value, key, index) {
@@ -135,12 +150,13 @@ export function continuePropertyChain<
       get: (target, key) => {
         return (continuePropertyChain(state, undefined, [...keyPath, key as any], callback))
       }
-    }
-  )) as any//PropChainType<S, T, DataAccessor>
+    })) as PropChainType<S, T,DataAccessor>
+
 }
 
 export function propertyChain<S>(
   state:S
 ):PropChainType<S, S> {
-  return continuePropertyChain<S,S>(state, state,[])
+  return continuePropertyChain<S,S,PropChainCallback<S,S>, PropChainDataAccessor<S,S>>(state, state)
+  //return continuePropertyChain<S,S>(state, state,[])
 }
