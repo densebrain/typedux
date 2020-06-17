@@ -1,3 +1,5 @@
+export * from "./PropertyChain"
+
 import {getLogger} from 'typelogger'
 
 const log = getLogger(__filename)

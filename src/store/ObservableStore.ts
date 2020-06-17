@@ -2,30 +2,30 @@ import {getLogger} from "typelogger"
 
 
 import RootReducer from "../reducers/RootReducer"
-
-
 // Vendor
 import {
-  Store,
-  createStore,
-  Reducer,
-  Unsubscribe,
   Action as ReduxAction,
-  StoreEnhancer,
+  AnyAction,
+  createStore,
   Observable,
-  Observer
+  Observer,
+  Reducer,
+  Store,
+  StoreEnhancer,
+  Unsubscribe
 } from "redux"
 import "symbol-observable"
 import {getValue} from "typeguard"
 import {isFunction, isString, nextTick} from "../util"
-import {State, ILeafReducer} from "../reducers"
+import {ILeafReducer, State} from "../reducers"
 import StateObserver, {TStateChangeHandler} from "./StateObserver"
 import {DefaultLeafReducer} from "../reducers/DefaultLeafReducer"
 import {INTERNAL_KEY} from "../Constants"
 import {InternalState} from "../internal/InternalState"
-import {TRootState} from "../reducers/State"
 import {ActionMessage} from "../actions/ActionTypes"
 import DumbReducer from "../reducers/DumbReducer"
+import {Selector, SelectorChain, selectorChain} from "../selectors"
+import _get from "lodash/get"
 
 const log = getLogger(__filename)
 
@@ -37,7 +37,7 @@ export interface IObserverCleaner {
 /**
  * Manage the redux store for RADS
  */
-export class ObservableStore<S extends TRootState> implements Store<S> {
+export class ObservableStore<S extends State<string>> implements Store<S> {
   
   /**
    * Factory method for creating a new observable store
@@ -48,7 +48,7 @@ export class ObservableStore<S extends TRootState> implements Store<S> {
    * @param defaultStateValue
    * @param leafReducersOrStates
    */
-  static createObservableStore<S extends TRootState>(
+  static createObservableStore<S extends State<string>>(
     leafReducersOrStates:Array<ILeafReducer<any, any> | State<string> | Function>,
     enhancer:StoreEnhancer<any> = null,
     rootStateType:{ new():S } = null,
@@ -87,23 +87,23 @@ export class ObservableStore<S extends TRootState> implements Store<S> {
   
   
   public rootReducer:RootReducer<S>
-  private observers:StateObserver[] = []
+  private observers:Array<StateObserver<S, any>> = []
   private rootReducerFn
-  private store
+  private store:Store<S>
   private pendingTick
   
   constructor(
     leafReducers:ILeafReducer<any, any>[],
-    enhancer:StoreEnhancer<S> = null,
+    enhancer:StoreEnhancer<ObservableStore<S>, unknown> = null,
     public rootStateType:{ new():S } = null,
     public defaultStateValue:any = null) {
     
     this.createRootReducer(...leafReducers)
-    this.store = createStore(
+    this.store = createStore<S, AnyAction, ObservableStore<S>, unknown>(
       this.rootReducerFn,
       this.rootReducer.defaultState(defaultStateValue),
       enhancer
-    )
+    ) as Store<S>
     
     this.subscribe(() =>
       this.scheduleNotification()
@@ -201,17 +201,43 @@ export class ObservableStore<S extends TRootState> implements Store<S> {
   
   
   /**
+   * Create a new selector from the store's state
+   */
+  selector():SelectorChain<S> {
+    return selectorChain(null as S)
+  }
+  
+  /**
+   * Observe state path for changes
+   *
+   * @param selector
+   * @param handler
+   * @returns {function()} unsubscribe observer
+   */
+  observe<T>(selector:Selector<S, T>, handler:TStateChangeHandler<S, T>):IObserverCleaner
+  
+  /**
    * Observe state path for changes
    *
    * @param path
    * @param handler
    * @returns {function()} unsubscribe observer
    */
-  observe(path:string | string[], handler:TStateChangeHandler):IObserverCleaner {
-    let observer = new StateObserver(path, handler)
+  observe<T = any>(path:string | string[], handler:TStateChangeHandler<S, T>):IObserverCleaner
+  observe<T = any>(pathOrSelector:Selector<S, T> | string | string[], handler:TStateChangeHandler<S, T>):IObserverCleaner {
+    let selector:Selector<S, T>
+    
+    if (isString(pathOrSelector) || Array.isArray(pathOrSelector)) {
+      const keyPath = pathOrSelector ? ((Array.isArray(pathOrSelector)) ? pathOrSelector : pathOrSelector.split('.')) : []
+      selector = (state:S) => this.getValueAtPath<T>(state, keyPath)
+    } else {
+      selector = pathOrSelector
+    }
+    
+    let observer = new StateObserver(selector, handler)
     this.observers.push(observer)
     
-    const removeObserver:IObserverCleaner = () => {
+    return () => {
       if (observer.removed) {
         log.debug("Already removed this observer", observer)
         return
@@ -229,9 +255,23 @@ export class ObservableStore<S extends TRootState> implements Store<S> {
       observer.removed = true
     }
     
-    return removeObserver
+  }
+  
+  getValueAtPath<T>(state:S, keyPath:Array<string | number>):T {
+    let newValue = _get(state, keyPath)
     
+    for (let key of keyPath) {
+      if (!newValue) break
+      
+      let
+        tempValue = (newValue.get) ? newValue.get(key) : null
+      
+      newValue = tempValue || newValue[key]
+      
+      //(this.keyPath.length > 0) ? state.getIn(this.keyPath) : state
+    }
     
+    return newValue as any
   }
   
   private observable = ():Observable<S> => {
@@ -246,7 +286,7 @@ export class ObservableStore<S extends TRootState> implements Store<S> {
        * be used to unsubscribe the observable from the store, and prevent further
        * emission of values from the observable.
        */
-      subscribe(observer: Observer<S>) {
+      subscribe(observer:Observer<S>) {
         if (typeof observer !== "object" || observer === null) {
           throw new TypeError("Expected the observer to be an object.")
         }
