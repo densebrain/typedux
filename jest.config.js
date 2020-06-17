@@ -18,3 +18,9 @@ module.exports = {
     "js"
   ]
 }
+/*
+"jest": {
+    "rootDir": "dist",
+    "globalSetup": "<rootDir>/test/test-setup",*/
+    //"testMatch": ["<rootDir>/test/**/*.spec.js"]
+//},

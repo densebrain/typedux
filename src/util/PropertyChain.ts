@@ -1,7 +1,7 @@
 import {State} from "reducers"
 //import * as _ from 'lodash'
 import {isNumber} from "@3fv/guard"
-
+import _toNumber from "lodash/toNumber"
 
 /**
  * Copyright (C) 2019-present, Rimeto, LLC.
@@ -124,7 +124,7 @@ export function continuePropertyChain<
       function resolveKey(value, key, index) {
         if (firstGet[index]) {
           if (Array.isArray(value)) {
-            const keyNum = _.toNumber(key)
+            const keyNum = _toNumber(key)
             if (isNumber(keyNum)) {
               key = keyPath[index] = keyNum
             }

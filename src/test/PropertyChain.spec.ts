@@ -1,10 +1,9 @@
 // import {propertyChain} from "../util"
-import {getLogger} from 'typelogger'
+import {getLogger} from '@3fv/logger-proxy'
 import {selectorChain, SelectorChain} from "../selectors/SelectorChain"
 // import {Selector} from "../selectors/SelectorTypes"
 
 import "jest"
-//import {getLogger} from '@3fv/logger-proxy'
 import {propertyChain} from "../util/PropertyChain"
 //import {selectorChain} from "../selectors/SelectorChain"
 import {Selector} from "../selectors/SelectorTypes"
@@ -16,7 +15,7 @@ const
   log = getLogger(__filename)
 
 describe('#selectors', function () {
-  this.timeout(10000)
+  jest.setTimeout(10000)
   
   it('Selector results in simple selector', () => {
     const
@@ -30,9 +29,9 @@ describe('#selectors', function () {
         }
       },
 
-      selectorChainTests:Array<[SelectorChain<typeof o>, any, Array<string | number>]> = [
+      //selectorChainTests:Array<[SelectorChain<typeof o>, any, Array<string | number>]> = [
 
-      //selectorChainTests:Array<[Selector<typeof o, any>, any, Array<string | number>]> = [
+      selectorChainTests:Array<[Selector<typeof o, any>, any, Array<string | number>]> = [
 
         [
           selectorChain(o).a.b.c(),
@@ -65,18 +64,18 @@ describe('#selectors', function () {
       
       log.info("Key path", keyPath, "value", value)
 
-      expect(value).to.equal(testValue)
-      expect(keyPath).to.deep.equal(testKeyPath)
+      expect(value).toEqual(testValue)
+      expect(keyPath).toEqual(testKeyPath)
     }
     
     for (const [selector, testValue, testKeyPath] of selectorChainTests) {
       //const [value, keyPath] = chain()
-      const value = selector()(() => o)
+      const value = selector(o)
       //log.info("Key path", keyPath, "value", value)
       // expect(value).to.equal(testValue)
 
       expect(value).toBe(testValue)
-      expect(keyPath).toMatchObject(testKeyPath)
+      //expect(keyPath).toMatchObject(testKeyPath)
     }
     //
     // for (const [selector, testValue] of selectorChainTests) {

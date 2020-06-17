@@ -7,11 +7,8 @@ import {getValue} from '@3fv/guard'
 import {installMockStoreProvider,createMockStore} from './mocks/TestHelpers'
 import {RootReducer, ILeafReducer, State, Reducer} from '../reducers'
 import {ActionMessage, ActionFactory, ActionReducer} from '../actions'
-
 import {getLogger} from '@3fv/logger-proxy'
-
 import { ActionThunk, Promised } from "../actions/ActionDecorations"
-
 import Promise from "../util/PromiseConfig"
 import { ObservableStore } from "../store/ObservableStore"
 import { getStoreInternalState } from "../actions/Actions"
