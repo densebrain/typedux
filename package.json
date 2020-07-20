@@ -1,14 +1,14 @@
 {
   "name": "typedux",
-  "version": "2.0.26",
-  "description": "Slightly adjusted Redux (awesome by default) for TS with immutablejs built in",
+  "version": "2.0.30",
+  "description": "Slightly adjusted Redux (awesome by default) for TS",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
     "clean": "rm -Rf dist",
     "compile": "tsc --project tsconfig.json",
     "compile:watch": "tsc --project tsconfig.json --watch",
-    "test": "npm run compile && ./node_modules/.bin/mocha --require dist/test/test-setup dist/test/TypeDux.spec.js",
+    "//test": "yarn compile && jest --require dist/test/test-setup dist/test/**/*.spec.js",
     "publish:patch": "npm run compile && npm version patch && git push --tags && npm publish"
   },
   "repository": {
@@ -18,7 +18,10 @@
   "keywords": [
     "redux",
     "typescript",
-    "immutable"
+    "react",
+    "oneway",
+    "state",
+    "state-machine"
   ],
   "files": [
     "src",
@@ -33,17 +36,19 @@
   },
   "homepage": "https://github.com/densebrain/typedux#readme",
   "dependencies": {
-    "bluebird": "^3.5.5",
+    "@3fv/deferred": "^1.2.1",
+    "@3fv/guard": "^1.0.16",
+    "@3fv/logger-proxy": "^1.0.1",
+    "bluebird": "^3.7.2",
     "browser-next-tick": "^1.1.0",
     "lodash": "^4.17.15",
-    "redux": "^4.0.4",
+    "redux": "^4.0.5",
     "reflect-metadata": "^0.1.13",
+    "reselect": "^4.0.0",
     "shallowequal": "^1.1.0",
     "source-map-support": "^0.5.13",
-    "symbol-observable": "1.2.0",
-    "typeguard": "0.0.17",
-    "typelogger": "^1.0.29",
-    "uuid": "^3.3.2"
+    "symbol-observable": "^1.2.0",
+    "uuid": "^8.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",
@@ -68,22 +73,19 @@
     "@babel/register": "^7.5.5",
     "@babel/runtime-corejs2": "^7.5.5",
     "@types/bluebird": "^3.5.27",
-    "@types/chai": "^4.2.0",
-    "@types/immutable": "^3.8.7",
-    "@types/mocha": "^5.2.7",
+    "@types/jest": "^25.1.4",
     "@types/node": "^12.7.2",
     "@types/redux": "^3.6.0",
+    "@types/reselect": "^2.2.0",
     "babel-plugin-add-module-exports": "^1.0.2",
-    "chai": "^4.2.0",
     "core-js": "^3.2.1",
     "del": "^5.0.0",
+    "jest": "^25.1.0",
     "merge2": "^1.2.4",
-    "mocha": "^6.2.0",
-    "mocha-junit-reporter": "^1.23.1",
     "run-sequence": "^2.2.1",
     "semver": "^6.3.0",
-    "sinon": "^7.4.1",
     "source-map-loader": "^0.2.4",
-    "typescript": "^3.5.3"
+    "ts-jest": "^25.2.1",
+    "typescript": "^3.8.3"
   }
 }

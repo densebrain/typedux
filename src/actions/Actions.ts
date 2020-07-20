@@ -3,7 +3,7 @@
 
 import {Store,Dispatch} from "redux"
 import {State} from '../reducers'
-import {getLogger} from "typelogger"
+import {getLogger} from '@3fv/logger-proxy'
 import {ActionOptions} from './ActionDecorations'
 import { makeId } from "../util/IdGenerator"
 import { InternalState } from "../internal/InternalState"
@@ -18,8 +18,8 @@ const
 
 // Internal type definition for
 // function that gets the store state
-export type GetStoreState<S extends State<any> = State<any>> = () => S
-export type DispatchState<S extends State<any> = State<any>> = Dispatch<S>
+export type GetStoreState<S extends State = any> = () => S
+export type DispatchState<S extends State = any> = Dispatch<S>
 
 export interface IActionRegistration {
 	paramTypes?:any[]
@@ -59,7 +59,7 @@ let getStoreState:GetStoreState
  *
  * @returns {GetStoreState}
  */
-export function getStoreStateProvider():GetStoreState {
+export function getStoreStateProvider<S extends State = any>():GetStoreState<S> {
 	return getStoreState
 }
 
@@ -88,7 +88,7 @@ export function getStoreInternalState():InternalState {
  * @param newDispatch
  * @param newGetState
  */
-export function setStoreProvider(newDispatch:DispatchState|Store<State<any>>,newGetState?:GetStoreState) {
+export function setStoreProvider<S extends State = any>(newDispatch:DispatchState|Store<S>,newGetState?:GetStoreState) {
 	if (newGetState) {
 		dispatch = newDispatch as DispatchState
 		getStoreState = newGetState

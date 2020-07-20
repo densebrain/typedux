@@ -9,12 +9,12 @@ export interface IStateConstructor<K, T extends State<K>> {
 
 
 
-export interface State<T> {
+export interface State<T = string> {
 	type:T
 	[key:string]:any
 }
 
-export type TRootState = State<string> & {[key:string]:{[key:string]:any}}
+export type TRootState = State & {[key:string]:{[key:string]:any}}
 
 /**
  * Function to patch an existing state

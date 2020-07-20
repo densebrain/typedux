@@ -1,9 +1,9 @@
-import {getLogger} from 'typelogger'
+import {getLogger} from '@3fv/logger-proxy'
 
 const log = getLogger(__filename)
 
 export * from './VariableProxy'
-
+export * from './PropertyChain'
 
 /**
  * Is a given value a function

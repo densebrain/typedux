@@ -7,10 +7,7 @@ import { ActionMessage } from "../actions/ActionTypes"
 import { INTERNAL_KEY } from "../Constants"
 import { ActionReducer } from "../actions/ActionDecorations"
 import { IPendingAction, ActionStatus } from "../actions/ActionTracker"
-
-
-const
-	_clone = require('lodash').clone
+import _clone from "lodash/clone"
 
 export class InternalActionFactory extends ActionFactory<InternalState,ActionMessage<InternalState>> {
 	
