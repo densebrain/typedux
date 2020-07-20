@@ -1,6 +1,6 @@
 {
   "name": "typedux",
-  "version": "2.0.32",
+  "version": "2.0.33",
   "description": "Slightly adjusted Redux (awesome by default) for TS",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
