@@ -7,10 +7,9 @@ import {getStoreStateProvider,getStoreDispatchProvider,makeLeafActionType} from 
 import {getLogger} from '@3fv/logger-proxy'
 import {Reducer, State} from '../reducers'
 import {Store} from "redux"
-
+import {v4 as uuid} from "uuid"
 
 const
-	uuid = require('uuid/v4'),
 	log = getLogger(__filename)
 
 
