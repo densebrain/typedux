@@ -1,10 +1,20 @@
+import { State, TRootState } from "./reducers/State";
+import { LeafActionMap, RootActionMap } from "./Types";
+import {ILeafReducer} from "@3fv/typedux/reducers"
+import {ObservableStore} from "@3fv/typedux/store"
 
+export class Typedux<
+  RS extends TRootState,
+  NS extends RootActionMap<RS>
+> {
 
-/**
- * Export all externals
- */
-export * from './util'
-export * from './reducers'
-export * from './store'
-export * from './actions'
-export * from './internal/InternalState'
+  constructor(
+    public readonly store: ObservableStore<RS>,
+    public readonly actions: NS
+
+  ) {
+  
+  }
+  
+}
+

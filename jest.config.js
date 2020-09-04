@@ -3,13 +3,13 @@ const {defaults: tsjPreset} = require('ts-jest/presets');
 module.exports = {
   verbose: true,
   
-  testRegex: "/src/.*\\.spec\\.(ts|tsx)$",
+  testRegex: "/tests/.*\\.spec\\.(ts|tsx)$",
   moduleDirectories: [
     "node_modules"
   ],
-  setupFilesAfterEnv: ["<rootDir>/src/test/test-setup.ts"],
+  setupFilesAfterEnv: ["<rootDir>/tests/test-setup.ts"],
   transform: {
-    "src/.*\\.ts": "ts-jest"
+    "(src|tests)/.*\\.ts": "ts-jest"
     //...tsjPreset.transform,
     
   },

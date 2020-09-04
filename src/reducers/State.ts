@@ -9,12 +9,19 @@ export interface IStateConstructor<K, T extends State<K>> {
 
 
 
-export interface State<T = string> {
+export type State<T = string> = {
 	type:T
-	[key:string]:any
-}
+} & Omit<{
+	[key: string]:any
+}, "type">
 
-export type TRootState = State & {[key:string]:{[key:string]:any}}
+export type TRootState = State<"ROOT"> //& Omit<{[key:string]:{[key:string]:any}}, "type">
+
+export function createDefaultRootState(): TRootState {
+	return {
+		type: "ROOT"
+	}
+}
 
 /**
  * Function to patch an existing state

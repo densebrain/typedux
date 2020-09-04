@@ -19,13 +19,25 @@
 		"allowSyntheticDefaultImports": true,
 		"sourceMap": true,
 		"jsx": "react",
-		"baseUrl": "./src",
+		"baseUrl": "./",
 		"outDir": "./dist",
+		"paths": {
+			"@3fv/typedux": [
+				"./src/index.ts"
+			],
+			"@3fv/typedux/*": [
+				"./src/*"
+			]
+		},
 		"typeRoots": [
 			"./node_modules/@types"
 		]
 		
 	},
+	"include": [
+		"./src",
+		"./tests"
+	],
 	"exclude": [
 		"node_modules",
 		"dist"

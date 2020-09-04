@@ -1,11 +1,13 @@
+import "source-map-support/register"
 import "jest"
+
 import {getLogger} from '@3fv/logger-proxy'
-import {propertyChain} from "../util/PropertyChain"
-import {selectorChain} from "../selectors/SelectorChain"
-import {Selector} from "../selectors/SelectorTypes"
+import {propertyChain} from "../src/util/PropertyChain"
+import {selectorChain} from "../src/selectors/SelectorChain"
+import {Selector} from "../src/selectors/SelectorTypes"
 
 
-require("source-map-support").install()
+
 
 const
   log = getLogger(__filename)

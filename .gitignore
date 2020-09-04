@@ -1,7 +1,8 @@
 # Typedux
-target
+/target
 /out
-dist
+/lib
+/dist
 
 
 # Created by .ignore support plugin (hsz.mobi)
@@ -86,3 +87,4 @@ jspm_packages
 # Optional REPL history
 .node_repl_history
 .idea/*markdown*
+/.idea/CustomInspectionsConfig.xml

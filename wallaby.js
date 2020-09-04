@@ -79,7 +79,7 @@ module.exports = function (wallaby) {
 			var mochaPath = path.join(wallaby.localProjectDir, 'src','test','mocks','test-setup')
 			//console.log('mocha path', mochaPath)
 			global.assert = require('assert')
-			require('./src/test/mocks/test-setup')
+			require('./tests/mocks/test-setup')
 
 		}
 	}
