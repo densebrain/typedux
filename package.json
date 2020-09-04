@@ -8,7 +8,7 @@
     "clean": "rm -Rf dist",
     "compile": "tsc --project tsconfig.json",
     "compile:watch": "tsc --project tsconfig.json --watch",
-    "//test": "yarn compile && jest --require dist/test/test-setup dist/test/**/*.spec.js",
+    "test": "jest",
     "publish:patch": "yarn run compile && npm version patch && git push --tags && npm publish"
   },
   "repository": {

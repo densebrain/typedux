@@ -23,18 +23,18 @@ export type ActionOptions = {
 /**
  * Action factory provider
  */
-export type TActionFnProvider<T> = (...args:any[]) => (dispatch, getState) => T
+export type ActionFnProvider<T> = (...args:any[]) => (dispatch, getState) => T
 
 /**
  * Action reducer provider
  */
-export type TActionReducerProvider<S> = (...args:any[]) => (state:S) => S
+export type ActionReducerProvider<S> = (...args:any[]) => (state:S) => S
 
 
 /**
  * Action provider
  */
-export type TActionProvider<T, S> = TActionFnProvider<T> | TActionReducerProvider<S>
+export type TActionProvider<T, S> = ActionFnProvider<T> | ActionReducerProvider<S>
 
 /**
  * Wrap action function so compiler allows it
@@ -42,8 +42,8 @@ export type TActionProvider<T, S> = TActionFnProvider<T> | TActionReducerProvide
  * @param fn
  * @constructor
  */
-export function Promised<T>(fn:(...args:any[]) => T):Promise<T> {
-  return ((...args:any[]) => {
+export function Promised<T,Args extends any[]>(fn:(...args:Args) => T | Promise<T>):Promise<T> {
+  return ((...args:Args) => {
     return fn(...args)
   }) as any
 }
