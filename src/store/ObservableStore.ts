@@ -18,7 +18,7 @@ import {
 import "symbol-observable"
 import {getValue} from "@3fv/guard"
 import {isFunction, isString, nextTick} from "../util"
-import {ILeafReducer, State} from "../reducers"
+import {ILeafReducer, State, RootState} from "../reducers"
 import StateObserver, {TStateChangeHandler} from "./StateObserver"
 import {DefaultLeafReducer} from "../reducers/DefaultLeafReducer"
 import {INTERNAL_KEY} from "../Constants"
@@ -49,7 +49,7 @@ export class ObservableStore<S extends State> implements Store<S> {
    * @param defaultStateValue
    * @param leafReducersOrStates
    */
-  static createObservableStore<S extends State>(
+  static createObservableStore<S extends RootState>(
     leafReducersOrStates:Array<ILeafReducer<any, any> | State | Function>,
     enhancer:StoreEnhancer<any> = null,
     rootStateType:new() => S = null,

@@ -2,12 +2,13 @@
 
 import { IPendingAction } from "../actions/ActionTracker"
 import {State} from "../reducers"
-
+import {INTERNAL_KEY} from "../Constants"
+import {clone} from "lodash"
 
 /**
  * State interface
  */
-export interface IInternalState extends State<string> {
+export interface IInternalState extends State<typeof INTERNAL_KEY> {
 	pendingActions:{[id:string]:IPendingAction}
 	totalActionCount:number
 	pendingActionCount:number
@@ -19,7 +20,7 @@ export interface IInternalState extends State<string> {
 
 export class InternalState implements IInternalState {
 	
-	static Key = "InternalState"
+	static Key:typeof INTERNAL_KEY = INTERNAL_KEY
 	
 	/**
 	 * Deserialize
@@ -27,7 +28,7 @@ export class InternalState implements IInternalState {
 	 * @param o
 	 * @returns {InternalState&U&{pendingActions: (Map<any, any>|Map<string, any>|any)}}
 	 */
-	static fromJS(o:any = {}) {
+	static fromJS(o:any = {}):InternalState {
 		if (o instanceof InternalState)
 			return o
 		
@@ -46,7 +47,7 @@ export class InternalState implements IInternalState {
 		Object.assign(this,o)
 	}
 	
-	type = "InternalState"
+	type:typeof INTERNAL_KEY = INTERNAL_KEY
 	
 	/**
 	 * All pending actions
@@ -63,7 +64,7 @@ export class InternalState implements IInternalState {
 	 * Returns empty object - can not be serialized
 	 */
 	toJS() {
-		return this
+		return {...clone(this)}
 	}
 	
 	

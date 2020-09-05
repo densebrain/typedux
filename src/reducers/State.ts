@@ -1,12 +1,35 @@
-import * as _ from 'lodash'
+import {clone} from 'lodash'
 
-export interface IStateConstructor<K, T extends State<K>> {
-	Key:string
-	new (o?:any):T
-	fromJS(o:any):T
+export type StateKey<K> = (K extends string? K : never)
+
+export interface StateConstructor<K extends string, S extends State<K>> {
+	Key: K
+	new (o?:any):S
+	fromJS(o:any):S
 }
 
+export function createStateConstructor<K extends string, S extends State<K>>(key: K): StateConstructor<K, S> {
+	return (class NewStateConstructor implements State<K> {
+		
+		static Key = key
 
+		static fromJS(o: any) {
+			return new NewStateConstructor(o)
+		}
+		
+		type:K = key
+		
+		constructor(o?:any) {
+			Object.assign(this, o || {})
+		}
+		
+		toJS() {
+			return {
+				...this
+			}
+		}
+	}) as unknown as StateConstructor<K, S>
+}
 
 
 export type State<T = string> = {
@@ -15,9 +38,9 @@ export type State<T = string> = {
 	[key: string]:any
 }, "type">
 
-export type TRootState = State<"ROOT"> //& Omit<{[key:string]:{[key:string]:any}}, "type">
+export type RootState = State<"ROOT"> //& Omit<{[key:string]:{[key:string]:any}}, "type">
 
-export function createDefaultRootState(): TRootState {
+export function createDefaultRootState(): RootState {
 	return {
 		type: "ROOT"
 	}
@@ -31,5 +54,5 @@ export function createDefaultRootState(): TRootState {
  * @returns {S}
  */
 export function patchState<S extends object = {}, SP extends Partial<S> = Partial<S>>(state:S,...patches:Array<SP>):S {
-		return Object.assign(_.clone(state),...patches)
+		return Object.assign(clone(state),...patches)
 }

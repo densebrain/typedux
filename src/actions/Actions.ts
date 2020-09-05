@@ -8,7 +8,7 @@ import {ActionOptions} from './ActionDecorations'
 import { makeId } from "../util/IdGenerator"
 import { InternalState } from "../internal/InternalState"
 import { INTERNAL_KEY } from "../Constants"
-import { TRootState } from "../reducers/State"
+import { RootState } from "../reducers/State"
 
 // const
 // 	_cloneDeep = require('lodash.cloneDeep')
@@ -79,7 +79,7 @@ export function getStoreDispatchProvider():DispatchState {
  * @returns {GetStoreState|any}
  */
 export function getStoreInternalState():InternalState {
-	return getStoreState && (getStoreState() as TRootState)[INTERNAL_KEY] as any
+	return getStoreState && (getStoreState() as RootState)[INTERNAL_KEY] as any
 }
 
 /**

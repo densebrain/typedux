@@ -1,5 +1,7 @@
 //import { State } from "./reducers/State"
 
+import { State } from "./reducers/State"
+
 export type MapMerge<FromMap extends {} = {}> = FromMap & {}
 
 export type LeafActionMap<
@@ -28,3 +30,8 @@ export type RootActionMap<NewLeaf = undefined, NewActions = {}, FromNS extends R
   FromNS &
   (NewLeaf extends string ? Record<NewLeaf,LeafActionMap<NewActions>> : {})
 
+
+export type LeafOptions<LeafState, LeafActions extends LeafActionMap<{}> = unknown> = {
+  stateConstructor?: new () => LeafState
+  actions?: LeafActions
+}
