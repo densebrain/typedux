@@ -3,11 +3,11 @@ import "source-map-support/register"
 import "jest"
 import {chain} from "lodash"
 import {getLogger} from '@3fv/logger-proxy'
-import {propertyChain} from "../src/util/PropertyChain"
-import {selectorChain} from "../src/selectors/SelectorChain"
-import {Selector} from "../src/selectors/SelectorTypes"
-import {createBuilder} from "../src/Builder"
-import {createDefaultRootState} from "../src/reducers/State"
+import {propertyChain} from "../util/PropertyChain"
+import {selectorChain} from "../selectors/SelectorChain"
+import {Selector} from "../selectors/SelectorTypes"
+import {createBuilder} from "../Builder"
+import {createDefaultRootState} from "../reducers/State"
 
 
 

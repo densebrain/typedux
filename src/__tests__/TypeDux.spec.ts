@@ -1,20 +1,20 @@
 import "source-map-support/register"
 import "jest"
-import DumbReducer from "../src/reducers/DumbReducer"
-import {isFunction, isString} from "../src/util/index"
+import DumbReducer from "../reducers/DumbReducer"
+import {isFunction, isString} from "../util/index"
 import {getValue} from '@3fv/guard'
 
 import {installMockStoreProvider,createMockStore} from './mocks/TestHelpers'
-import {RootReducer, ILeafReducer, State, Reducer} from '../src/reducers/index'
-import {ActionMessage, ActionFactory, ActionReducer} from '../src/actions/index'
+import {RootReducer, ILeafReducer, State, Reducer} from '../reducers/index'
+import {ActionMessage, ActionFactory, ActionReducer} from '../actions/index'
 
 import {getLogger} from '@3fv/logger-proxy'
 
-import { ActionThunk, Promised } from "../src/actions/ActionDecorations"
+import { ActionThunk, Promised } from "../actions/ActionDecorations"
 
-import Promise from "../src/util/PromiseConfig"
-import { ObservableStore } from "../src/store/ObservableStore"
-import { getStoreInternalState } from "../src/actions/Actions"
+import Promise from "../util/PromiseConfig"
+import { ObservableStore } from "../store/ObservableStore"
+import { getStoreInternalState } from "../actions/Actions"
 
 
 const
