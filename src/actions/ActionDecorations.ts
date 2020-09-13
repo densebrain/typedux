@@ -138,6 +138,8 @@ function actionDecorator(options:ActionOptions = {}) {
         return message
       }, ...preArgs)
     }
+  
+    descriptor.value.bind(target)
     
     /**
      * If this is a reducer function, then

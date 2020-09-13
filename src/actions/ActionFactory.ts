@@ -137,6 +137,8 @@ export abstract class ActionFactory<S extends State<any>,M extends ActionMessage
 		
 		this._dispatcher = dispatch
 		this._getState = getStoreState
+		
+		return this
 	}
 
 	/**

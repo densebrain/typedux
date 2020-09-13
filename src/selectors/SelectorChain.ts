@@ -7,9 +7,10 @@ import {
   PropChainDataAccessor,
   PropChainDataWrapper
 } from "../util/PropertyChain"
-import { Selector, InferredSelector } from "./SelectorTypes";
+import {Selector, InferredSelector, SelectorSubscriptionListener} from "./SelectorTypes"
 import { isNumber } from "@3fv/guard";
 import * as _ from 'lodash'
+import {ObservableStore} from "../store/ObservableStore"
 
 // export type SelectorChainType<S,T> = Exclude<SelectorChainType<S, T>, SelectorChainDataAccessor<S,T>> & {
 //   (): Selector<S,T>
@@ -95,43 +96,54 @@ function continueSelectorChain<
   S,
   T
 >(
+  store: ObservableStore<any>,
   state:S,
   data:T,
   keyPath:Array<string | number> = []
 ): SelectorChainType<S,T> {//SelectorChainType<S,T> {
   keyPath = keyPath || []
   // noinspection DuplicatedCode
-  return (new Proxy(
-    (():Selector<S,T> => {
-      
-      // TRACK FIRST PROP ACCESS
-      const firstGet = keyPath.map(() => true)
-      
-      // CHECK IF KEY SHOULD BE NUMBER
-      function resolveKey(value, key, index) {
-        if (firstGet[index]) {
-          if (Array.isArray(value)) {
-            const keyNum = _.toNumber(key)
-            if (isNumber(keyNum)) {
-              key = keyPath[index] = keyNum
-            }
+  const nextSelector = (():Selector<S,T> => {
+  
+    // TRACK FIRST PROP ACCESS
+    const firstGet = keyPath.map(() => true)
+  
+    // CHECK IF KEY SHOULD BE NUMBER
+    function resolveKey(value, key, index) {
+      if (firstGet[index]) {
+        if (Array.isArray(value)) {
+          const keyNum = _.toNumber(key)
+          if (isNumber(keyNum)) {
+            key = keyPath[index] = keyNum
           }
-          firstGet[index] = false
         }
-        
-        return key
+        firstGet[index] = false
       }
-      
-      const getter:Selector<S,T> = (state:S) =>
-        keyPath.reduce((value, key, index) => {
-          return value[resolveKey(value, key, index)]
-        }, state) as any
-      
-      return getter as Selector<S,T> // overrideCallback(getter, keyPath)
-    }) as SelectorChainDataAccessor<S,T>,
+    
+      return key
+    }
+  
+    function getterFn(state:S) {
+      return keyPath.reduce((value, key, index) => {
+        return value[resolveKey(value, key, index)]
+      }, state) as any
+    }
+    const getter:Selector<S,T> = Object.assign(getterFn, {
+      subscribe(
+        listener: SelectorSubscriptionListener<T>
+      ) {
+        return  store.observe(getterFn, listener)
+      }
+    })
+    
+    return getter as Selector<S,T> // overrideCallback(getter, keyPath)
+  }) as SelectorChainDataAccessor<S,T>
+  
+  return (new Proxy(
+    nextSelector,
     {
       get: (target, key) => {
-        return continueSelectorChain(state, undefined, [...keyPath, key as any])
+        return continueSelectorChain(store,state, undefined, [...keyPath, key as any])
       }
     }
   )) as SelectorChainType<S, T>
@@ -144,7 +156,8 @@ export type SelectorChain<S> = SelectorChainType<S, S>
 export function selectorChain<
   S
 >(
+  store: ObservableStore<any>,
   state:S
 ): SelectorChain<S> {
-  return continueSelectorChain<S,S>(state, state)
+  return continueSelectorChain<S,S>(store, state, state)
 }

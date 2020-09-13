@@ -9,7 +9,7 @@
 
 import {State} from '../reducers'
 import {getLogger} from '@3fv/logger-proxy'
-import { Selector } from '../selectors';
+import {Selector, SelectorFn} from '../selectors'
 
 const
 	log = getLogger(__filename)
@@ -36,7 +36,7 @@ export class StateObserver<S extends State, T> {
 	
 
 	//constructor(s:string | Array<string|number>,private handler:TStateChangeHandler<S,T>) {
-	constructor(private selector: Selector<S,T>,private handler:TStateChangeHandler<S,T>) {
+	constructor(private selector: SelectorFn<S,T>,private handler:TStateChangeHandler<S,T>) {
 		//this.keyPath = path ? ((isArray(path)) ? path : path.split('.')) : []
 	}
 

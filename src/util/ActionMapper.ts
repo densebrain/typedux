@@ -17,8 +17,8 @@ export function makeMappedReducerFn<S extends any,M>(propertyKey:string,args) {
 		if (!stateFn)
 			throw new Error(`Unable to find mapped reduce function on state ${propertyKey}`)
 
-		if (state && typeof state.withMutation === 'function') {
-			const newState = state.withMutation(tempState => {
+		if (state && typeof (state as any).withMutation === 'function') {
+			const newState = (state as any).withMutation(tempState => {
 				tempState = tempState[propertyKey](...args)
 				return tempState
 			})

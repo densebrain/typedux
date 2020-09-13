@@ -1,20 +1,17 @@
 import "source-map-support/register"
 import "jest"
-import DumbReducer from "../reducers/DumbReducer"
-import {isFunction, isString} from "../util"
-import {getValue} from '@3fv/guard'
 
-import {installMockStoreProvider,createMockStore} from './mocks/TestHelpers'
-import {RootReducer, ILeafReducer, State, Reducer} from '../reducers'
-import {ActionMessage, ActionFactory, ActionReducer} from '../actions'
+import {createMockStore, installMockStoreProvider} from './mocks/TestHelpers'
+import {ILeafReducer, RootReducer} from '../reducers'
 
 import {getLogger} from '@3fv/logger-proxy'
 
-import { ActionThunk, Promised } from "../actions/ActionDecorations"
-
 import Promise from "../util/PromiseConfig"
-import { ObservableStore } from "../store/ObservableStore"
-import { getStoreInternalState } from "../actions/Actions"
+import {ObservableStore} from "../store/ObservableStore"
+import {getStoreInternalState} from "../actions/Actions"
+import {createMockRootReducer} from "./mocks/createMockRootReducer"
+import {getDefaultMockState, MockKey, MockStateStr1} from "./mocks/MockConstants"
+import {MockActionFactory} from "./mocks/MockActionFactory"
 
 
 const
@@ -22,62 +19,9 @@ const
 
 installMockStoreProvider()
 
-function getDefaultState(reducer) {
-	// noinspection TypeScriptValidateJSTypes
-	return reducer.handle(
-		null,
-		{ type:'@INIT' }
-	)
-}
-
-const
-	MockKey = 'mock',
-	MockStateStr1 = 'my first string'
 
 
-/**
- * Mock leaf state, dumb test state with test props
- */
-class MockLeafState implements State<any> {
-	type = MockLeafState
-	
-	str1:string = MockStateStr1
-	str2:string
 
-	constructor(props:any = {}) {
-		
-		
-		Object.assign(this,props)
-	}
-}
-
-/**
- * Make root reducer
- *
- * @param {ILeafReducer<any, any>} leafReducers
- * @returns {RootReducer<State<any>>}
- */
-function makeRootReducer(...leafReducersOrStates:Array<ILeafReducer<any,any>|State<string>>) {
-	let
-		leafReducers = leafReducersOrStates.filter(it => isFunction(getValue(() => (it as any).leaf))) as Array<ILeafReducer<any,any>>,
-		leafStates = leafReducersOrStates.filter(it => !isFunction(getValue(() => (it as any).leaf)) && isString(getValue(() => (it as any).type))) as Array<State<string>>
-	
-	leafReducers = [...leafReducers, ...leafStates.map(state => new DumbReducer(state))]
-	
-	return new RootReducer(null,...leafReducers)
-}
-
-interface IMockState extends State<string> {
-	type: string
-	[key:string]:any
-}
-
-/**
- * Typed action message
- */
-interface MockMessage extends ActionMessage<MockLeafState> {
-
-}
 
 //
 // class MockLeafReducer implements ILeafReducer<MockLeafState,MockMessage> {
@@ -97,44 +41,7 @@ interface MockMessage extends ActionMessage<MockLeafState> {
 // }
 
 // Simple mock factory
-class MockActionFactory extends ActionFactory<MockLeafState,MockMessage> {
 
-	constructor() {
-		super(MockLeafState)
-	}
-
-	leaf():string {
-		return MockKey;
-	}
-
-
-
-	@ActionReducer()
-	mockUpdate(val:string) {
-		return (state:IMockState) => ({...state, str1: val})
-	}
-
-	@ActionReducer()
-	mockUpdateFromState(newVal:string) {
-		return (state:Map<string,any>) => ({...state, str2: newVal})
-	}
-	
-	@ActionThunk()
-	mockThunk() {
-		return Promised((dispatch,getState) => {
-			return Promise.delay(1000).then(() => "mock")
-		})
-	}
-	
-	@ActionThunk()
-	mockThunkError() {
-		return Promised((dispatch,getState) => {
-			return Promise.delay(1000).then(() => {
-				throw new Error('MockThunkErrorTest')
-			})
-		})
-	}
-}
 
 
 describe('#typedux', function() {
@@ -150,11 +57,11 @@ describe('#typedux', function() {
 		[leafReducer] = ObservableStore.makeSimpleReducers({type: MockKey, str1: MockStateStr1})//new MockLeafReducer()
 		
 		// ROOT REDUCER
-		reducer = makeRootReducer(ObservableStore.makeInternalReducer(),leafReducer)
+		reducer = createMockRootReducer(ObservableStore.makeInternalReducer(),leafReducer)
 		
 		// STORE
 		store = createMockStore(
-			getDefaultState(reducer),
+			getDefaultMockState(reducer),
 			reducer.makeGenericHandler(),(data) => {
 			log.debug('on state change',data)
 		})
@@ -227,7 +134,7 @@ describe('#typedux', function() {
 			
 		
 		return pendingPromise.then(() => thunkPromise)
-			
+		
 	})
 	
 	it('Promises action Exception',() => {

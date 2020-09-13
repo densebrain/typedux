@@ -1,18 +1,84 @@
+import "source-map-support/register"
 import "jest"
 import {getLogger} from '@3fv/logger-proxy'
 import {propertyChain} from "../util/PropertyChain"
 import {selectorChain} from "../selectors/SelectorChain"
 import {Selector} from "../selectors/SelectorTypes"
+import {configureMockStore} from "./mocks/MockStore"
+import {ILeafReducer, RootReducer} from "../reducers/index"
+import {ObservableStore} from "../store/ObservableStore"
+import {createMockStore, installMockStoreProvider} from "./mocks/TestHelpers"
+import {getDefaultMockState, MockKey, MockStateStr1} from "./mocks/MockConstants"
+import {createMockRootReducer} from "./mocks/createMockRootReducer"
+
+import { IMockState } from "./mocks/MockState"
+import {MockLeafState} from "./mocks/MockLeafState"
+import {setStoreProvider} from "../actions/Actions"
+import {MockActionFactory} from "./mocks/MockActionFactory"
 
 
 require("source-map-support").install()
+
+//installMockStoreProvider()
 
 const
   log = getLogger(__filename)
 
 describe('#selectors', function () {
   //jest.setTimeout(10000)
+  jest.setTimeout(10000)
   
+  let
+    reducer:RootReducer<any>,
+    leafReducers:Array<ILeafReducer<IMockState,any>>,
+    leafReducer:ILeafReducer<any,any>,
+    store = null,
+    actions
+  
+  beforeEach(() => {
+    // leafReducers = ObservableStore.makeSimpleReducers({type: MockKey, str1: MockStateStr1})//new MockLeafReducer()
+    
+    // ROOT REDUCER
+    reducer = createMockRootReducer(ObservableStore.makeInternalReducer(),leafReducer)
+    
+    // STORE
+    store = ObservableStore.createObservableStore(
+      ObservableStore.makeSimpleReducers(new MockLeafState()),
+      undefined,
+      undefined,
+      //getDefaultMockState(reducer),
+      {
+        mock: new MockLeafState()
+      }
+    )
+    setStoreProvider(store)
+    // INIT
+    //store.dispatch({type:'@INIT'})
+    
+    // ACTIONS
+    actions = new MockActionFactory().setStore(store)
+  })
+  
+  it('Selector subscribe', () => {
+    
+    let count = 0
+    selectorChain(store as any, null as IMockState)
+      .mock
+      .str1()
+      .subscribe((newValue, oldValue) => {
+        //console.log("new", newValue, "old", oldValue)
+        if (!count) {
+          expect(newValue).toBe(MockStateStr1)
+        }else {
+          expect(newValue).toBe("cool")
+          expect(oldValue).toBe(MockStateStr1)
+        }
+        count++
+      })
+  
+    actions.mockUpdate(MockStateStr1)
+    actions.mockUpdate("cool")
+  })
   
   it('Selector results in simple selector', () => {
     const
@@ -25,9 +91,10 @@ describe('#selectors', function () {
           }
         }
       },
+      //store = configureMockStore()(o),
       selectorChainTests:Array<[Selector<typeof o, any>, any, Array<string | number>]> = [
         [
-          selectorChain(o).a.b.c(),
+          selectorChain(store as any,o).a.b.c(),
           o.a.b.c,
           ["a", "b", "c"]
         ]

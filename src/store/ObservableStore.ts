@@ -25,13 +25,13 @@ import {INTERNAL_KEY} from "../Constants"
 import {InternalState} from "../internal/InternalState"
 import {ActionMessage} from "../actions/ActionTypes"
 import DumbReducer from "../reducers/DumbReducer"
-import {Selector, SelectorChain, selectorChain} from "../selectors"
+import {Selector, SelectorChain, selectorChain, SelectorFn} from "../selectors"
 import _get from "lodash/get"
 
 const log = getLogger(__filename)
 
 
-export interface IObserverCleaner {
+export interface ObserverDisposer {
   ():void
 }
 
@@ -51,9 +51,9 @@ export class ObservableStore<S extends State> implements Store<S> {
    */
   static createObservableStore<S extends State>(
     leafReducersOrStates:Array<ILeafReducer<any, any> | State | Function>,
-    enhancer:StoreEnhancer<any> = null,
-    rootStateType:new() => S = null,
-    defaultStateValue:any = null
+    enhancer:StoreEnhancer<any> = undefined,
+    rootStateType:new() => S = undefined,
+    defaultStateValue:any = undefined
   ):ObservableStore<S> {
     let
       leafReducers = leafReducersOrStates.filter(it => isFunction(getValue(() => (it as any).leaf))) as Array<ILeafReducer<any, any>>,
@@ -90,14 +90,14 @@ export class ObservableStore<S extends State> implements Store<S> {
   public rootReducer:RootReducer<S>
   private observers:Array<StateObserver<S, any>> = []
   private rootReducerFn
-  private store:Store<S>
-  private pendingTick
+  private readonly store:Store<S>
+  
   
   constructor(
     leafReducers:ILeafReducer<any, any>[],
-    enhancer:StoreEnhancer<ObservableStore<S>, unknown> = null,
-    public rootStateType:{ new():S } = null,
-    public defaultStateValue:any = null) {
+    enhancer:StoreEnhancer<ObservableStore<S>, unknown> = undefined,
+    public rootStateType:{ new():S } = undefined,
+    public defaultStateValue:any = undefined) {
     
     this.createRootReducer(...leafReducers)
     this.store = createStore<S, AnyAction, ObservableStore<S>, unknown>(
@@ -183,14 +183,16 @@ export class ObservableStore<S extends State> implements Store<S> {
    * Schedule notifications to go out on next tick
    */
   scheduleNotification() {
-    if (this.pendingTick) return
-    
-    this.pendingTick = nextTick(() => {
-      let state = this.getState()
-      
-      this.pendingTick = null
-      this.observers.forEach((listener) => listener.onChange(state))
-    })
+    let state = this.getState()
+  
+    //this.pendingTick = null
+    this.observers.forEach((listener) => listener.onChange(state))
+    // if (this.pendingTick) return
+    //
+    //
+    // this.pendingTick = nextTick(() => {
+    //
+    // })
   }
   
   /**
@@ -205,8 +207,10 @@ export class ObservableStore<S extends State> implements Store<S> {
    * Create a new selector from the store's state
    */
   selector():SelectorChain<S> {
-    return selectorChain(null as S)
+    return selectorChain(this, null as S)
   }
+  
+  
   
   /**
    * Observe state path for changes
@@ -215,7 +219,7 @@ export class ObservableStore<S extends State> implements Store<S> {
    * @param handler
    * @returns {function()} unsubscribe observer
    */
-  observe<T>(selector:Selector<S, T>, handler:TStateChangeHandler<S, T>):IObserverCleaner
+  observe<T>(selector:SelectorFn<S, T>, handler:TStateChangeHandler<S, T>):ObserverDisposer
   
   /**
    * Observe state path for changes
@@ -224,13 +228,13 @@ export class ObservableStore<S extends State> implements Store<S> {
    * @param handler
    * @returns {function()} unsubscribe observer
    */
-  observe<T = any>(path:string | string[], handler:TStateChangeHandler<S, T>):IObserverCleaner
-  observe<T = any>(pathOrSelector:Selector<S, T> | string | string[], handler:TStateChangeHandler<S, T>):IObserverCleaner {
-    let selector:Selector<S, T>
+  observe<T = any>(path:string | string[], handler:TStateChangeHandler<S, T>):ObserverDisposer
+  observe<T = any>(pathOrSelector:SelectorFn<S, T> | string | string[], handler:TStateChangeHandler<S, T>):ObserverDisposer {
+    let selector:SelectorFn<S, T>
     
     if (isString(pathOrSelector) || Array.isArray(pathOrSelector)) {
       const keyPath = pathOrSelector ? ((Array.isArray(pathOrSelector)) ? pathOrSelector : pathOrSelector.split('.')) : []
-      selector = (state:S) => this.getValueAtPath<T>(state, keyPath)
+      selector = ((state:S) => this.getValueAtPath<T>(state, keyPath)) as any
     } else {
       selector = pathOrSelector
     }
