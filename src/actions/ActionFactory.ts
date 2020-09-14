@@ -1,6 +1,6 @@
 
 
-import {Enumerable,SelfTyped} from '../util'
+import {Enumerable} from '../util'
 import {ActionMessage} from './ActionTypes'
 import {ActionThunk} from './ActionDecorations'
 import {getStoreStateProvider,getStoreDispatchProvider,makeLeafActionType} from './Actions'
@@ -33,7 +33,7 @@ export abstract class ActionFactory<S extends State<any>,M extends ActionMessage
 	 *
 	 * @param stateType
 	 */
-	constructor(stateType:{new(): S}) {
+	protected constructor(stateType:{new(): S}) {
 		log.debug(`Created action factory with state type: ${stateType.name}`)
 		this.stateType = stateType
 	}

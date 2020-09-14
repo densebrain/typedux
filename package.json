@@ -38,7 +38,7 @@
   "dependencies": {
     "@3fv/deferred": "^1.2.1",
     "@3fv/guard": "^1.0.16",
-    "@3fv/logger-proxy": "^1.0.1",
+    "@3fv/logger-proxy": "^1.0.2",
     "bluebird": "^3.7.2",
     "browser-next-tick": "^1.1.0",
     "lodash": "^4.17.15",
