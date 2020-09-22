@@ -5,7 +5,7 @@ import type {ObjectAsMap, State} from './State'
 import type {ActionMessage} from "../actions"
 import type {ILeafReducer} from './LeafReducer'
 
-import {isFunction} from '../util'
+import {Flag, isFunction} from '../util'
 // import {getGlobalStateProvider} from '../actions/Actions'
 import isEqualShallow from 'shallowequal'
 
@@ -14,6 +14,7 @@ import _clone from "lodash/clone"
 
 import {INTERNAL_ACTION, INTERNAL_ACTIONS} from "../Constants"
 import type {ObservableStore} from "../store/ObservableStore"
+import {Option} from "@3fv/prelude-ts"
 
 const
 	ActionIdCacheMax = 500,
@@ -151,6 +152,10 @@ export class RootReducer<S extends State> {
 			}
 		}
 		try {
+			
+			/**
+			 * Tracks whether the overall state has changed
+			 */
 			let hasChanged = false
 			
 			// Guard state type as immutable
@@ -159,10 +164,65 @@ export class RootReducer<S extends State> {
 				hasChanged = true
 			}
 			
-			const stateMap:State<any> = state as any
+			const createChangeDetector = <CS extends State>(leaf: string, currentState: CS, updateState: (newState: CS) => any, changed: Flag) =>
+				(newReducerState: CS) => {
+					if (!newReducerState) {
+						throw new Error(`New reducer state is null for leaf ${leaf}`)
+					}
+					
+					const noMatch = !isEqualShallow(currentState, newReducerState)
+					if (noMatch) {
+						changed.set()
+						updateState(_clone(newReducerState))
+					}
+					
+					
+			}
 			
-			// Iterate leafs and execute actions
+			const stateMap:State = state as any
+			const actionReg = this.store?.actions?.getAction(action.leaf, action.type)
 			let tempState = {...stateMap}
+			
+			if (isFunction(actionReg?.action)) {
+				Option.ofNullable(tempState[action.leaf])
+					.ifSome(reducerState => {
+						const {leaf} = action,
+							changed = new Flag(),
+						checkReducerStateChange = createChangeDetector(leaf, reducerState, newState => {
+							tempState = {...tempState, [leaf]: newState }
+							hasChanged = true
+						}, changed)
+						
+						
+						// ActionMessage.reducers PROVIDED
+						log.debug('Action type supported', action.leaf, action.type)
+						
+						if (action.stateType && reducerState instanceof action.stateType) {
+							_get(action, 'reducers', []).forEach((actionReducer) =>
+								checkReducerStateChange(actionReducer(reducerState, action)))
+						}
+						
+						
+						// IF @ActionReducer REGISTERED
+						if (actionReg?.options?.isReducer === true) {
+							Option.ofNullable(actionReg.action(null, ...action.args))
+								.filter(isFunction)
+								.match({
+									None: () => {
+										throw new Error(`Action reducer did not return a function: ${actionReg.type}`)
+									},
+									Some: reducerFn => {
+										log.debug(`Calling action reducer: ${actionReg.fullName}`)
+										checkReducerStateChange(reducerFn(reducerState, tempState))
+									}
+								})
+						}
+						
+						
+					})
+			}
+			// Iterate leafs and execute actions
+			
 			for (let reducer of this.reducers) {
 				if (isFunction(reducer)) {
 					const simpleReducer = reducer as any
@@ -182,11 +242,13 @@ export class RootReducer<S extends State> {
 					rawLeafState = tempState[leaf],
 					
 					// Shape it for the reducer
-					startReducerState = rawLeafState
+					startReducerState = rawLeafState,
+					
+					stateChangeDetected = new Flag()
 				
 				let
-					reducerState = startReducerState,
-					stateChangeDetected = false
+					reducerState = startReducerState
+					
 				
 				try {
 					
@@ -195,16 +257,9 @@ export class RootReducer<S extends State> {
 					 *
 					 * @param newReducerState
 					 */
-					const checkReducerStateChange = (newReducerState) => {
-						if (!newReducerState) {
-							throw new Error(`New reducer state is null for leaf ${leaf}`)
-						}
-						
-						
-						stateChangeDetected = stateChangeDetected || !isEqualShallow(reducerState, newReducerState)
-						reducerState = _clone(newReducerState)
-						//log.debug("State change detected",stateChangeDetected)
-					}
+					const checkReducerStateChange = createChangeDetector(leaf, reducerState, newState => {
+						reducerState = newState
+					}, stateChangeDetected)
 					
 					// Check internal actions
 					if (INTERNAL_ACTIONS.includes(action.type)) {
@@ -220,34 +275,14 @@ export class RootReducer<S extends State> {
 						continue
 					}
 					
-					// Get the action registration
-					const actionReg = this.store?.actions?.getAction(leaf, action.type)
 					
-					log.debug('Action type supported', leaf, action.type)
+					
 					
 					// CHECK REDUCER.HANDLE
 					if (reducer.handle) {
 						checkReducerStateChange(reducer.handle(reducerState, action))
 					}
 					
-					// ActionMessage.reducers PROVIDED
-					if (action.stateType && reducerState instanceof action.stateType) {
-						_get(action, 'reducers', []).forEach((actionReducer) =>
-							checkReducerStateChange(actionReducer(reducerState, action)))
-					}
-					
-					
-					// IF @ActionReducer REGISTERED
-					if (actionReg && actionReg.options.isReducer) {
-						const reducerFn = actionReg.action(null, ...action.args)
-						if (!reducerFn || !isFunction(reducerFn)) {
-							//noinspection ExceptionCaughtLocallyJS
-							throw new Error(`Action reducer did not return a function: ${actionReg.type}`)
-						}
-						
-						log.debug(`Calling action reducer: ${actionReg.fullName}`)
-						checkReducerStateChange(reducerFn(reducerState, this.store.getState()))
-					}
 					
 					// CHECK ACTUAL REDUCER FOR SUPPORT
 					if (isFunction(reducer[action.type])) {

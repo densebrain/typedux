@@ -2,12 +2,14 @@ import type {State} from "./State"
 import type {ActionMessage} from "../actions"
 import type {ILeafReducer} from "./LeafReducer"
 import {isString} from "../util"
+import { clone } from "lodash"
 
 
 export default class DumbReducer<S extends State<string>> implements ILeafReducer<S,ActionMessage<S>> {
 	
-	private key:string
-	private providedState:S = null
+	private readonly key:string
+	private readonly providedState:S = null
+	
 	constructor(keyOrState:string|State<string>) {
 		if (isString(keyOrState)) {
 			this.key = keyOrState
@@ -28,6 +30,6 @@ export default class DumbReducer<S extends State<string>> implements ILeafReduce
 
 
 	defaultState(o?:any) {
-		return this.providedState || {type: this.key} as S
+		return clone(this.providedState) || {type: this.key} as S
 	}
 }

@@ -30,7 +30,7 @@ export class DefaultLeafReducer<K extends string, S extends State<K>, StateType 
 	 * @param stateType
 	 * @returns {AnonLeafReducer}
 	 */
-	static makeLeafReducer<K extends string, S extends State<K>, StateType extends StateConstructor<S>>(
+	static create<K extends string, S extends State<K>, StateType extends StateConstructor<S>>(
 		leaf:string,
 		stateType:StateType
 	):DefaultLeafReducer<K,S,StateType,ActionMessage<S>> {

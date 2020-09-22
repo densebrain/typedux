@@ -1,59 +1,61 @@
-
-
 import type { PendingAction } from "../actions"
-import type {State} from "../reducers"
+import type { State } from "../reducers"
+import { INTERNAL_KEY } from "../Constants"
 
+export type InternalStateKey = typeof INTERNAL_KEY
 
+export class InternalState implements State<InternalStateKey> {
+  static Key: InternalStateKey = INTERNAL_KEY
 
+  /**
+   * Deserialize
+   *
+   * @param o
+   * @returns {InternalState&U&{pendingActions: (Map<any, any>|Map<string, any>|any)}}
+   */
+  static fromJS(o: any = {}) {
+    if (o instanceof InternalState) return o
 
-export class InternalState implements State<"InternalState"> {
-	
-	static Key:"InternalState" = "InternalState"
+    const state = new InternalState(),
+      { pendingActions = {} } = o
+
+    return Object.assign(state, { pendingActions })
+  }
+
+  /**
+   * Create a new internal state
+   */
+  constructor(o: any = {}) {
+    Object.assign(this, o)
+  }
+
+  type: InternalStateKey = INTERNAL_KEY
+
+  /**
+   * All pending actions
+   */
+  pendingActions: { [id: string]: PendingAction } = {}
 	
 	/**
-	 * Deserialize
-	 *
-	 * @param o
-	 * @returns {InternalState&U&{pendingActions: (Map<any, any>|Map<string, any>|any)}}
+	 * Total actions executed
 	 */
-	static fromJS(o:any = {}) {
-		if (o instanceof InternalState)
-			return o
-		
-		const
-			state = new InternalState(),
-			{pendingActions = {}} = o
-		
-		
-		return Object.assign(state, {pendingActions})
-	}
+	totalActionCount: number = 0
 	
 	/**
-	 * Create a new internal state
+	 * Pending action count
 	 */
-	constructor(o:any = {}) {
-		Object.assign(this,o)
-	}
+  pendingActionCount: number = 0
 	
-	type:"InternalState" = "InternalState"
 	
 	/**
-	 * All pending actions
+	 * Has pending actions currently ?
 	 */
-	pendingActions:{[id:string]:PendingAction} = {}
-	
-	totalActionCount:number = 0
-	
-	pendingActionCount:number = 0
-	
-	hasPendingActions:boolean = false
-	
-	/**
-	 * Returns empty object - can not be serialized
-	 */
-	toJS() {
-		return this
-	}
-	
-	
+  hasPendingActions: boolean = false
+
+  /**
+   * Returns empty object - can not be serialized
+   */
+  toJS() {
+    return this
+  }
 }

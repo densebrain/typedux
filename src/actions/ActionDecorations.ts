@@ -1,64 +1,33 @@
 import {isFunction} from '../util'
-import type {ActionMessage} from './ActionTypes'
-import type {Reducer, State} from '../reducers'
-import type {ActionRegistration} from './Actions'
-import type {ActionFactory} from './ActionFactory'
+import type {
+  ActionFactory,
+  ActionFactoryConstructor,
+  ActionMessage,
+  ActionOptions,
+  ActionRegistration
+} from './ActionTypes'
+import type {StateKey} from '../reducers'
 
 
 import {getLogger} from '@3fv/logger-proxy'
 import {ActionTracker} from "./ActionTracker"
+import {createActionRegistration} from "./Actions"
 
 const
   log = getLogger(__filename)
 
 
-export type ActionOptions = {
-  isPromise?:boolean
-  isReducer?:boolean
-  factory?:any
-  reducers?:Reducer<any, any>[]
-  mapped?:string[]
-}
-
-
-/**
- * Action factory provider
- */
-export type ActionFnProvider<T> = (...args:any[]) => (dispatch, getState) => T
-
-/**
- * Action reducer provider
- */
-export type ActionReducerProvider<S> = (...args:any[]) => (state:S) => S
-
-
-/**
- * Action provider
- */
-export type TActionProvider<T, S> = ActionFnProvider<T> | ActionReducerProvider<S>
-
-/**
- * Wrap action function so compiler allows it
- *
- * @param fn
- * @constructor
- */
-export function Promised<T,Args extends any[]>(fn:(...args:Args) => T | Promise<T>):Promise<T> {
-  return ((...args:Args) => {
-    return fn(...args)
-  }) as any
-}
 
 /**
  * Decorate an action with options provided
  *
  * @param options
  */
-function actionDecorator(options:ActionOptions = {}) {
+function actionDecorator<A extends ActionFactory = ActionFactory, F extends ActionFactoryConstructor<A> = ActionFactoryConstructor<A>>(options:ActionOptions<F> = {}) {
   
   // Actual decorator is returned
-  return function <S extends State<any>, M extends ActionMessage<S>>(
-    target:ActionFactory<S, M>,
+  return function <S extends A["state"] = A["state"], M extends ActionMessage<S> = ActionMessage<S>>(
+    target: A,
     propertyKey:string,
     descriptor:TypedPropertyDescriptor<any>
   ) {
@@ -89,8 +58,9 @@ function actionDecorator(options:ActionOptions = {}) {
     
     // Override the default method
     descriptor.value = function (...preArgs:any[]) {
-      const actionFactory = this as ActionFactory<any, any>,
-        actionContainer = actionFactory?.getStore()?.actions
+      const actionFactory = target as ActionFactory<any, any>,
+        store = actionFactory?.getStore(),
+        actionContainer = store?.actions
       return actionContainer?.executeActionChain(reg, (id, ...args) => {
         
         // Grab the current dispatcher
@@ -109,7 +79,7 @@ function actionDecorator(options:ActionOptions = {}) {
             this.leaf(),
             propertyKey,
             data,
-            this.getStore()
+            store
           ).promise
         }
         
@@ -147,13 +117,15 @@ function actionDecorator(options:ActionOptions = {}) {
      * register the actual action
      */
     const actionFn = (options.isReducer) ? actionCreator : descriptor.value
-    
-    reg = target.getStore()?.actions?.registerAction(
-      target.constructor,
-      target.leaf ? target.leaf() : '__typedux',
+    //getStore()?.actions?.
+    reg = target.registerAction(
+      createActionRegistration<A, F, StateKey<S>>(
+      target.constructor as F,
+      target.leaf(),
       propertyKey,
       actionFn,
       options
+      )
     )
     
     return descriptor

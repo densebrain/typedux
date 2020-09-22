@@ -1,8 +1,8 @@
 import {Middleware, Reducer} from 'redux'
 
-import {configureMockStoreFactory, MockStore, MockStoreFactory} from './MockStore'
+import {configureMockStoreFactory, MockStoreFactory} from './MockStore'
 
-import {ActionFactory, setGlobalStore} from '../../actions'
+import {BaseActionFactory, setGlobalStore} from '../../actions'
 import {getLogger} from '@3fv/logger-proxy'
 import {State, StateArgs} from '../../reducers'
 import {ObservableStore} from "../../store/ObservableStore"

@@ -1,3 +1,5 @@
+import "source-map-support/register"
+
 // declare global {
 // 	const sinon: typeof sinonGlobal
 // 	const expect: typeof chaiGlobal.expect

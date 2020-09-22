@@ -5,6 +5,7 @@ export * from './VariableProxy'
 export * from './PropertyChain'
 export * from './UtilDecorations'
 export * from "./Promise"
+export * from "./Flag"
 
 /**
  * Retrieve a deep property by string

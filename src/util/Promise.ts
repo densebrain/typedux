@@ -13,3 +13,14 @@ export {default as Bluebird} from 'bluebird'
 //   defer
 // })
 
+/**
+ * Wrap action function so compiler allows it
+ *
+ * @param fn
+ * @constructor
+ */
+export function Promised<T,Args extends any[]>(fn:(...args:Args) => T | Promise<T>):Promise<T> {
+  return ((...args:Args) => {
+    return fn(...args)
+  }) as any
+}

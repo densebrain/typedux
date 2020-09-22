@@ -1,19 +1,17 @@
-import "source-map-support/register"
 import "jest"
-
-import {createMockStore} from './mocks/TestHelpers'
-import {ILeafReducer, RootReducer, State} from '../reducers'
+import {ILeafReducer} from '../reducers'
 
 import {getLogger} from '@3fv/logger-proxy'
 
 import {Bluebird as Promise} from "../util"
-import {ObservableStore} from "../store"
 import {getGlobalStoreInternalState} from "../actions"
-import {createMockRootReducer} from "./mocks/createMockRootReducer"
-import {getDefaultMockState, MockKey, MockStateStr1} from "./mocks/MockConstants"
+import {MockStateStr1} from "./mocks/MockConstants"
 import {MockActionFactory} from "./mocks/MockActionFactory"
 import {configureMockStoreFactory, MockStoreFactory} from "./mocks/MockStore"
 import {MockLeafState} from "./mocks/MockLeafState"
+import {ObservableStore} from "../store/ObservableStore"
+import {INTERNAL_KEY} from "../Constants"
+import {InternalState} from "../internal/InternalState"
 
 
 const
@@ -48,15 +46,20 @@ const
 
 
 
-describe('#typedux', function() {
+describe('Typedux', function() {
 	jest.setTimeout(10000)
 	
 	let
 		//reducer:RootReducer<any>,
 		mockStoreFactory: MockStoreFactory,
 		leafReducer:ILeafReducer<any,any>,
-		store = null,
-		actions:MockActionFactory
+		store: ObservableStore = null,
+		actions:MockActionFactory,
+		getInternalState = () => {
+			if (!store) throw Error("store not set")
+			
+			return store.getState()[INTERNAL_KEY]
+		}
 
 	beforeEach(() => {
 		//[leafReducer] = ObservableStore.makeSimpleReducers({type: MockKey, str1: MockStateStr1} as State<typeof MockKey>)//new MockLeafReducer()
@@ -81,7 +84,7 @@ describe('#typedux', function() {
 		store.dispatch({type:'@INIT'})
 		
 		// ACTIONS
-		actions = new MockActionFactory()
+		actions = new MockActionFactory(store)
 	})
 
 	it('Uses reducers on the action message',() => {
@@ -118,7 +121,7 @@ describe('#typedux', function() {
 		expect(mockStateAfter.str2).not.toBe(mockState.str2)
 	})
 	
-	it('Promises action',() => {
+	it('PromisesAction',() => {
 		const
 			
 			// FUNCTION TEST
@@ -128,7 +131,7 @@ describe('#typedux', function() {
 				return Promise
 					.delay(1000).then(() => {
 						const
-							internalState = getGlobalStoreInternalState()
+							internalState: InternalState = getInternalState()// getGlobalStoreInternalState()
 						
 						expect(internalState.hasPendingActions).toBe(false)
 						expect(internalState.totalActionCount).toBe(1)
@@ -138,8 +141,8 @@ describe('#typedux', function() {
 			
 			// TRACKING TEST
 			pendingPromise = Promise.delay(300).then(() => {
-				expect(getGlobalStoreInternalState().hasPendingActions).toBe(true)
-				expect(getGlobalStoreInternalState().pendingActionCount).toBe(1)
+				expect(getInternalState().hasPendingActions).toBe(true)
+				expect(getInternalState().pendingActionCount).toBe(1)
 			})
 			
 			
@@ -150,7 +153,7 @@ describe('#typedux', function() {
 	
 	it('Promises action Exception',() => {
 		return actions.mockThunkError()
-			.then((result) => {
+			.then(() => {
 				throw new Error(`Thunk should not resolve, - should reject`)
 			})
 			.catch(err => {
@@ -159,7 +162,7 @@ describe('#typedux', function() {
 				return Promise.delay(1000).then(() => {
 					
 					const
-						internalState = getGlobalStoreInternalState()
+						internalState = getInternalState()
 					
 					expect(internalState.pendingActionCount).toBe(0)
 					

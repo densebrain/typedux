@@ -1,13 +1,13 @@
 import {State} from "../../reducers/State"
-import {MockStateStr1} from "./MockConstants"
+import {MockKey, MockStateStr1} from "./MockConstants"
 
 /**
  * Mock leaf state, dumb test state with test props
  */
-export class MockLeafState implements State<any> {
-  static Key = "mock"
+export class MockLeafState implements State<typeof MockKey> {
+  static readonly Key: typeof MockKey = MockKey
   
-  type = MockLeafState.Key
+  readonly type: typeof MockKey = MockLeafState.Key
   // type = MockLeafState
   //
   str1:string = MockStateStr1

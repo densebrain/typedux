@@ -2,25 +2,27 @@ import {Action, applyMiddleware, Middleware, Reducer, Store, Unsubscribe} from "
 import { ObservableStore } from "../../store/ObservableStore"
 import {State, StateArgs} from "../../reducers"
 import {isFunction} from '../../util'
-import {ActionFactory, ActionFactoryConstructor} from "../../actions/ActionFactory"
-
-/**
- * Slightly extended Store interface for
- * easier testing
- */
-export class MockStore<S extends State> extends ObservableStore<S> {
-	// setState(newState)
-	// getActions()
-	// getReducer:Reducer<S>
-	// clearActions()
-}
+import {BaseActionFactory, ActionFactoryConstructor} from "../../actions"
+//
+// /**
+//  * Slightly extended Store interface for
+//  * easier testing
+//  */
+// export class MockStore<S extends State> extends ObservableStore<S> {
+// 	// setState(newState)
+// 	// getActions()
+// 	// getReducer:Reducer<S>
+// 	// clearActions()
+// }
 
 /**
  * Shape of the factory used to build stores
  */
 export interface MockStoreFactory {
-	(fromState:any,storeReducer?:any,onStateChange?:Function,storeMixins?:any):MockStore<any>
+	(fromState:any,storeReducer?:any,onStateChange?:Function,storeMixins?:any):ObservableStore<any>
 }
+
+const Noop = (() => {})
 
 /**
  * Create a new factory with the provided middlewares
@@ -29,15 +31,17 @@ export interface MockStoreFactory {
  * @param middlewares to install in the mock store
  * @returns {MockStoreFactory}
  */
-function mockStoreFactory(middlewares:Middleware[] = [], stateArgs: StateArgs[] = [],  actionFactories: Array<ActionFactoryConstructor<any> | ActionFactory<any, any>> = []):MockStoreFactory {
-	return function(fromState:any,storeReducer = null,onStateChange: (() => void) = null,storeMixins:any = null):MockStore<any> {
+
+
+function mockStoreFactory(middlewares:Middleware[] = [], stateArgs: StateArgs[] = [],  actionFactories: Array<ActionFactoryConstructor<any> | BaseActionFactory<any, any>> = []):MockStoreFactory {
+	return function(fromState:any,storeReducer = null,onStateChange: (() => void) = Noop,storeMixins:any = null):ObservableStore<any> {
 
 		// First calculate the store state if a function was provided
 		let storeState = (isFunction(fromState)) ? fromState() : fromState
 
 		function makeStore() {
 			
-			const store = new MockStore<any>(
+			const store = new ObservableStore<any>(
 				ObservableStore.makeSimpleReducers(...stateArgs),
 				null,
 				null,
@@ -65,6 +69,6 @@ function mockStoreFactory(middlewares:Middleware[] = [], stateArgs: StateArgs[] 
 	}
 }
 
-export function configureMockStoreFactory(middlewares:Middleware[] = [], stateArgs: StateArgs[] = [], actionFactories: Array<ActionFactoryConstructor<any> | ActionFactory<any, any>> = []) {
+export function configureMockStoreFactory(middlewares:Middleware[] = [], stateArgs: StateArgs[] = [], actionFactories: Array<ActionFactoryConstructor<any> | BaseActionFactory<any, any>> = []) {
 	return mockStoreFactory(middlewares,stateArgs,actionFactories)
 }

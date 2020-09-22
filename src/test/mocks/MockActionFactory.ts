@@ -1,18 +1,19 @@
-import {ActionFactory} from "../../actions/ActionFactory"
+import {BaseActionFactory} from "../../actions/BaseActionFactory"
 import {MockKey} from "./MockConstants"
-import {ActionReducer, ActionThunk, Promised} from "../../actions/ActionDecorations"
-import {Bluebird as Promise} from "../../util"
+import {ActionReducer, ActionThunk} from "../../actions/ActionDecorations"
+import {Bluebird as Promise, Promised} from "../../util"
 import { MockLeafState } from "./MockLeafState"
-import { MockMessage } from "./MockMessage"
-import { IMockState } from "./MockState"
+import type { MockMessage } from "./MockMessage"
+import type { IMockState } from "./MockState"
+import type { ObservableStore } from "../../store/ObservableStore"
 
-export class MockActionFactory extends ActionFactory<MockLeafState,MockMessage> {
+export class MockActionFactory extends BaseActionFactory<MockLeafState,MockMessage> {
   
-  constructor() {
-    super(MockLeafState)
+  constructor(store?: ObservableStore<any>) {
+    super(MockLeafState,store)
   }
   
-  leaf():string {
+  leaf(): typeof MockKey {
     return MockKey;
   }
   

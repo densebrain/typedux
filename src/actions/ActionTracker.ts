@@ -2,7 +2,7 @@ import type {ObservableStore} from "../store/ObservableStore"
 import {ActionMessage, ActionStatus} from "./ActionTypes"
 
 
-import {InternalActionFactory} from "../internal/InternalActionFactory"
+import type {InternalActionFactory as InternalActionFactoryType} from "../internal/InternalActionFactory"
 import {Bluebird as Promise} from '../util'
 
 
@@ -67,6 +67,7 @@ export class ActionTracker<T> {
     
     
     const
+      InternalActionFactory: new (store:ObservableStore) => InternalActionFactoryType = require("../internal/InternalActionFactory").InternalActionFactory,
       internalActions = new InternalActionFactory(store)
     
     this._promise = new Promise<T>((resolve, reject) => {

@@ -1,9 +1,9 @@
 import type {ObservableStore} from "../store"
 
 import { PendingAction, ActionStatus, ActionMessage } from "../actions/ActionTypes"
-import {ActionFactory} from "../actions/ActionFactory"
+import {BaseActionFactory} from "../actions/BaseActionFactory"
 import {ActionReducer} from "../actions/ActionDecorations"
-import { InternalState } from "./InternalState"
+import { InternalState, InternalStateKey } from "./InternalState"
 
 import { INTERNAL_KEY } from "../Constants"
 
@@ -11,13 +11,15 @@ import { INTERNAL_KEY } from "../Constants"
 import _clone from "lodash/clone"
 
 
-export class InternalActionFactory extends ActionFactory<InternalState,ActionMessage<InternalState>> {
+//export type InternalStateKey = typeof INTERNAL_KEY
+
+export class InternalActionFactory extends BaseActionFactory<InternalState,ActionMessage<InternalState>, InternalStateKey> {
 	
-	constructor(store?: ObservableStore<any>) {
+	constructor(store?: ObservableStore) {
 		super(InternalState,store)
 	}
 	
-	leaf():string {
+	leaf():InternalStateKey {
 		return INTERNAL_KEY
 	}
 	

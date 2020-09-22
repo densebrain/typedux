@@ -1,8 +1,10 @@
 # TypeDux / Redux / ReTyped
 
-A leaf based TypeScript 2 Immutable wrapper around REDUX - all decoration driven
+** DOCS NEED UPDATING, USE v2 FOR NOW **
 
-To start, like everyone else, I love the benefits of an immutable functional paradigm, but the overhead of 
+A leaf based TypeScript 4 Immutable wrapper around REDUX - all decoration driven
+
+To start, like everyone else, I love the benefits of an immutable functional paradigm, but the overhead of
 implementing it in the real world consistently proves difficult for a number of reasons
 * Learning curve
 * Type Safety
@@ -10,10 +12,10 @@ implementing it in the real world consistently proves difficult for a number of 
 * Scope access
 * Integration into a current application
 
-The issues arise from a completely decoupled solution, which in practice provides an optimal usage pattern, 
+The issues arise from a completely decoupled solution, which in practice provides an optimal usage pattern,
 but provides hurdle after hurdle in terms of learning and on-boarding as well as reusing existing code.
- 
-Enter _TypeDux_, simply put it's redux with an immutable & observable root state that is statically typed at every node 
+
+Enter _TypeDux_, simply put it's redux with an immutable & observable root state that is statically typed at every node
  and end, reuse and manage
 
 ## Install
@@ -23,7 +25,7 @@ Same as every other package, note that reflect-metadata, ImmutableJS and Redux a
 ```
 NOTE: Runtime requires ES6 level polyfills - so babel-polyfill or transform-runtime, etc work just fine
 
-npm i --save typdux 
+npm i --save typdux
 ```
 
 ## Getting Started
@@ -51,7 +53,7 @@ class ExampleLeafState extends ExampleLeafRecord {
 
 	constructor(props:any = {}) {
 		super(props)
-		
+
 		Object.assign(this,props)
 	}
 }
@@ -70,35 +72,35 @@ interface ExampleMessage extends ActionMessage<ExampleLeafState> {
 import {ActionFactory,ActionReducer,ActionThunk} from 'typedux'
 
 class ExampleActionFactory extends ActionFactory<ExampleLeafState,ExampleLeafMessage> {
-	
+
 	constructor() {
   		super(ExampleLeafState)
   	}
-  
+
   	leaf():string {
   		return 'exampleLeafKey';
   	}
-  
+
   	/**
     * State Accessors are SUPER easy
 		  */
     getStr1() {
 			return this.state.str1
     }
-  
+
     /**
     * Reducers (if you don't know what a reducer is checkout the redux docs)
-    * are super easy, annotate ActionReducer and return a function that takes state  
+    * are super easy, annotate ActionReducer and return a function that takes state
 		 */
   	@ActionReducer()
   	exampleStr1Update(val:string) {
   		return (state:ExampleLeafState) => state.set('str1',val)
-  	}	
-  	
+  	}
+
   	/**
-  	* Thunks are now track-able and wrapped in promises,  
-  	* getState is superfluous as it dispatch because this.state and 
-  	* calling any action directly provides required context 
+  	* Thunks are now track-able and wrapped in promises,
+  	* getState is superfluous as it dispatch because this.state and
+  	* calling any action directly provides required context
 		 */
   	@ActionThunk()
     exampleThunk() {
@@ -106,7 +108,7 @@ class ExampleActionFactory extends ActionFactory<ExampleLeafState,ExampleLeafMes
         return Promise.delay(1000).then(() => "example")
       })
     }
-} 
+}
 ```
 
 3.  Create the store
@@ -116,26 +118,26 @@ __NOTE: ALL ACTION FACTORIES AND DECORATIONS MUST BE LOADED BEFORE CREATING THE 
 ```typescript
 // Typescript
 const store = ObservableStore.createObservableStore(
-	
+
 	// Array of reducers (can be an empty array if only using @ActionFactory)
-	reducers, 
-	
+	reducers,
+
 	// Additional enhancers for dev, etc
-	compose.call(null, ...enhancers) as StoreEnhancer<any>, 
-	
+	compose.call(null, ...enhancers) as StoreEnhancer<any>,
+
 	// Initial state
-	null 
+	null
 )
 ```
 
 4.  Observe store keys and leafs
-```typescript 
+```typescript
 
 // Create an observer
 const unsub = store.observe(['exampleLeafKey','str1'],(newStr1,oldStr1) => {
 	console.log(`str1 change from`,oldStr1,`to`,newStr1)
 })
-	
+
 // Unsubscribe when done
 unsub()
 ```
