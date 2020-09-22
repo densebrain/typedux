@@ -1,6 +1,6 @@
 {
   "name": "typedux",
-  "version": "2.0.35",
+  "version": "3.0.0",
   "description": "Slightly adjusted Redux (awesome by default) for TS",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -9,6 +9,7 @@
     "compile": "tsc --project tsconfig.json",
     "compile:watch": "tsc --project tsconfig.json --watch",
     "test": "jest",
+    "publish": "yarn run compile && npm version patch && git push --tags && npm publish",
     "publish:patch": "yarn run compile && npm version patch && git push --tags && npm publish"
   },
   "repository": {
