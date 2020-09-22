@@ -6,13 +6,14 @@ import { InternalState } from "./InternalState"
 import { ActionMessage } from "../actions/ActionTypes"
 import { INTERNAL_KEY } from "../Constants"
 import { ActionReducer } from "../actions/ActionDecorations"
-import { IPendingAction, ActionStatus } from "../actions/ActionTracker"
+import { PendingAction, ActionStatus } from "../actions/ActionTracker"
 import _clone from "lodash/clone"
+import {ObservableStore} from "../store/ObservableStore"
 
 export class InternalActionFactory extends ActionFactory<InternalState,ActionMessage<InternalState>> {
 	
-	constructor() {
-		super(InternalState)
+	constructor(store?: ObservableStore<any>) {
+		super(InternalState,store)
 	}
 	
 	leaf():string {
@@ -20,7 +21,7 @@ export class InternalActionFactory extends ActionFactory<InternalState,ActionMes
 	}
 	
 	@ActionReducer()
-	setPendingAction(action:IPendingAction) {
+	setPendingAction(action:PendingAction) {
 		return (state:InternalState) => {
 			
 			let

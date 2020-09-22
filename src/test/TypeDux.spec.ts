@@ -1,23 +1,26 @@
 import "source-map-support/register"
 import "jest"
 
-import {createMockStore, installMockStoreProvider} from './mocks/TestHelpers'
-import {ILeafReducer, RootReducer} from '../reducers'
+import {createMockStore} from './mocks/TestHelpers'
+import {ILeafReducer, RootReducer, State} from '../reducers'
 
 import {getLogger} from '@3fv/logger-proxy'
 
-import Promise from "../util/PromiseConfig"
-import {ObservableStore} from "../store/ObservableStore"
-import {getStoreInternalState} from "../actions/Actions"
+import {Bluebird as Promise} from "../util"
+import {ObservableStore} from "../store"
+import {getStoreInternalState} from "../actions"
 import {createMockRootReducer} from "./mocks/createMockRootReducer"
 import {getDefaultMockState, MockKey, MockStateStr1} from "./mocks/MockConstants"
 import {MockActionFactory} from "./mocks/MockActionFactory"
+import {configureMockStoreFactory, MockStoreFactory} from "./mocks/MockStore"
 
 
 const
 	log = getLogger(__filename)
 
-installMockStoreProvider()
+
+// configureMockStoreFactory()
+// installMockGlobalStore()
 
 
 
@@ -49,20 +52,24 @@ describe('#typedux', function() {
 	
 	let
 		reducer:RootReducer<any>,
+		mockStoreFactory: MockStoreFactory,
 		leafReducer:ILeafReducer<any,any>,
 		store = null,
 		actions:MockActionFactory
 
 	beforeEach(() => {
-		[leafReducer] = ObservableStore.makeSimpleReducers({type: MockKey, str1: MockStateStr1})//new MockLeafReducer()
+		//[leafReducer] = ObservableStore.makeSimpleReducers({type: MockKey, str1: MockStateStr1} as State<typeof MockKey>)//new MockLeafReducer()
 		
 		// ROOT REDUCER
 		reducer = createMockRootReducer(ObservableStore.makeInternalReducer(),leafReducer)
 		
+		mockStoreFactory = configureMockStoreFactory([], [], [MockActionFactory])
+		
 		// STORE
 		store = createMockStore(
 			getDefaultMockState(reducer),
-			reducer.makeGenericHandler(),(data) => {
+			reducer.makeGenericHandler(),
+			(data) => {
 			log.debug('on state change',data)
 		})
 
@@ -94,7 +101,7 @@ describe('#typedux', function() {
 
 	it('Uses state reducers too',() => {
 		let
-			state = store.getState(),
+			//state = store.getState(),
 			mockState = actions.state
 		
 		expect(mockState.str2).toBeUndefined()

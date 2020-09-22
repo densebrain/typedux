@@ -1,14 +1,17 @@
+import type {ObservableStore} from "../store/ObservableStore"
+import type {Dispatch} from "redux"
+import type {State,TRootState} from '../reducers'
+import type {ActionOptions} from './ActionDecorations'
 
 
-
-import {Store,Dispatch} from "redux"
-import {State} from '../reducers'
+import {Option} from "@3fv/prelude-ts"
 import {getLogger} from '@3fv/logger-proxy'
-import {ActionOptions} from './ActionDecorations'
 import { makeId } from "../util/IdGenerator"
 import { InternalState } from "../internal/InternalState"
 import { INTERNAL_KEY } from "../Constants"
-import { TRootState } from "../reducers/State"
+
+
+import {ActionMessage} from "./ActionTypes"
 
 // const
 // 	_cloneDeep = require('lodash.cloneDeep')
@@ -19,9 +22,9 @@ const
 // Internal type definition for
 // function that gets the store state
 export type GetStoreState<S extends State = any> = () => S
-export type DispatchState<S extends State = any> = Dispatch<S>
+export type DispatchState<A extends ActionMessage<any> = any> = Dispatch<A>
 
-export interface IActionRegistration {
+export interface ActionRegistration {
 	paramTypes?:any[]
 	type:string
 	fullName:string
@@ -31,27 +34,39 @@ export interface IActionRegistration {
 	actionFactory:any
 }
 
-export interface IActionInterceptorNext {
+export interface ActionInterceptorNext {
 	():any
 }
 
-export interface IActionInterceptor {
-	(reg:IActionRegistration,next:IActionInterceptorNext,...args:any[]):any
+export interface ActionInterceptor {
+	(reg:ActionRegistration, next:ActionInterceptorNext, ...args:any[]):any
 }
 
-let registeredActions:{[actionType:string]:IActionRegistration} = {}
+let registeredActions:{[actionType:string]:ActionRegistration} = {}
 
-let actionInterceptors:IActionInterceptor[] = []
+let actionInterceptors:ActionInterceptor[] = []
 
-/**
- * Reference to a dispatcher
- */
-let dispatch:DispatchState
 
-/**
- * Reference to store state
- */
-let getStoreState:GetStoreState
+let globalStore: ObservableStore<any>
+// /**
+//  * Reference to a dispatcher
+//  */
+// let dispatch:DispatchState
+//
+// /**
+//  * Reference to store state
+//  */
+// let getStoreState:GetStoreState
+
+export const getGlobalStore = () => globalStore
+
+export const getGlobalStoreState = () => getGlobalStore()?.getState()
+
+const globalDispatchProvider = (<A extends ActionMessage<any>>(action: A) => Option.ofNullable(globalStore)
+	.map(store => store.dispatch(action))
+	.getOrThrow(`Invalid store`)) as Dispatch<any>
+
+
 
 /**
  * Get the current store state get
@@ -59,8 +74,8 @@ let getStoreState:GetStoreState
  *
  * @returns {GetStoreState}
  */
-export function getStoreStateProvider<S extends State = any>():GetStoreState<S> {
-	return getStoreState
+export function getGlobalStateProvider<S extends State = any>():GetStoreState<S> {
+	return getGlobalStoreState
 }
 
 /**
@@ -69,8 +84,8 @@ export function getStoreStateProvider<S extends State = any>():GetStoreState<S> 
  *
  * @returns {DispatchState}
  */
-export function getStoreDispatchProvider():DispatchState {
-	return dispatch
+export function getGlobalDispatchProvider():DispatchState {
+	return globalDispatchProvider
 }
 
 /**
@@ -79,31 +94,22 @@ export function getStoreDispatchProvider():DispatchState {
  * @returns {GetStoreState|any}
  */
 export function getStoreInternalState():InternalState {
-	return getStoreState && (getStoreState() as TRootState)[INTERNAL_KEY] as any
+	return getGlobalStoreState && (getGlobalStoreState() as TRootState)[INTERNAL_KEY] as any
 }
 
 /**
  * Set the global store provider
  *
- * @param newDispatch
- * @param newGetState
+ * @param newStore
  */
-export function setStoreProvider<S extends State = any>(newDispatch:DispatchState|Store<S>,newGetState?:GetStoreState) {
-	if (newGetState) {
-		dispatch = newDispatch as DispatchState
-		getStoreState = newGetState
-	} else if (newDispatch) {
-
-		// Cast the guarded type
-		const newStore = newDispatch as Store<any>
-
-		// Set and bind
-		dispatch = newStore.dispatch.bind(newDispatch)
-		getStoreState = newStore.getState.bind(newDispatch)
+export function setGlobalStore<S extends ObservableStore<any>>(newStore: S) {
+	if (!newStore && process.env.NODE_ENV === "development") {
+		console.warn(`You are setting the global store to null`)
 	}
 
-	if (!dispatch || !getStoreState)
-		throw new Error('Set store provider must include both dispatch and getState')
+	// Cast the guarded type
+	globalStore = newStore
+
 }
 
 
@@ -113,7 +119,7 @@ export function setStoreProvider<S extends State = any>(newDispatch:DispatchStat
  * @param interceptor
  * @returns {()=>undefined}
  */
-export function addActionInterceptor(interceptor:IActionInterceptor) {
+export function addActionInterceptor(interceptor:ActionInterceptor) {
 	actionInterceptors.push(interceptor)
 
 	return () => {
@@ -135,7 +141,7 @@ export function addActionInterceptor(interceptor:IActionInterceptor) {
  */
 function executeActionInterceptor(
 	index:number,
-	reg:IActionRegistration,
+	reg:ActionRegistration,
 	actionId:string,
 	action:Function,
 	args:any[]
@@ -163,7 +169,7 @@ function executeActionInterceptor(
  * @param args
  * @returns {any|any}
  */
-export function executeActionChain(reg:IActionRegistration,actionFn:Function,...args:any[]) {
+export function executeActionChain(reg:ActionRegistration, actionFn:Function, ...args:any[]) {
 	return executeActionInterceptor(0,reg,makeId(),actionFn,args)
 }
 
@@ -191,7 +197,7 @@ export function makeLeafActionType(leaf:string,type:string) {
  * @param options
  */
 
-export function registerAction(actionFactory:any,leaf:string,type:string,action:Function,options:ActionOptions):IActionRegistration {
+export function registerAction(actionFactory:any,leaf:string,type:string,action:Function,options:ActionOptions):ActionRegistration {
 	const reg = {
 		type,
 		fullName: makeLeafActionType(leaf,type),
@@ -220,9 +226,9 @@ export function registerAction(actionFactory:any,leaf:string,type:string,action:
  *
  * @param leaf
  * @param type
- * @returns {IActionRegistration}
+ * @returns {ActionRegistration}
  */
-export function getAction(leaf:string,type:string):IActionRegistration {
+export function getAction(leaf:string,type:string):ActionRegistration {
 	return registeredActions[makeLeafActionType(leaf,type)]
 }
 

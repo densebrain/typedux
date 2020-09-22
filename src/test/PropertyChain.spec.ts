@@ -4,16 +4,14 @@ import {getLogger} from '@3fv/logger-proxy'
 import {propertyChain} from "../util/PropertyChain"
 import {selectorChain} from "../selectors/SelectorChain"
 import {Selector} from "../selectors/SelectorTypes"
-import {configureMockStore} from "./mocks/MockStore"
 import {ILeafReducer, RootReducer} from "../reducers/index"
 import {ObservableStore} from "../store/ObservableStore"
-import {createMockStore, installMockStoreProvider} from "./mocks/TestHelpers"
 import {getDefaultMockState, MockKey, MockStateStr1} from "./mocks/MockConstants"
 import {createMockRootReducer} from "./mocks/createMockRootReducer"
 
 import { IMockState } from "./mocks/MockState"
 import {MockLeafState} from "./mocks/MockLeafState"
-import {setStoreProvider} from "../actions/Actions"
+import {setGlobalStore} from "../actions/Actions"
 import {MockActionFactory} from "./mocks/MockActionFactory"
 
 
@@ -51,7 +49,7 @@ describe('#selectors', function () {
         mock: new MockLeafState()
       }
     )
-    setStoreProvider(store)
+    setGlobalStore(store)
     // INIT
     //store.dispatch({type:'@INIT'})
     

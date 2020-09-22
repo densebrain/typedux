@@ -1,12 +1,12 @@
+import Immutable from "immutable"
 import {getLogger} from '@3fv/logger-proxy'
-
 import {Action as ReduxAction, Reducer as ReduxReducer} from 'redux'
-import {State} from './State'
+import {ObjectAsMap, State} from './State'
 import {ActionMessage, getAction} from "../actions"
 import {ILeafReducer} from './LeafReducer'
 
 import {isFunction} from '../util'
-import {getStoreStateProvider} from '../actions/Actions'
+import {getGlobalStateProvider} from '../actions/Actions'
 import isEqualShallow from 'shallowequal'
 import {INTERNAL_ACTION, INTERNAL_ACTIONS} from "../Constants"
 import _get from "lodash/get"
@@ -17,6 +17,7 @@ const
 	log = getLogger(__filename)
 
 
+
 /**
  * Get leaf value
  *}
@@ -24,11 +25,12 @@ const
  * @param leaf
  * @return {any}
  */
-function getLeafValue<S extends State, K, R = (K extends keyof S ? S[K] : unknown)>(rootValue:Partial<S>, leaf:string):R {
-	return rootValue &&
-		(isFunction(rootValue.get) ?
-			rootValue.get(leaf) :
-			rootValue[leaf])
+function getLeafValue<S extends Partial<S> | ObjectAsMap<S>, K, R = (K extends keyof S ? S[K] : unknown)>(rootValue:S, leaf:string):R {
+	if (Immutable.isMap(rootValue)) {
+		return rootValue.get(leaf)
+	} else {
+		return _get(rootValue,leaf)
+	}
 }
 
 /**
@@ -94,7 +96,7 @@ export class RootReducer<S extends State> {
 		
 		// LOAD THE STATE AND VERIFY IT IS Immutable.Map/Record
 		let
-			state = defaultStateValue || {type: "ROOT"} as State<any>
+			state:Partial<S> = defaultStateValue || {type: "ROOT"} as any
 		
 		
 		// ITERATE REDUCERS & CREATE LEAF STATES
@@ -103,7 +105,7 @@ export class RootReducer<S extends State> {
 			.forEach(reducer => {
 				const
 					leaf = reducer.leaf(),
-					leafDefaultState = getLeafValue<S, typeof leaf>(defaultStateValue, leaf)
+					leafDefaultState = getLeafValue(defaultStateValue, leaf)
 				
 				state = {...state, [leaf]: reducer.defaultState(leafDefaultState || {})}
 			})
@@ -241,7 +243,7 @@ export class RootReducer<S extends State> {
 						}
 						
 						log.debug(`Calling action reducer: ${actionReg.fullName}`)
-						checkReducerStateChange(reducerFn(reducerState, getStoreStateProvider()))
+						checkReducerStateChange(reducerFn(reducerState, getGlobalStateProvider()))
 					}
 					
 					// CHECK ACTUAL REDUCER FOR SUPPORT

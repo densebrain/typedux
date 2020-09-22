@@ -17,8 +17,8 @@ import {
 } from "redux"
 import "symbol-observable"
 import {getValue} from "@3fv/guard"
-import {isFunction, isString, nextTick} from "../util"
-import {ILeafReducer, State} from "../reducers"
+import {isFunction, isString} from "../util"
+import {ILeafReducer, State, StateArgs, StateConstructor} from "../reducers"
 import StateObserver, {TStateChangeHandler} from "./StateObserver"
 import {DefaultLeafReducer} from "../reducers/DefaultLeafReducer"
 import {INTERNAL_KEY} from "../Constants"
@@ -71,7 +71,7 @@ export class ObservableStore<S extends State> implements Store<S> {
    * @param {string | State} statesOrKeys
    * @returns {Array<State>}
    */
-  static makeSimpleReducers<S extends State = State>(...statesOrKeys:Array<string | State>):Array<ILeafReducer<S, any>> {
+  static makeSimpleReducers<Args extends StateArgs[], S extends State = State>(...statesOrKeys:Args):Array<ILeafReducer<S>> {
     return statesOrKeys
       .map(state => isString(state) ? {type: state} : state as State)
       .map(state => new DumbReducer(state))

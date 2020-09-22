@@ -1,7 +1,7 @@
 import {ActionFactory} from "../../actions/ActionFactory"
 import {MockKey} from "./MockConstants"
 import {ActionReducer, ActionThunk, Promised} from "../../actions/ActionDecorations"
-import Promise from "../../util/PromiseConfig"
+import {Bluebird as Promise} from "../../util"
 import { MockLeafState } from "./MockLeafState"
 import { MockMessage } from "./MockMessage"
 import { IMockState } from "./MockState"

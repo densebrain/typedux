@@ -1,20 +1,30 @@
-import * as _ from 'lodash'
+import Immutable from "immutable"
+import {clone} from 'lodash'
 
-export interface IStateConstructor<K, T extends State<K>> {
-	Key:string
-	new (o?:any):T
-	fromJS(o:any):T
+export type StateKey<S extends State> = (S extends State<infer K> ? K : never)
+
+
+export type StateArgs = (keyof any) | State | StateConstructor<any>
+
+// export type ObjectType<T extends {}, K extends keyof T = keyof T, V extends T[K] = T[K]> = [K,V]
+
+export type ObjectAsMap<T extends {}, K extends keyof T = keyof T, V extends T[K] = T[K]> = Immutable.Map<K,V>
+
+export interface StateConstructor<S extends State, Key extends StateKey<S> = StateKey<S>> {
+	Key:Key
+	new (o?:Partial<S>):S
+	fromJS?: (o:Partial<S>) => S
 }
 
 
 
-
-export interface State<T = string> {
+//, K extends string = string
+export interface State<T extends string = string> {
 	type:T
-	[key:string]:any
+	//[key:string]:any
 }
 
-export type TRootState = State & {[key:string]:{[key:string]:any}}
+export type TRootState = State & {[key in keyof any]:{[key in keyof any]:any}}
 
 /**
  * Function to patch an existing state
@@ -24,5 +34,5 @@ export type TRootState = State & {[key:string]:{[key:string]:any}}
  * @returns {S}
  */
 export function patchState<S extends object = {}, SP extends Partial<S> = Partial<S>>(state:S,...patches:Array<SP>):S {
-		return Object.assign(_.clone(state),...patches)
+		return Object.assign(clone(state),...patches)
 }

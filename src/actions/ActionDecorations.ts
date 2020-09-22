@@ -2,7 +2,7 @@ import {isFunction} from '../util'
 import {ActionMessage} from './ActionTypes'
 import {Reducer, State} from '../reducers'
 import {ActionFactory} from './ActionFactory'
-import {executeActionChain, registerAction, getStoreStateProvider, IActionRegistration} from './Actions'
+import {executeActionChain, registerAction, getGlobalStateProvider, ActionRegistration, getGlobalStore} from './Actions'
 
 import {getLogger} from '@3fv/logger-proxy'
 import {ActionTracker} from "./ActionTracker"
@@ -84,7 +84,7 @@ function actionDecorator(options:ActionOptions = {}) {
       }
     
     
-    let reg:IActionRegistration = null
+    let reg:ActionRegistration = null
     
     // Override the default method
     descriptor.value = function (...preArgs:any[]) {
@@ -92,7 +92,8 @@ function actionDecorator(options:ActionOptions = {}) {
         
         // Grab the current dispatcher
         const
-          {dispatcher} = this
+          actionFactory = this as ActionFactory<any, any>,
+          {dispatcher} = actionFactory
         
         let
           data:any = (actionCreator && !options.isReducer) ?
@@ -107,8 +108,7 @@ function actionDecorator(options:ActionOptions = {}) {
             this.leaf(),
             propertyKey,
             data,
-            dispatcher,
-            getStoreStateProvider()
+            this.getStore()
           ).promise
         }
         

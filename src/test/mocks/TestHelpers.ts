@@ -1,23 +1,30 @@
-import {Reducer} from 'redux'
+import {Middleware, Reducer} from 'redux'
 
-import {configureMockStore,MockStore} from './MockStore'
-import {setStoreProvider} from '../../actions'
+import {configureMockStoreFactory, MockStore, MockStoreFactory} from './MockStore'
+
+import {ActionFactory, setGlobalStore} from '../../actions'
 import {getLogger} from '@3fv/logger-proxy'
+import {State, StateArgs} from '../../reducers'
+import {ObservableStore} from "../../store/ObservableStore"
 const log = getLogger(__filename)
 
+
+
+// ObserveableStore
+// ((...args:any[]) => {
+// 	log.info('MOCK DISPATCH OVERRIDE')
+// }) as any, () => ({ type: "MOCK" }) as State<"MOCK">
 /**
  * Install a completely mock - EMPTY
  * store provider for the actions
  * framework
  */
-export function installMockStoreProvider() {
-	setStoreProvider(((...args:any[]) => {
-		log.info('MOCK DISPATCH OVERRIDE')
-	}) as any, () => {return { type: "MOCK" }})
+export function installMockGlobalStore(store: ObservableStore<any>) {
+	setGlobalStore(store)
 }
 
 
-const mockStore = configureMockStore()
+const defaultMockStoreFactory = configureMockStoreFactory()
 
 /**
  * In testing any of these types can be provided as a state
@@ -35,13 +42,14 @@ export type TestStateType = Function | void
 export function createMockStore(
 	getState:TestStateType,
 	storeReducers:Reducer<any> = null,
-	onStateChange:(newState:any) => void = null
+	onStateChange:(newState:any) => void = null,
+	mockStoreFactory: MockStoreFactory = defaultMockStoreFactory
 ) {
 	const
-		newMockStore = mockStore(getState,storeReducers,onStateChange)
+		newMockStore = mockStoreFactory(getState,storeReducers,onStateChange)
 
 	// Globally override the default dispatch
-	setStoreProvider(newMockStore)
+	setGlobalStore(newMockStore)
 
 	return newMockStore
 }

@@ -1,6 +1,6 @@
 
 
-import Bluebird from 'bluebird'
+export {default as Bluebird} from 'bluebird'
 
 // import {Deferred} from "@3fv/deferred"
 //
@@ -13,4 +13,3 @@ import Bluebird from 'bluebird'
 //   defer
 // })
 
-export default Bluebird

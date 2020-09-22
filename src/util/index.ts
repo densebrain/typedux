@@ -1,81 +1,10 @@
-import {getLogger} from '@3fv/logger-proxy'
-
-const log = getLogger(__filename)
-
+export * from "./StringHelpers"
+export * from "./TestHelpers"
+export * from "./Guards"
 export * from './VariableProxy'
 export * from './PropertyChain'
-
-/**
- * Is a given value a function
- *
- * @param o
- * @returns {boolean}
- */
-export function isFunction(o:any):o is Function {
-	return typeof o === 'function'
-}
-
-/**
- * is string
- *
- * @param o
- * @returns {boolean}
- */
-export function isString(o:any):o is String {
-	return typeof o === 'string'
-}
-
-
-export function isPromise(o:any):o is Promise<any> {
-	return o instanceof Promise || (o && isFunction(o.then))
-}
-
-/**
- * Is array type guard
- *
- * @param o
- */
-export function isArray<T>(o:any|Array<T>):o is Array<T> {
-	return Array.isArray(o)
-}
-
-/**
- * Mark a property as enumerable - or not
- *
- * @param value
- * @returns {function(any, string, PropertyDescriptor): undefined}
- * @constructor
- */
-export function Enumerable(value:boolean) {
-	return function (target:any, propertyKey:string, descriptor:PropertyDescriptor) {
-		descriptor.enumerable = value
-	}
-}
-
-export interface SelfTyped<T> {
-	new(): T
-}
-
-export type NextTickFunction = (callback: Function) => void
-
-function makeNextTick():NextTickFunction {
-	let nextTickFn
-	try {
-
-		nextTickFn = require('process').nextTick.bind(process)
-	} catch (err) {
-
-	}
-
-	if (!nextTickFn) {
-		log.debug('In browser, using browser-next-tick')
-		nextTickFn = require('browser-next-tick')
-	}
-
-	return nextTickFn as NextTickFunction
-}
-
-export const nextTick = makeNextTick()
+export * from './UtilDecorations'
+export * from "./Promise"
 
 /**
  * Retrieve a deep property by string
@@ -100,6 +29,4 @@ export function getProperty<T>(o:any,path:string,defaultValue:T = null):T {
 }
 
 
-export function toProperCase(str:string):string {
-	return str.charAt(0).toUpperCase() + str.substring(1)
-}
+

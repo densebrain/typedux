@@ -1,13 +1,13 @@
 import {ILeafReducer} from './LeafReducer'
 import {ActionMessage} from '../actions'
 import {isString,isFunction} from '../util'
-import {IStateConstructor, State} from "./State"
+import {StateConstructor, State} from "./State"
 
 
 /**
  * Leaf reducer
  */
-export class DefaultLeafReducer<K, S extends State<K>, StateType extends IStateConstructor<K,S>, A extends ActionMessage<S>> implements ILeafReducer<S,A> {
+export class DefaultLeafReducer<K extends string, S extends State<K>, StateType extends StateConstructor<S>, A extends ActionMessage<S>> implements ILeafReducer<S,A> {
 	
 	/**
 	 * Inflate from js
@@ -30,7 +30,7 @@ export class DefaultLeafReducer<K, S extends State<K>, StateType extends IStateC
 	 * @param stateType
 	 * @returns {AnonLeafReducer}
 	 */
-	static makeLeafReducer<K,S extends State<K>, StateType extends IStateConstructor<K,S>>(
+	static makeLeafReducer<K extends string, S extends State<K>, StateType extends StateConstructor<S>>(
 		leaf:string,
 		stateType:StateType
 	):DefaultLeafReducer<K,S,StateType,ActionMessage<S>> {

@@ -1,25 +1,14 @@
 
 
-import { IPendingAction } from "../actions/ActionTracker"
-import {State} from "../reducers"
-
-
-/**
- * State interface
- */
-export interface IInternalState extends State<string> {
-	pendingActions:{[id:string]:IPendingAction}
-	totalActionCount:number
-	pendingActionCount:number
-	hasPendingActions: boolean
-}
+import type { PendingAction } from "../actions"
+import type {State} from "../reducers"
 
 
 
 
-export class InternalState implements IInternalState {
+export class InternalState implements State<"InternalState"> {
 	
-	static Key = "InternalState"
+	static Key:"InternalState" = "InternalState"
 	
 	/**
 	 * Deserialize
@@ -46,12 +35,12 @@ export class InternalState implements IInternalState {
 		Object.assign(this,o)
 	}
 	
-	type = "InternalState"
+	type:"InternalState" = "InternalState"
 	
 	/**
 	 * All pending actions
 	 */
-	pendingActions:{[id:string]:IPendingAction} = {}
+	pendingActions:{[id:string]:PendingAction} = {}
 	
 	totalActionCount:number = 0
 	

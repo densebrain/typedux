@@ -1,28 +1,19 @@
-import {getLogger} from '@3fv/logger-proxy'
-import {InternalActionFactory} from "../internal/InternalActionFactory"
+import type {ObservableStore} from "../store/ObservableStore"
+import type {ActionMessage} from "./ActionTypes"
 
-import Promise from '../util/PromiseConfig'
-import {isPromise} from "../util/index"
 
-const
-  log = getLogger(__filename)
+import {InternalActionFactory} from "../internal"
+import {Bluebird as Promise} from '../util'
 
-let
-  InternalActionFactoryClazz:typeof InternalActionFactory
 
 /**
  * Get an instance of the internal action factory
  *
- * @param dispatch
- * @param getState
  * @returns {InternalActionFactory}
+ * @param store
  */
-function getInternalActions(dispatch, getState) {
-  if (!InternalActionFactoryClazz)
-    InternalActionFactoryClazz = require("../internal/InternalActionFactory").InternalActionFactory
-  
-  return InternalActionFactoryClazz
-    .newWithDispatcher(InternalActionFactoryClazz, dispatch, getState)
+function getInternalActions(store: ObservableStore<any>): InternalActionFactory {
+  return new InternalActionFactory(store)
 }
 
 
@@ -32,7 +23,7 @@ export enum ActionStatus {
 }
 
 
-export interface IPendingAction {
+export interface PendingAction {
   id:string
   leaf:string
   name:string
@@ -84,22 +75,20 @@ export class ActionTracker<T> {
    * @param leaf
    * @param name
    * @param action
-   * @param dispatch
-   * @param getState
    * @param id
+   * @param store
    */
   constructor(
     public id:string,
     public leaf:string,
     public name:string,
     public action:(dispatch, getState) => T,
-    public dispatch:Function,
-    public getState:Function
+    public store: ObservableStore<any>
   ) {
     
     
     const
-      internalActions = getInternalActions(dispatch, getState)
+      internalActions = getInternalActions(store)
     
     this._promise = new Promise<T>((resolve, reject) => {
       
@@ -111,25 +100,22 @@ export class ActionTracker<T> {
         internalActions.setPendingAction(this)
         
         const
+          dispatch = <A extends ActionMessage<any>>(action: A): A =>
+            store?.dispatch(action),
+          getState = () => store?.getState(),
           result =
             action(dispatch, getState)
         
-        // WRAP PROMISE
-        if (isPromise(result)) {
-          result
-            .then(resolve)
-            .catch(reject)
-        }
+        // UNWRAP PROMISE
+        Promise
+          .resolve(result)
+          .then(resolve)
+          .catch(reject)
         
-        // WRAP REGULAR ACTION
-        else {
-          resolve(result)
-        }
       } catch (err) {
         reject(err)
       }
     }).finally(() => {
-      
       // FINALLY NOTIFY INTERNAL STATE
       this.status = ActionStatus.Finished
       internalActions.setPendingAction({...this})

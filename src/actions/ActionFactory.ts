@@ -1,20 +1,26 @@
+import type {ObservableStore} from "../store"
 
-
-import {Enumerable} from '../util'
+import {Option} from "@3fv/prelude-ts"
+import {Enumerable, isNotEmpty} from '../util'
 import {ActionMessage} from './ActionTypes'
 import {ActionThunk} from './ActionDecorations'
-import {getStoreStateProvider,getStoreDispatchProvider,makeLeafActionType} from './Actions'
+import {getGlobalStore, makeLeafActionType} from './Actions'
 import {getLogger} from '@3fv/logger-proxy'
-import {Reducer, State} from '../reducers'
-import {Store} from "redux"
-import {v4 as uuid} from "uuid"
+import {Reducer, State, StateConstructor} from '../reducers'
+import {Action, Dispatch, Store} from "redux"
+import * as ID from "shortid"
+import {isFunction} from "@3fv/guard"
+import {isMap} from "immutable"
 
 const
 	log = getLogger(__filename)
 
 
-export interface IActionFactoryConstructor<S extends State<any>> {
-	new ():ActionFactory<S,ActionMessage<S>>
+export interface ActionFactoryConstructor<Clazz extends ActionFactory<any,any>, S extends Clazz["state"] = Clazz["state"]> {
+	
+	setStore: (store: ObservableStore<any>) => void
+	
+	new ():Clazz
 }
 
 /**
@@ -22,20 +28,31 @@ export interface IActionFactoryConstructor<S extends State<any>> {
  *
  */
 export abstract class ActionFactory<S extends State<any>,M extends ActionMessage<S>> {
-
-	private _dispatcher:Function
-	private _getState:Function
-	stateType:any
+	
+	protected static clazzStore: ObservableStore<any>
+	
+	static setStore(newClazzStore: ObservableStore<any>) {
+		this.clazzStore = newClazzStore
+	}
+	
+	// protected readonly _dispatcher:Function
+	//protected readonly _getState:Function
+	
+	protected store: ObservableStore<any>
+	
+	readonly stateType:StateConstructor<S>
 
 	/**
 	 * Create a new action factory that consumes and produces a specific
 	 * state type
 	 *
 	 * @param stateType
+	 * @param withStore
 	 */
-	protected constructor(stateType:{new(): S}) {
+	protected constructor(stateType:StateConstructor<S>, withStore: ObservableStore<any> = undefined) {
 		log.debug(`Created action factory with state type: ${stateType.name}`)
 		this.stateType = stateType
+		this.store = withStore
 	}
 
 	/**
@@ -48,11 +65,20 @@ export abstract class ActionFactory<S extends State<any>,M extends ActionMessage
 	 * @returns {T}
 	 */
 
-	static newWithDispatcher<S extends State<any>,A extends ActionFactory<S,ActionMessage<S>>>
-	(actionClazz:{new ():A}, newDispatcher:Function, newGetState?:Function):A {
-		return (new actionClazz()).withDispatcher(newDispatcher, newGetState)
+	static newWithStore<S extends State<any>,A extends ActionFactory<S,ActionMessage<S>>>
+	(newStore: ObservableStore<any>):A {
+		const instance = new (<any>this.constructor)
+		
+		instance.store = newStore
+		
+		return instance
 	}
 
+	getStore() {
+		return this.store ?? ActionFactory.clazzStore ?? getGlobalStore()
+	}
+	
+	
 	/**
 	 * The leaf served by this implementation
 	 */
@@ -70,15 +96,15 @@ export abstract class ActionFactory<S extends State<any>,M extends ActionMessage
 	 */
 
 	@Enumerable(false)
-	get dispatcher():Function {
-		const dispatch = getStoreDispatchProvider()
+	get dispatcher(): Dispatch<any> {
+		const store = this.getStore()
 
-		if (!this._dispatcher && !dispatch) {
+		if (!store || !isFunction(store.dispatch)) {
 			throw new Error("Global dispatcher must be set before any actions occur")
 		}
 
 
-		return this._dispatcher || dispatch
+		return (<A extends Action>(action: A) => store.dispatch<A>(action)) as Dispatch<any>
 	}
 
 	/**
@@ -90,20 +116,15 @@ export abstract class ActionFactory<S extends State<any>,M extends ActionMessage
 	 * @returns instance of the state supported by this factory
 	 */
 	get state():S {
-		const getStoreState = getStoreStateProvider()
-		const state = (this._getState) ? this._getState() :
-			(getStoreState) ? getStoreState() : null
+		const store = this.getStore()
+		//const getStoreState = getGlobalStateProvider()
+		const state = store?.getState()
 
-		if (!state) return null
+		if (!state)
+			return null
 
 		const leaf = this.leaf()
-		return ((leaf) ? state[leaf] : state) as S
-		// const stateValue = leaf ? state[leaf] : state
-		// if (this.stateType.recordType && stateValue instanceof this.stateType.recordType) {
-		// 	return this.stateType.fromJS(stateValue)
-		// } else {
-		//
-		// }
+		return !leaf ? state : isMap(state) ? state.get(leaf) : state[leaf]
 	}
 
 
@@ -113,15 +134,14 @@ export abstract class ActionFactory<S extends State<any>,M extends ActionMessage
 	 * new dispatcher and optionally a new
 	 * getState
 	 *
-	 * @param newDispatcher
-	 * @param newGetState
-	 * @returns {ActionFactory}
+	 * @returns {any}
+	 * @param newStore
 	 */
-	withDispatcher(newDispatcher:Function, newGetState?:Function):this {
+	withStore(newStore:ObservableStore<any>):this {
 		let instance = new (<any>this.constructor)
 
-		instance._dispatcher = newDispatcher
-		instance._getState = newGetState
+		instance.store = newStore
+		
 		return instance
 
 	}
@@ -130,13 +150,10 @@ export abstract class ActionFactory<S extends State<any>,M extends ActionMessage
 	 * Set the store for action factory
 	 *
 	 * @param newStore
+	 * @return {this<S, M>}
 	 */
-	setStore(newStore:Store<State<any>>) {
-		const dispatch = newStore.dispatch.bind(newStore)
-		const getStoreState = newStore.getState.bind(newStore)
-		
-		this._dispatcher = dispatch
-		this._getState = getStoreState
+	setStore(newStore:ObservableStore<any>) {
+		this.store = newStore
 		
 		return this
 	}
@@ -163,7 +180,9 @@ export abstract class ActionFactory<S extends State<any>,M extends ActionMessage
 		data = {}
 	):M {
 		return Object.assign({
-			id: id || uuid(),
+			id: Option.ofNullable(id)
+				.filter(isNotEmpty)
+				.getOrCall(() => ID.generate()),
 			leaf,
 			type: makeLeafActionType(this.leaf(),type),
 			reducers,
