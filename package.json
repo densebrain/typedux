@@ -9,7 +9,7 @@
     "compile": "tsc --project tsconfig.json",
     "compile:watch": "tsc --project tsconfig.json --watch",
     "test": "jest",
-    "publish:as-is": "yarn run compile && npm version patch && git push --tags && npm publish",
+    "publish:as-is": "yarn run compile && npm publish",
     "publish:patch": "yarn run compile && npm version patch && git push --tags && npm publish"
   },
   "repository": {
