@@ -23,7 +23,7 @@ Same as every other package, note that reflect-metadata, ImmutableJS and Redux a
 ```
 NOTE: Runtime requires ES6 level polyfills - so babel-polyfill or transform-runtime, etc work just fine
 
-npm i --save typdux 
+npm i --save typedux 
 ```
 
 ## Getting Started
