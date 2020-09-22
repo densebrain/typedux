@@ -2,12 +2,11 @@ import type {ObservableStore} from "../store"
 
 import {Option} from "@3fv/prelude-ts"
 import {Enumerable, isNotEmpty} from '../util'
-import {ActionMessage} from './ActionTypes'
-import {ActionThunk} from './ActionDecorations'
-import {getGlobalStore, makeLeafActionType} from './Actions'
+import type {ActionMessage} from './ActionTypes'
+import {getGlobalStore} from './Actions'
 import {getLogger} from '@3fv/logger-proxy'
-import {Reducer, State, StateConstructor} from '../reducers'
-import {Action, Dispatch, Store} from "redux"
+import type {Reducer, State, StateConstructor} from '../reducers'
+import type {Action, Dispatch, Store} from "redux"
 import * as ID from "shortid"
 import {isFunction} from "@3fv/guard"
 import {isMap} from "immutable"
@@ -27,13 +26,7 @@ export interface ActionFactoryConstructor<Clazz extends ActionFactory<any,any>, 
  * Base class for action implementations for a given state
  *
  */
-export abstract class ActionFactory<S extends State<any>,M extends ActionMessage<S>> {
-	
-	protected static clazzStore: ObservableStore<any>
-	
-	static setStore(newClazzStore: ObservableStore<any>) {
-		this.clazzStore = newClazzStore
-	}
+abstract class ActionFactory<S extends State<any>,M extends ActionMessage<S>> {
 	
 	// protected readonly _dispatcher:Function
 	//protected readonly _getState:Function
@@ -184,7 +177,7 @@ export abstract class ActionFactory<S extends State<any>,M extends ActionMessage
 				.filter(isNotEmpty)
 				.getOrCall(() => ID.generate()),
 			leaf,
-			type: makeLeafActionType(this.leaf(),type),
+			type: this.getStore()?.actions?.makeLeafActionType(this.leaf(),type),
 			reducers,
 			args,
 			stateType: this.stateType
@@ -197,7 +190,7 @@ export abstract class ActionFactory<S extends State<any>,M extends ActionMessage
 	 *
 	 * @param error
 	 */
-	@ActionThunk()
+	//@ActionThunk()
 	setError(error:Error) {
 
 	}
@@ -205,3 +198,13 @@ export abstract class ActionFactory<S extends State<any>,M extends ActionMessage
 
 }
 
+namespace ActionFactory {
+	export let clazzStore: ObservableStore<any>
+	
+	export function setStore(newClazzStore: ObservableStore<any>) {
+		clazzStore = newClazzStore
+	}
+}
+
+
+export {ActionFactory}

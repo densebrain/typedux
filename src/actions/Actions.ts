@@ -2,7 +2,7 @@ import type {ObservableStore} from "../store/ObservableStore"
 import type {Dispatch} from "redux"
 import type {State,TRootState} from '../reducers'
 import type {ActionOptions} from './ActionDecorations'
-
+import type {ActionMessage} from "./ActionTypes"
 
 import {Option} from "@3fv/prelude-ts"
 import {getLogger} from '@3fv/logger-proxy'
@@ -11,7 +11,7 @@ import { InternalState } from "../internal/InternalState"
 import { INTERNAL_KEY } from "../Constants"
 
 
-import {ActionMessage} from "./ActionTypes"
+
 
 // const
 // 	_cloneDeep = require('lodash.cloneDeep')
@@ -23,6 +23,7 @@ const
 // function that gets the store state
 export type GetStoreState<S extends State = any> = () => S
 export type DispatchState<A extends ActionMessage<any> = any> = Dispatch<A>
+export type ActionFactoryDecorator<T> = (factory:{new():T}) => T
 
 export interface ActionRegistration {
 	paramTypes?:any[]
@@ -42,9 +43,7 @@ export interface ActionInterceptor {
 	(reg:ActionRegistration, next:ActionInterceptorNext, ...args:any[]):any
 }
 
-let registeredActions:{[actionType:string]:ActionRegistration} = {}
 
-let actionInterceptors:ActionInterceptor[] = []
 
 
 let globalStore: ObservableStore<any>
@@ -93,7 +92,7 @@ export function getGlobalDispatchProvider():DispatchState {
  *
  * @returns {GetStoreState|any}
  */
-export function getStoreInternalState():InternalState {
+export function getGlobalStoreInternalState():InternalState {
 	return getGlobalStoreState && (getGlobalStoreState() as TRootState)[INTERNAL_KEY] as any
 }
 
@@ -112,6 +111,14 @@ export function setGlobalStore<S extends ObservableStore<any>>(newStore: S) {
 
 }
 
+export class ActionContainer {
+	registeredActions:{[actionType:string]:ActionRegistration} = {}
+	
+	actionInterceptors:ActionInterceptor[] = []
+
+	constructor(public store: ObservableStore<any> ) {
+	
+	}
 
 /**
  * Add an interceptor
@@ -119,7 +126,8 @@ export function setGlobalStore<S extends ObservableStore<any>>(newStore: S) {
  * @param interceptor
  * @returns {()=>undefined}
  */
-export function addActionInterceptor(interceptor:ActionInterceptor) {
+addActionInterceptor(interceptor:ActionInterceptor) {
+	const {actionInterceptors} = this
 	actionInterceptors.push(interceptor)
 
 	return () => {
@@ -139,16 +147,18 @@ export function addActionInterceptor(interceptor:ActionInterceptor) {
  * @param args
  * @returns {any}
  */
-function executeActionInterceptor(
+executeActionInterceptor(
 	index:number,
 	reg:ActionRegistration,
 	actionId:string,
 	action:Function,
 	args:any[]
 ) {
+	const {actionInterceptors, store} = this
+
 	if (actionInterceptors.length > index) {
 		return actionInterceptors[index](reg,() => {
-			return executeActionInterceptor(
+			return this.executeActionInterceptor(
 				index + 1,
 				reg,
 				actionId,
@@ -169,11 +179,11 @@ function executeActionInterceptor(
  * @param args
  * @returns {any|any}
  */
-export function executeActionChain(reg:ActionRegistration, actionFn:Function, ...args:any[]) {
-	return executeActionInterceptor(0,reg,makeId(),actionFn,args)
+executeActionChain(reg:ActionRegistration, actionFn:Function, ...args:any[]) {
+	return this.executeActionInterceptor(0,reg,makeId(),actionFn,args)
 }
 
-export type ActionFactoryDecorator<T> = (factory:{new():T}) => T
+
 
 /**
  * Create a fully qualified action type
@@ -183,7 +193,7 @@ export type ActionFactoryDecorator<T> = (factory:{new():T}) => T
  *
  * @returns {string}
  */
-export function makeLeafActionType(leaf:string,type:string) {
+makeLeafActionType(leaf:string,type:string) {
 	return type.indexOf('.') > -1 ? type : `${leaf}.${type}`
 }
 
@@ -197,10 +207,10 @@ export function makeLeafActionType(leaf:string,type:string) {
  * @param options
  */
 
-export function registerAction(actionFactory:any,leaf:string,type:string,action:Function,options:ActionOptions):ActionRegistration {
+registerAction(actionFactory:any,leaf:string,type:string,action:Function,options:ActionOptions):ActionRegistration {
 	const reg = {
 		type,
-		fullName: makeLeafActionType(leaf,type),
+		fullName: this.makeLeafActionType(leaf,type),
 		leaf,
 		options,
 		actionFactory,
@@ -215,7 +225,7 @@ export function registerAction(actionFactory:any,leaf:string,type:string,action:
 			return action.apply(actions,args)
 		}
 	}
-	registeredActions[reg.fullName] = reg
+	this.registeredActions[reg.fullName] = reg
 
 	return reg
 }
@@ -228,11 +238,14 @@ export function registerAction(actionFactory:any,leaf:string,type:string,action:
  * @param type
  * @returns {ActionRegistration}
  */
-export function getAction(leaf:string,type:string):ActionRegistration {
-	return registeredActions[makeLeafActionType(leaf,type)]
+getAction(leaf:string,type:string):ActionRegistration {
+	return this.registeredActions[this.makeLeafActionType(leaf,type)]
 }
 
 
-export function getAllActions() {
-	return registeredActions // _cloneDeep(registeredActions)
+getAllActions() {
+	return this.registeredActions // _cloneDeep(registeredActions)
+}
+
+
 }

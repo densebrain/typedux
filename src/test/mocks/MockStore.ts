@@ -30,7 +30,7 @@ export interface MockStoreFactory {
  * @returns {MockStoreFactory}
  */
 function mockStoreFactory(middlewares:Middleware[] = [], stateArgs: StateArgs[] = [],  actionFactories: Array<ActionFactoryConstructor<any> | ActionFactory<any, any>> = []):MockStoreFactory {
-	return function(fromState:any,storeReducer = null,onStateChange:Function = null,storeMixins:any = null):MockStore<any> {
+	return function(fromState:any,storeReducer = null,onStateChange: (() => void) = null,storeMixins:any = null):MockStore<any> {
 
 		// First calculate the store state if a function was provided
 		let storeState = (isFunction(fromState)) ? fromState() : fromState
@@ -47,10 +47,15 @@ function mockStoreFactory(middlewares:Middleware[] = [], stateArgs: StateArgs[] 
 
 			if (storeMixins)
 				Object.assign(store, storeMixins)
-
+			
+			actionFactories.forEach(factory =>
+				factory.setStore(store)
+			)
+			store.subscribe(onStateChange)
 			return store
 		}
 
+		
 		if (middlewares.length) {
 			const addMiddleware = applyMiddleware(...middlewares)(makeStore as any)
 			return addMiddleware(storeReducer,fromState) as any

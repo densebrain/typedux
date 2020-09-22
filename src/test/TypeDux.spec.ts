@@ -8,11 +8,12 @@ import {getLogger} from '@3fv/logger-proxy'
 
 import {Bluebird as Promise} from "../util"
 import {ObservableStore} from "../store"
-import {getStoreInternalState} from "../actions"
+import {getGlobalStoreInternalState} from "../actions"
 import {createMockRootReducer} from "./mocks/createMockRootReducer"
 import {getDefaultMockState, MockKey, MockStateStr1} from "./mocks/MockConstants"
 import {MockActionFactory} from "./mocks/MockActionFactory"
 import {configureMockStoreFactory, MockStoreFactory} from "./mocks/MockStore"
+import {MockLeafState} from "./mocks/MockLeafState"
 
 
 const
@@ -51,7 +52,7 @@ describe('#typedux', function() {
 	jest.setTimeout(10000)
 	
 	let
-		reducer:RootReducer<any>,
+		//reducer:RootReducer<any>,
 		mockStoreFactory: MockStoreFactory,
 		leafReducer:ILeafReducer<any,any>,
 		store = null,
@@ -61,17 +62,20 @@ describe('#typedux', function() {
 		//[leafReducer] = ObservableStore.makeSimpleReducers({type: MockKey, str1: MockStateStr1} as State<typeof MockKey>)//new MockLeafReducer()
 		
 		// ROOT REDUCER
-		reducer = createMockRootReducer(ObservableStore.makeInternalReducer(),leafReducer)
+		//reducer = createMockRootReducer(ObservableStore.makeInternalReducer(),leafReducer)
 		
 		mockStoreFactory = configureMockStoreFactory([], [], [MockActionFactory])
 		
 		// STORE
-		store = createMockStore(
-			getDefaultMockState(reducer),
-			reducer.makeGenericHandler(),
-			(data) => {
-			log.debug('on state change',data)
-		})
+		store = mockStoreFactory(() => ({
+			[MockLeafState.Key]: new MockLeafState()
+		}), )
+		// 	createMockStore(
+		// 	getDefaultMockState(reducer),
+		// 	reducer.makeGenericHandler(),
+		// 	(data) => {
+		// 	log.debug('on state change',data)
+		// })
 
 		// INIT
 		store.dispatch({type:'@INIT'})
@@ -124,7 +128,7 @@ describe('#typedux', function() {
 				return Promise
 					.delay(1000).then(() => {
 						const
-							internalState = getStoreInternalState()
+							internalState = getGlobalStoreInternalState()
 						
 						expect(internalState.hasPendingActions).toBe(false)
 						expect(internalState.totalActionCount).toBe(1)
@@ -134,8 +138,8 @@ describe('#typedux', function() {
 			
 			// TRACKING TEST
 			pendingPromise = Promise.delay(300).then(() => {
-				expect(getStoreInternalState().hasPendingActions).toBe(true)
-				expect(getStoreInternalState().pendingActionCount).toBe(1)
+				expect(getGlobalStoreInternalState().hasPendingActions).toBe(true)
+				expect(getGlobalStoreInternalState().pendingActionCount).toBe(1)
 			})
 			
 			
@@ -155,7 +159,7 @@ describe('#typedux', function() {
 				return Promise.delay(1000).then(() => {
 					
 					const
-						internalState = getStoreInternalState()
+						internalState = getGlobalStoreInternalState()
 					
 					expect(internalState.pendingActionCount).toBe(0)
 					

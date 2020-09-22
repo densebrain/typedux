@@ -1,8 +1,9 @@
 import {isFunction} from '../util'
-import {ActionMessage} from './ActionTypes'
-import {Reducer, State} from '../reducers'
-import {ActionFactory} from './ActionFactory'
-import {executeActionChain, registerAction, getGlobalStateProvider, ActionRegistration, getGlobalStore} from './Actions'
+import type {ActionMessage} from './ActionTypes'
+import type {Reducer, State} from '../reducers'
+import type {ActionRegistration} from './Actions'
+import type {ActionFactory} from './ActionFactory'
+
 
 import {getLogger} from '@3fv/logger-proxy'
 import {ActionTracker} from "./ActionTracker"
@@ -88,12 +89,12 @@ function actionDecorator(options:ActionOptions = {}) {
     
     // Override the default method
     descriptor.value = function (...preArgs:any[]) {
-      return executeActionChain(reg, (id, ...args) => {
+      const actionFactory = this as ActionFactory<any, any>,
+        actionContainer = actionFactory?.getStore()?.actions
+      return actionContainer?.executeActionChain(reg, (id, ...args) => {
         
         // Grab the current dispatcher
-        const
-          actionFactory = this as ActionFactory<any, any>,
-          {dispatcher} = actionFactory
+        const {dispatcher} = actionFactory
         
         let
           data:any = (actionCreator && !options.isReducer) ?
@@ -147,7 +148,7 @@ function actionDecorator(options:ActionOptions = {}) {
      */
     const actionFn = (options.isReducer) ? actionCreator : descriptor.value
     
-    reg = registerAction(
+    reg = target.getStore()?.actions?.registerAction(
       target.constructor,
       target.leaf ? target.leaf() : '__typedux',
       propertyKey,

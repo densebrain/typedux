@@ -1,35 +1,14 @@
 import type {ObservableStore} from "../store/ObservableStore"
-import type {ActionMessage} from "./ActionTypes"
+import {ActionMessage, ActionStatus} from "./ActionTypes"
 
 
-import {InternalActionFactory} from "../internal"
+import {InternalActionFactory} from "../internal/InternalActionFactory"
 import {Bluebird as Promise} from '../util'
 
 
-/**
- * Get an instance of the internal action factory
- *
- * @returns {InternalActionFactory}
- * @param store
- */
-function getInternalActions(store: ObservableStore<any>): InternalActionFactory {
-  return new InternalActionFactory(store)
-}
 
 
-export enum ActionStatus {
-  Started = 1,
-  Finished = 2
-}
 
-
-export interface PendingAction {
-  id:string
-  leaf:string
-  name:string
-  status:ActionStatus
-  
-}
 
 /**
  * Wraps an action providing tracking events and data
@@ -88,7 +67,7 @@ export class ActionTracker<T> {
     
     
     const
-      internalActions = getInternalActions(store)
+      internalActions = new InternalActionFactory(store)
     
     this._promise = new Promise<T>((resolve, reject) => {
       

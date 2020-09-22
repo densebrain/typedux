@@ -1,14 +1,15 @@
+import type {ObservableStore} from "../store"
 
-
-
-import { ActionFactory } from "../actions/ActionFactory"
+import { PendingAction, ActionStatus, ActionMessage } from "../actions/ActionTypes"
+import {ActionFactory} from "../actions/ActionFactory"
+import {ActionReducer} from "../actions/ActionDecorations"
 import { InternalState } from "./InternalState"
-import { ActionMessage } from "../actions/ActionTypes"
+
 import { INTERNAL_KEY } from "../Constants"
-import { ActionReducer } from "../actions/ActionDecorations"
-import { PendingAction, ActionStatus } from "../actions/ActionTracker"
+
+
 import _clone from "lodash/clone"
-import {ObservableStore} from "../store/ObservableStore"
+
 
 export class InternalActionFactory extends ActionFactory<InternalState,ActionMessage<InternalState>> {
 	

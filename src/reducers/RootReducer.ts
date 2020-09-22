@@ -1,16 +1,19 @@
 import Immutable from "immutable"
 import {getLogger} from '@3fv/logger-proxy'
 import {Action as ReduxAction, Reducer as ReduxReducer} from 'redux'
-import {ObjectAsMap, State} from './State'
-import {ActionMessage, getAction} from "../actions"
-import {ILeafReducer} from './LeafReducer'
+import type {ObjectAsMap, State} from './State'
+import type {ActionMessage} from "../actions"
+import type {ILeafReducer} from './LeafReducer'
 
 import {isFunction} from '../util'
-import {getGlobalStateProvider} from '../actions/Actions'
+// import {getGlobalStateProvider} from '../actions/Actions'
 import isEqualShallow from 'shallowequal'
-import {INTERNAL_ACTION, INTERNAL_ACTIONS} from "../Constants"
+
 import _get from "lodash/get"
 import _clone from "lodash/clone"
+
+import {INTERNAL_ACTION, INTERNAL_ACTIONS} from "../Constants"
+import type {ObservableStore} from "../store/ObservableStore"
 
 const
 	ActionIdCacheMax = 500,
@@ -65,7 +68,7 @@ export class RootReducer<S extends State> {
 	 * @param rootStateType - type of root state, must be immutable map or record
 	 * @param reducers - list of all child reducers
 	 */
-	constructor(private rootStateType:{ new():S } = null, ...reducers:ILeafReducer<any, any>[]) {
+	constructor(private store: ObservableStore<any>, private rootStateType:{ new():S } = null, ...reducers:ILeafReducer<any, any>[]) {
 		const leafs = []
 		reducers
 			.filter(reducer => isFunction(reducer.leaf))
@@ -218,7 +221,7 @@ export class RootReducer<S extends State> {
 					}
 					
 					// Get the action registration
-					const actionReg = getAction(leaf, action.type)
+					const actionReg = this.store?.actions?.getAction(leaf, action.type)
 					
 					log.debug('Action type supported', leaf, action.type)
 					
@@ -243,7 +246,7 @@ export class RootReducer<S extends State> {
 						}
 						
 						log.debug(`Calling action reducer: ${actionReg.fullName}`)
-						checkReducerStateChange(reducerFn(reducerState, getGlobalStateProvider()))
+						checkReducerStateChange(reducerFn(reducerState, this.store.getState()))
 					}
 					
 					// CHECK ACTUAL REDUCER FOR SUPPORT

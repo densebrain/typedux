@@ -1,16 +1,8 @@
 
-import {State} from "../reducers/State"
-import {
-  PropChainType,
-  continuePropertyChain,
-  PropChainCallback,
-  PropChainDataAccessor,
-  PropChainDataWrapper
-} from "../util/PropertyChain"
-import {Selector, InferredSelector, SelectorSubscriptionListener} from "./SelectorTypes"
-import { isNumber } from "@3fv/guard";
-import * as _ from 'lodash'
-import {ObservableStore} from "../store/ObservableStore"
+
+import type {Selector, InferredSelector, SelectorSubscriptionListener} from "./SelectorTypes"
+import { isNumber, toNumber } from "@3fv/guard";
+import type {ObservableStore} from "../store/ObservableStore"
 
 // export type SelectorChainType<S,T> = Exclude<SelectorChainType<S, T>, SelectorChainDataAccessor<S,T>> & {
 //   (): Selector<S,T>
@@ -112,7 +104,7 @@ function continueSelectorChain<
     function resolveKey(value, key, index) {
       if (firstGet[index]) {
         if (Array.isArray(value)) {
-          const keyNum = _.toNumber(key)
+          const keyNum = toNumber(key)
           if (isNumber(keyNum)) {
             key = keyPath[index] = keyNum
           }

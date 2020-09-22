@@ -18,15 +18,19 @@ import {
 import "symbol-observable"
 import {getValue} from "@3fv/guard"
 import {isFunction, isString} from "../util"
-import {ILeafReducer, State, StateArgs, StateConstructor} from "../reducers"
+
+import type {ILeafReducer, State, StateArgs, StateConstructor} from "../reducers"
+import type {ActionMessage} from "../actions"
+
 import StateObserver, {TStateChangeHandler} from "./StateObserver"
 import {DefaultLeafReducer} from "../reducers/DefaultLeafReducer"
 import {INTERNAL_KEY} from "../Constants"
 import {InternalState} from "../internal/InternalState"
-import {ActionMessage} from "../actions/ActionTypes"
+
 import DumbReducer from "../reducers/DumbReducer"
 import {Selector, SelectorChain, selectorChain, SelectorFn} from "../selectors"
 import _get from "lodash/get"
+import {ActionContainer} from "../actions"
 
 const log = getLogger(__filename)
 
@@ -87,7 +91,10 @@ export class ObservableStore<S extends State> implements Store<S> {
   }
   
   
-  public rootReducer:RootReducer<S>
+  rootReducer:RootReducer<S>
+  
+  readonly actions:ActionContainer
+  
   private observers:Array<StateObserver<S, any>> = []
   private rootReducerFn
   private readonly store:Store<S>
@@ -96,14 +103,17 @@ export class ObservableStore<S extends State> implements Store<S> {
   constructor(
     leafReducers:ILeafReducer<any, any>[],
     enhancer:StoreEnhancer<ObservableStore<S>, unknown> = undefined,
-    public rootStateType:{ new():S } = undefined,
+    public rootStateType:(new () => S) = undefined,
     public defaultStateValue:any = undefined) {
+  
+    this.actions = new ActionContainer(this)
     
     this.createRootReducer(...leafReducers)
+    
     this.store = createStore<S, AnyAction, ObservableStore<S>, unknown>(
       this.rootReducerFn,
       this.rootReducer.defaultState(defaultStateValue) as PreloadedState<S>,
-      enhancer
+      enhancer ?? (next => next) as any
     ) as Store<S>
     
     this.subscribe(() =>
@@ -118,11 +128,12 @@ export class ObservableStore<S extends State> implements Store<S> {
    * @returns {any}
    */
   private createRootReducer(...leafReducers:ILeafReducer<any, any>[]) {
-    this.rootReducer = new RootReducer<S>(this.rootStateType, ...leafReducers)
+    this.rootReducer = new RootReducer<S>(this, this.rootStateType, ...leafReducers)
     this.rootReducerFn = this.rootReducer.makeGenericHandler()
     
     return this.rootReducerFn
   }
+  
   
   
   /**

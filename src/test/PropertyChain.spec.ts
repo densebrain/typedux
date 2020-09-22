@@ -37,7 +37,7 @@ describe('#selectors', function () {
     // leafReducers = ObservableStore.makeSimpleReducers({type: MockKey, str1: MockStateStr1})//new MockLeafReducer()
     
     // ROOT REDUCER
-    reducer = createMockRootReducer(ObservableStore.makeInternalReducer(),leafReducer)
+    //reducer = createMockRootReducer(ObservableStore.makeInternalReducer(),leafReducer)
     
     // STORE
     store = ObservableStore.createObservableStore(

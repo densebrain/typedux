@@ -1,7 +1,6 @@
-import {State} from "./State"
-import {ActionMessage} from "../actions"
-import {Reducer} from "./ReducerTypes"
-import {ILeafReducer} from "./LeafReducer"
+import type {State} from "./State"
+import type {ActionMessage} from "../actions"
+import type {ILeafReducer} from "./LeafReducer"
 import {isString} from "../util"
 
 

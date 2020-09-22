@@ -1,8 +1,8 @@
 
 
 
-import {ActionMessage} from "../actions"
-import { State } from "./State";
+import type {ActionMessage} from "../actions"
+import type { State } from "./State";
 
 /**
  * Check object shape to see if

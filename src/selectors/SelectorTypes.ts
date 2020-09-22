@@ -1,4 +1,4 @@
-import {ObserverDisposer} from "../store/ObservableStore"
+import type {ObserverDisposer} from "../store/ObservableStore"
 
 export type SelectorSubscriptionListener<R> = (value: R, previousValue?: R) => any
 

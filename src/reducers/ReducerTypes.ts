@@ -1,4 +1,4 @@
-import {ActionMessage} from '../actions'
+import type {ActionMessage} from '../actions'
 
 /**
  * Internal reducer type
