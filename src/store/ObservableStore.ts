@@ -1,4 +1,4 @@
-import {getLogger} from "@3fv/logger-proxy"
+import { getLogger } from "@3fv/logger-proxy"
 
 import RootReducer from "../reducers/RootReducer"
 // Vendor
@@ -15,22 +15,27 @@ import {
   Unsubscribe
 } from "redux"
 import "symbol-observable"
-import {getValue} from "@3fv/guard"
-import {isFunction, isString} from "../util"
+import { getValue } from "@3fv/guard"
+import { isFunction, isString } from "../util"
 
-import type {ILeafReducer, State, StateArgs} from "../reducers"
-import type {ActionMessage} from "../actions"
+import type { ILeafReducer, State, StateArgs } from "../reducers"
+import type {
+  ActionFactory,
+  ActionFactoryConstructor,
+  ActionMessage
+} from "../actions"
 
-import {ActionContainer} from "../actions"
+import { ActionContainer } from "../actions"
 
-import StateObserver, {TStateChangeHandler} from "./StateObserver"
-import {DefaultLeafReducer} from "../reducers/DefaultLeafReducer"
-import {INTERNAL_KEY} from "../Constants"
-import {InternalState} from "../internal/InternalState"
+import StateObserver, { TStateChangeHandler } from "./StateObserver"
+import { DefaultLeafReducer } from "../reducers/DefaultLeafReducer"
+import { INTERNAL_KEY } from "../Constants"
+import { InternalState } from "../internal/InternalState"
 
 import DumbReducer from "../reducers/DumbReducer"
-import {SelectorChain, selectorChain, SelectorFn} from "../selectors"
+import { SelectorChain, selectorChain, SelectorFn } from "../selectors"
 import _get from "lodash/get"
+import { Option } from "@3fv/prelude-ts"
 
 const log = getLogger(__filename)
 
@@ -60,12 +65,11 @@ export class ObservableStore<S extends State = State> implements Store<S> {
     let leafReducers = leafReducersOrStates.filter(it =>
         isFunction(getValue(() => (it as any).leaf))
       ) as Array<ILeafReducer<any, any>>,
-      leafStates =
-        leafReducersOrStates.filter(
-          it =>
-            !isFunction(getValue(() => (it as any).leaf)) &&
-            isString(getValue(() => (it as any).type))
-        ) as Array<State>,
+      leafStates = leafReducersOrStates.filter(
+        it =>
+          !isFunction(getValue(() => (it as any).leaf)) &&
+          isString(getValue(() => (it as any).type))
+      ) as Array<State>,
       otherReducers = leafReducersOrStates.filter(it =>
         isFunction(it)
       ) as Array<ILeafReducer<any, any>>
@@ -107,13 +111,15 @@ export class ObservableStore<S extends State = State> implements Store<S> {
     return DefaultLeafReducer.create(INTERNAL_KEY, InternalState)
   }
 
-  rootReducer: RootReducer<S>
-
-  readonly actions: ActionContainer
+  private rootReducer: RootReducer<S>
 
   private observers: Array<StateObserver<S, any>> = []
   private rootReducerFn
   private readonly store: Store<S>
+
+  private readonly actionFactories = new Map<string, ActionFactory>()
+
+  readonly actionContainer: ActionContainer
 
   constructor(
     leafReducers: ILeafReducer<any, any>[],
@@ -121,7 +127,7 @@ export class ObservableStore<S extends State = State> implements Store<S> {
     public rootStateType: new () => S = undefined,
     public defaultStateValue: any = undefined
   ) {
-    this.actions = new ActionContainer(this)
+    this.actionContainer = new ActionContainer(this)
 
     this.createRootReducer(
       ObservableStore.createInternalReducer(),
@@ -135,6 +141,28 @@ export class ObservableStore<S extends State = State> implements Store<S> {
     ) as Store<S>
 
     this.subscribe(() => this.scheduleNotification())
+  }
+  
+  /**
+   * Get a prepared set of actions
+   *
+   * @param keyOrCtor - class name of class constructor to search for
+   */
+  getActions<A extends ActionFactory>(
+    keyOrCtor: ActionFactoryConstructor<A> | string
+  ): A {
+    const key = isString(keyOrCtor) ? keyOrCtor : keyOrCtor.name
+    return Option.ofNullable(this.actionFactories.get(key) as A).getOrCall(
+      () => {
+        if (isString(keyOrCtor)) {
+          throw Error(`No registered actions with key: ${keyOrCtor}`)
+        }
+
+        const actions = new keyOrCtor(this as ObservableStore<any>)
+        this.actionFactories.set(key, actions)
+        return actions as A
+      }
+    )
   }
 
   /**

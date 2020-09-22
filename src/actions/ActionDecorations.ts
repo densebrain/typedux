@@ -60,7 +60,7 @@ function actionDecorator<A extends ActionFactory = ActionFactory, F extends Acti
     descriptor.value = function (...preArgs:any[]) {
       const actionFactory = target as ActionFactory<any, any>,
         store = actionFactory?.getStore(),
-        actionContainer = store?.actions
+        actionContainer = store?.actionContainer
       return actionContainer?.executeActionChain(reg, (id, ...args) => {
         
         // Grab the current dispatcher

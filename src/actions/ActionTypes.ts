@@ -130,7 +130,7 @@ export interface ActionFactoryConstructor<
 > {
   setStore: (store: ObservableStore<any>) => void
 
-  new (): Clazz
+  new (store?: ObservableStore): Clazz
 }
 
 export interface ActionMessage<S extends State> extends Action {

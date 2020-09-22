@@ -35,7 +35,7 @@ abstract class BaseActionFactory<
   readonly stateType: StateConstructor<S, K>
 
   private pushStoreActions() {
-    Option.ofNullable(this.store?.actions)
+    Option.ofNullable(this.store?.actionContainer)
       .ifSome(actions => {
         this.actions.forEach(actions.registerAction.bind(actions))
       })

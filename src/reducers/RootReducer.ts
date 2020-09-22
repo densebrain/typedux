@@ -180,7 +180,7 @@ export class RootReducer<S extends State> {
 			}
 			
 			const stateMap:State = state as any
-			const actionReg = this.store?.actions?.getAction(action.leaf, action.type)
+			const actionReg = this.store?.actionContainer?.getAction(action.leaf, action.type)
 			let tempState = {...stateMap}
 			
 			if (isFunction(actionReg?.action)) {
