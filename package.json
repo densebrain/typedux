@@ -40,7 +40,7 @@
     "@3fv/deferred": "^1.2.1",
     "@3fv/guard": "^1.4.13",
     "@3fv/logger-proxy": "^1.0.2",
-    "@3fv/prelude-ts": "^0.8.18",
+    "@3fv/prelude-ts": "^0.8.19",
     "bluebird": "^3.7.2",
     "immutable": "~4.0.0-rc.12",
     "lodash": "^4.17.20",

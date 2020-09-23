@@ -1,7 +1,7 @@
 import Immutable from "immutable"
 import { clone } from "lodash"
 
-export type StateKey<S extends State> =  S extends State<infer K> ? (K extends string ? K : never) : never
+export type StateKey<S extends State> =   S extends State<infer K> ? (K extends string ? (K & keyof any) : never) : never
 
 export type StateArgs = keyof any | State | StateConstructor<any>
 
@@ -25,6 +25,8 @@ export interface StateConstructor<
 //, K extends string = string
 export interface State<T extends string = any> {
   readonly type: T
+  
+  toJS?: () => any
   //[key:string]:any
 }
 

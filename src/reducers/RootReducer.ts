@@ -60,8 +60,12 @@ export class RootReducer<S extends State> {
 	 * onError ref, allows an error handler to
 	 * be assigned to the reducer
 	 */
-	public onError:RootReducerErrorHandler
+	private onError:RootReducerErrorHandler
 	
+	setOnError(onError: RootReducerErrorHandler) {
+		this.onError = onError
+		return this
+	}
 	
 	/**
 	 * Create reducer

@@ -1,6 +1,6 @@
 import { getLogger } from "@3fv/logger-proxy"
 
-import RootReducer from "../reducers/RootReducer"
+import RootReducer, {RootReducerErrorHandler} from "../reducers/RootReducer"
 // Vendor
 import {
   Action as ReduxAction,
@@ -43,10 +43,36 @@ export interface ObserverDisposer {
   (): void
 }
 
+
+export function processLeafReducersAndStates(
+  leafReducersOrStates: Array<ILeafReducer<any, any> | State | Function>
+) {
+  const leafReducers = leafReducersOrStates.filter(it =>
+      isFunction(getValue(() => (it as any).leaf))
+    ) as Array<ILeafReducer<any, any>>,
+    leafStates = leafReducersOrStates.filter(
+      it =>
+        !isFunction(getValue(() => (it as any).leaf)) &&
+        isString(getValue(() => (it as any).type))
+    ) as Array<State>,
+    otherReducers = leafReducersOrStates.filter(it =>
+      isFunction(it)
+    ) as Array<ILeafReducer<any, any>>
+  
+  return [
+    ...otherReducers,
+    ...leafReducers,
+    ...leafStates.map(state => new DumbReducer(state))
+  ]
+}
+
 /**
  * Manage the redux store for RADS
  */
-export class ObservableStore<S extends State = State> implements Store<S> {
+export class ObservableStore<S extends State = any> implements Store<S> {
+  
+  
+  
   /**
    * Factory method for creating a new observable store
    *
@@ -62,26 +88,11 @@ export class ObservableStore<S extends State = State> implements Store<S> {
     rootStateType: new () => S = undefined,
     defaultStateValue: any = undefined
   ): ObservableStore<S> {
-    let leafReducers = leafReducersOrStates.filter(it =>
-        isFunction(getValue(() => (it as any).leaf))
-      ) as Array<ILeafReducer<any, any>>,
-      leafStates = leafReducersOrStates.filter(
-        it =>
-          !isFunction(getValue(() => (it as any).leaf)) &&
-          isString(getValue(() => (it as any).type))
-      ) as Array<State>,
-      otherReducers = leafReducersOrStates.filter(it =>
-        isFunction(it)
-      ) as Array<ILeafReducer<any, any>>
-
-    leafReducers = [
-      ...otherReducers,
-      ...leafReducers,
-      ...leafStates.map(state => new DumbReducer(state))
-    ]
+    
+    
 
     return new ObservableStore(
-      leafReducers,
+      leafReducersOrStates,
       enhancer,
       rootStateType,
       defaultStateValue
@@ -120,9 +131,11 @@ export class ObservableStore<S extends State = State> implements Store<S> {
   private readonly actionFactories = new Map<string, ActionFactory>()
 
   readonly actionContainer: ActionContainer
-
+  
+  
+  
   constructor(
-    leafReducers: ILeafReducer<any, any>[],
+    leafReducersOrStates: Array<ILeafReducer<any, any> | State | Function>,
     enhancer: StoreEnhancer<ObservableStore<S>, unknown> = undefined,
     public rootStateType: new () => S = undefined,
     public defaultStateValue: any = undefined
@@ -131,7 +144,7 @@ export class ObservableStore<S extends State = State> implements Store<S> {
 
     this.createRootReducer(
       ObservableStore.createInternalReducer(),
-      ...leafReducers
+      ...processLeafReducersAndStates(leafReducersOrStates)
     )
 
     this.store = createStore<S, AnyAction, ObservableStore<S>, unknown>(
@@ -141,6 +154,11 @@ export class ObservableStore<S extends State = State> implements Store<S> {
     ) as Store<S>
 
     this.subscribe(() => this.scheduleNotification())
+  }
+  
+  setOnError(onError: RootReducerErrorHandler) {
+    this.rootReducer?.setOnError(onError)
+    return this
   }
   
   /**
