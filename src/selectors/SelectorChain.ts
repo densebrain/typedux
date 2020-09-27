@@ -1,5 +1,5 @@
 
-
+import type {State} from "../reducers"
 import type {Selector, InferredSelector, SelectorSubscriptionListener} from "./SelectorTypes"
 import { isNumber, toNumber } from "@3fv/guard";
 import type {ObservableStore} from "../store/ObservableStore"
@@ -46,7 +46,7 @@ export interface SelectorChainArrayWrapper<S, T extends SelectorChainCallback<S,
  * Data accessor interface to dereference the value of an `any` type.
  * @extends SelectorChainDataAccessor<any>
  */
-export interface SelectorChainAny<S> extends SelectorChainDataAccessor<S, any>  {
+export interface SelectorChainAny<S> extends SelectorChainDataAccessor<S, S>  {
   [K:string]:SelectorChainAny<S> // Enable deep traversal of arbitrary props
 }
 
@@ -146,9 +146,9 @@ export type SelectorChain<S> = SelectorChainType<S, S>
   //PropChainType<S, S,SelectorChainDataAccessor<S,S>>
 
 export function selectorChain<
-  S
+  S extends State
 >(
-  store: ObservableStore<any>,
+  store: ObservableStore<S>,
   state:S
 ): SelectorChain<S> {
   return continueSelectorChain<S,S>(store, state, state)

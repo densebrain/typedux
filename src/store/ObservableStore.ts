@@ -33,7 +33,7 @@ import { INTERNAL_KEY } from "../Constants"
 import { InternalState } from "../internal/InternalState"
 
 import DumbReducer from "../reducers/DumbReducer"
-import { SelectorChain, selectorChain, SelectorFn } from "../selectors"
+import { SelectorChain, selectorChain, SelectorChainType, SelectorFn } from "../selectors"
 import _get from "lodash/get"
 import { Option } from "@3fv/prelude-ts"
 
@@ -257,14 +257,7 @@ export class ObservableStore<S extends State = any> implements Store<S> {
   scheduleNotification() {
     let state = this.getState()
 
-    //this.pendingTick = null
     this.observers.forEach(listener => listener.onChange(state))
-    // if (this.pendingTick) return
-    //
-    //
-    // this.pendingTick = nextTick(() => {
-    //
-    // })
   }
 
   /**
@@ -277,8 +270,8 @@ export class ObservableStore<S extends State = any> implements Store<S> {
   /**
    * Create a new selector from the store's state
    */
-  selector(): SelectorChain<S> {
-    return selectorChain(this, null as S)
+  selector<Chain extends SelectorChainType<S,S> = SelectorChainType<S,S>>(): Chain {
+    return selectorChain<S>(this, null as S) as Chain
   }
 
   /**

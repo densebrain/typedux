@@ -131,7 +131,7 @@ export function getGlobalStoreInternalState(): InternalState {
  *
  * @param newStore
  */
-export function setGlobalStore<S extends ObservableStore<any>>(newStore: S) {
+export function setGlobalStore<Store extends ObservableStore>(newStore: Store) {
   if (!newStore && process.env.NODE_ENV === "development") {
     console.warn(`You are setting the global store to null`)
   }

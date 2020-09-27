@@ -37,6 +37,24 @@
       <option name="USE_CHAINED_CALLS_GROUP_INDENTS" value="true" />
       <option name="IMPORT_PREFER_ABSOLUTE_PATH" value="TRUE" />
     </JSCodeStyleSettings>
+    <JetCodeStyleSettings>
+      <option name="PACKAGES_TO_USE_STAR_IMPORTS">
+        <value>
+          <package name="java.util" alias="false" withSubpackages="false" />
+          <package name="kotlinx.android.synthetic" alias="false" withSubpackages="true" />
+          <package name="io.ktor" alias="false" withSubpackages="true" />
+        </value>
+      </option>
+      <option name="PACKAGES_IMPORT_LAYOUT">
+        <value>
+          <package name="" alias="false" withSubpackages="true" />
+          <package name="java" alias="false" withSubpackages="true" />
+          <package name="javax" alias="false" withSubpackages="true" />
+          <package name="kotlin" alias="false" withSubpackages="true" />
+          <package name="" alias="true" withSubpackages="true" />
+        </value>
+      </option>
+    </JetCodeStyleSettings>
     <TypeScriptCodeStyleSettings version="0">
       <option name="USE_SEMICOLON_AFTER_STATEMENT" value="false" />
       <option name="FORCE_SEMICOLON_STYLE" value="true" />
@@ -88,12 +106,6 @@
         <option name="CONTINUATION_INDENT_SIZE" value="2" />
         <option name="TAB_SIZE" value="2" />
         <option name="KEEP_INDENTS_ON_EMPTY_LINES" value="true" />
-      </indentOptions>
-    </codeStyleSettings>
-    <codeStyleSettings language="Jade">
-      <indentOptions>
-        <option name="INDENT_SIZE" value="2" />
-        <option name="TAB_SIZE" value="2" />
       </indentOptions>
     </codeStyleSettings>
     <codeStyleSettings language="JavaScript">
