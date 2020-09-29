@@ -5529,10 +5529,10 @@ typedarray-to-buffer@^3.1.5:
   dependencies:
     is-typedarray "^1.0.0"
 
-typescript@^4.0.2:
-  version "4.0.3"
-  resolved "https://registry.npmjs.org/typescript/-/typescript-4.0.3.tgz#153bbd468ef07725c1df9c77e8b453f8d36abba5"
-  integrity sha512-tEu6DGxGgRJPb/mVPIZ48e69xCn2yRmCgYmDugAVwmJ6o+0u1RI18eO7E7WBTLYLaEVVOhwQmcdhQHweux/WPg==
+typescript@^4.1.0-beta:
+  version "4.1.0-dev.20200928"
+  resolved "https://registry.npmjs.org/typescript/-/typescript-4.1.0-dev.20200928.tgz#0a99b6d52dee987f699b5a2a482b818c16c3e293"
+  integrity sha512-9cmA/XElcRW+jjMhZjMLEDOdjsx7VGwW7hRoUwSldlFW4GSByD7LgRO5XcpgRdPaa6qFM2F8rorON0ThgrLAkQ==
 
 unicode-canonical-property-names-ecmascript@^1.0.4:
   version "1.0.4"
