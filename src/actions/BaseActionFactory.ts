@@ -141,7 +141,7 @@ abstract class BaseActionFactory<
     const leaf = this.leaf()
     return !leaf
       ? state
-      : Immutable.isMap(state)
+      : Immutable.Map.isMap(state)
       ? state.get(leaf)
       : state[leaf]
   }

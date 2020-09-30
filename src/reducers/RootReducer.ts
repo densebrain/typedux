@@ -30,8 +30,8 @@ const
  * @return {any}
  */
 function getLeafValue<S extends Partial<S> | ObjectAsMap<S>, K, R = (K extends keyof S ? S[K] : unknown)>(rootValue:S, leaf:string):R {
-	if (Immutable.isMap(rootValue)) {
-		return rootValue.get(leaf)
+	if (Immutable.Map.isMap(rootValue)) {
+		return (rootValue as Immutable.Map<any, any>).get(leaf)
 	} else {
 		return _get(rootValue,leaf)
 	}
