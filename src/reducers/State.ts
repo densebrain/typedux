@@ -1,4 +1,4 @@
-import Immutable from "immutable"
+import * as Immutable from "immutable"
 import { clone } from "lodash"
 
 export type StateKey<S extends State> =   S extends State<infer K> ? (K extends string ? (K & keyof any) : never) : never

@@ -1,4 +1,4 @@
-import Immutable from "immutable"
+import * as Immutable from "immutable"
 import {getLogger} from '@3fv/logger-proxy'
 import {Action as ReduxAction, Reducer as ReduxReducer} from 'redux'
 import type {ObjectAsMap, State} from './State'

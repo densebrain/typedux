@@ -13,7 +13,7 @@ import type { Reducer, State, StateConstructor, StateKey } from "../reducers"
 import type { Action, Dispatch, Store } from "redux"
 import * as ID from "shortid"
 import {isDefined, isFunction} from "@3fv/guard"
-import Immutable from "immutable"
+import * as Immutable from "immutable"
 import {clone, uniqBy } from "lodash"
 
 const log = getLogger(__filename)
