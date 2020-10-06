@@ -17,9 +17,9 @@ if (Sh.test("-d",distDir)) {
 }
 
 Sh.echo("Starting build")
-Array(["es2016","commonjs"], ["es2018","esnext"], ["es5","umd"])
-  .map(([target,mod]) => [target,mod, Path.join(distDir, mod.toString())])
-  .forEach(([target,mod, outDir]) => {
+Array(["es2016","commonjs"], ["es6","es2015", "esm"], ["es5","umd"])
+  .map(([target,mod,suffix = mod]) => [target,mod, suffix, Path.join(distDir, suffix.toString())])
+  .forEach(([target,mod, suffix, outDir]) => {
     if (Sh.test("-d", outDir)) {
       Sh.echo(`Cleaning: ${outDir}`)
       Sh.rm("-Rf",outDir)
@@ -35,18 +35,18 @@ Array(["es2016","commonjs"], ["es2018","esnext"], ["es5","umd"])
             ...pkg.compilerOptions,
             target,
             module: mod,
-            outDir: `./dist/${mod}`
+            outDir: `./dist/${suffix}`
           }
         }))
         .getOrThrow(),
-      outTsConfigFilename = `tsconfig-${mod}.json`,
+      outTsConfigFilename = `tsconfig-${suffix}.json`,
       outTsConfigFile = Path.join(rootDir, outTsConfigFilename)
 
     
-    Sh.echo(`Writing tsconfig for (${mod}) to ${outTsConfigFile}`)
+    Sh.echo(`Writing tsconfig for (${suffix}) to ${outTsConfigFile}`)
     Fs.writeFileSync(outTsConfigFile, JSON.stringify(outTsConfig, null, 2))
 
-    Sh.echo(`Building for module system: ${mod}`)
+    Sh.echo(`Building for module system: ${suffix}`)
     // Sh.cp("-R", `${srcDir}/*`, outDir)
 
     const result = Sh.exec(`./node_modules/.bin/tsc -p ${outTsConfigFilename}`, {
