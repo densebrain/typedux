@@ -11,7 +11,7 @@ const rootDir = Path.resolve(__dirname, ".."),
   tsConfigFile = Path.join(rootDir, "tsconfig.json"),
   distDir = Path.join(rootDir, "dist")
 
-if (Sh.test("-d")) {
+if (Sh.test("-d",distDir)) {
   Sh.echo("Removing `dist` build directory")
   Sh.rm("-Rf",distDir)
 }
