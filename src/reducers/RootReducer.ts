@@ -227,7 +227,9 @@ export class RootReducer<S extends RootState = any> {
             action.leaf,
             action.type
           )}`,
-          JSON.stringify(action, null, 2)
+          action
+          
+          //JSON.stringify(action, null, 2)
         )
       }
 
