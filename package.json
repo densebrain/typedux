@@ -16,9 +16,9 @@
     "compile:watch": "tsc --project tsconfig.json --watch",
     "build": "node scripts/build.js",
     "test": "jest",
-    "preversion": "run-s build ",
-    "publish:as-is": "yarn run build && npm publish",
-    "publish:patch": "yarn version --patch --non-interactive && git push --tags && npm publish"
+    "preversion": "run-s build",
+    "release:as-is": "yarn run build && yarn publish",
+    "release:patch": "node scripts/release.js"
   },
   "repository": {
     "type": "git",
