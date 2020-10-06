@@ -219,17 +219,15 @@ export class RootReducer<S extends RootState = any> {
 
 	    // Is the reg invalid, i.e. reg not found and leaf + type set
       const actionRegInvalid =
-        [action.leaf, action.type].every(isString) && !actionReg
+        !actionReg && [action.leaf, action.type].every(isString)
 
-      if (isDev && log.isDebugEnabled() && !actionRegInvalid) {
+      if (isDev && log.isDebugEnabled() && actionRegInvalid) {
         log.warn(
           `Unable to find action registration for: ${createLeafActionType(
             action.leaf,
             action.type
           )}`,
           action
-          
-          //JSON.stringify(action, null, 2)
         )
       }
 
