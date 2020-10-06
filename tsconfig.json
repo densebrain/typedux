@@ -18,22 +18,17 @@
 		"esModuleInterop": true,
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
+		"skipLibCheck": true,
 		"preserveConstEnums": true,
 		"allowSyntheticDefaultImports": true,
-//		"sourceMap": true,
-		"inlineSourceMap": true,
-		"inlineSources": true,
+		"sourceMap": true,
 		"jsx": "react",
-		"sourceRoot": "./src",
-		"outDir": "./dist",
-		"baseUrl": "./",
-		"typeRoots": [
-			"./node_modules/@types"
-		]
-		
+		"outDir": "./dist/commonjs",
+		"baseUrl": "./"
 	},
 	"exclude": [
 		"node_modules",
-		"dist"
+		"dist",
+		"lib"
 	]
 }
