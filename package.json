@@ -1,6 +1,6 @@
 {
   "name": "typedux",
-  "version": "3.0.12",
+  "version": "3.0.13",
   "description": "Slightly adjusted Redux (awesome by default) for TS",
   "main": "dist/commonjs/index.js",
   "module": "dist/esnext/index.js",
@@ -12,10 +12,11 @@
   "typings": "dist/index.d.ts",
   "scripts": {
     "clean": "rm -Rf dist",
-    "compile": "tsc --project tsconfig.json",
-    "compile:watch": "tsc --project tsconfig.json --watch",
-    "build": "node scripts/build.js",
-    "test": "jest",
+    "build": "tsc --project tsconfig.json",
+    "build:watch": "tsc --project tsconfig.json --watch",
+    "build:release": "node scripts/build.js",
+    "test": "run-s build test:run",
+    "test:run": "jest",
     "preversion": "run-s build",
     "release:as-is": "yarn run build && yarn publish",
     "release:patch": "node scripts/release.js"
