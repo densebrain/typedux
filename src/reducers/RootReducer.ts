@@ -246,8 +246,10 @@ export class RootReducer<S extends RootState = any> {
             )
 
           // ActionMessage.reducers PROVIDED
-          log.debug("Action type supported", action.leaf, action.type)
-
+          if (log.isDebugEnabled() && isDev) {
+            log.debug("Action type supported", action.leaf, action.type)
+          }
+      
           if (action.stateType && reducerState instanceof action.stateType) {
             _get(action, "reducers", []).forEach(actionReducer =>
               checkReducerStateChange(actionReducer(reducerState, action))
@@ -265,7 +267,9 @@ export class RootReducer<S extends RootState = any> {
                   )
                 },
                 Some: reducerFn => {
-                  log.debug(`Calling action reducer: ${actionReg.fullName}`)
+                  if (log.isDebugEnabled() && isDev) {
+                    log.debug(`Calling action reducer: ${actionReg.fullName}`)
+                  }
                   checkReducerStateChange(reducerFn(reducerState, tempState))
                 }
               })
@@ -312,9 +316,11 @@ export class RootReducer<S extends RootState = any> {
 
           // Check internal actions
           if (INTERNAL_ACTIONS.includes(action.type)) {
-            log.debug(
-              `Sending init event to ${leaf} - internal action received ${action.type}`
-            )
+            if (log.isDebugEnabled() && isDev) {
+              log.debug(
+                `Sending init event to ${leaf} - internal action received ${action.type}`
+              )
+            }
 
             if (INTERNAL_ACTION.INIT === action.type && reducer.init) {
               checkReducerStateChange(reducer.init(startReducerState))
@@ -351,13 +357,14 @@ export class RootReducer<S extends RootState = any> {
           hasChanged = true
         }
       }
-
-      log.debug(
-        "Has changed after all reducers",
-        hasChanged,
-        "states equal",
-        isEqualShallow(tempState, state)
-      )
+      if (log.isDebugEnabled() && isDev) {
+        log.debug(
+          "Has changed after all reducers",
+          hasChanged,
+          "states equal",
+          isEqualShallow(tempState, state)
+        )
+      }
       return (hasChanged ? tempState : state) as S
     } catch (err) {
       log.error("Error bubbled to root reducer", err)

@@ -1,9 +1,9 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="compile:watch" type="js.build_tools.npm" nameIsGenerated="true">
+  <configuration default="false" name="release:patch" type="js.build_tools.npm" nameIsGenerated="true">
     <package-json value="$PROJECT_DIR$/package.json" />
     <command value="run" />
     <scripts>
-      <script value="compile:watch" />
+      <script value="release:patch" />
     </scripts>
     <node-interpreter value="project" />
     <envs />

@@ -18,7 +18,7 @@ import "symbol-observable"
 import {getValue} from "@3fv/guard"
 import {isFunction, isString} from "../util"
 
-import type {ILeafReducer, State, StateArgs} from "../reducers"
+import type {ILeafReducer, RootState, State, StateArgs} from "../reducers"
 import type {ActionFactory, ActionFactoryConstructor, ActionMessage} from "../actions"
 import {ActionContainer} from "../actions"
 
@@ -31,6 +31,7 @@ import DumbReducer from "../reducers/DumbReducer"
 import {selectorChain, SelectorChainType, SelectorFn} from "../selectors"
 import _get from "lodash/get"
 import {Option} from "@3fv/prelude-ts"
+import {isDev} from "../dev"
 
 const log = getLogger(__filename)
 
@@ -64,7 +65,7 @@ export function processLeafReducersAndStates(
 /**
  * Manage the redux store for RADS
  */
-export class ObservableStore<S extends State = any> implements Store<S> {
+export class ObservableStore<S extends RootState = any> implements Store<S> {
   
   
   
@@ -77,7 +78,7 @@ export class ObservableStore<S extends State = any> implements Store<S> {
    * @param defaultStateValue
    * @param leafReducersOrStates
    */
-  static createObservableStore<S extends State>(
+  static createObservableStore<S extends RootState>(
     leafReducersOrStates: Array<ILeafReducer<any, any> | State | Function>,
     enhancer: StoreEnhancer<any> = undefined,
     rootStateType: new () => S = undefined,
@@ -314,7 +315,9 @@ export class ObservableStore<S extends State = any> implements Store<S> {
 
     return () => {
       if (observer.removed) {
-        log.debug("Already removed this observer", observer)
+        if (log.isDebugEnabled() && isDev) {
+          log.debug("Already removed this observer", observer)
+        }
         return
       }
 
