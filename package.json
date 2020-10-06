@@ -17,8 +17,8 @@
     "build:release": "node scripts/build.js",
     "test": "run-s build test:run",
     "test:run": "jest",
-    "preversion": "run-s build",
-    "release:as-is": "yarn run build && yarn publish",
+    "preversion": "run-s build:release",
+    "release:as-is": "yarn run build:release && yarn publish",
     "release:patch": "node scripts/release.js"
   },
   "repository": {
