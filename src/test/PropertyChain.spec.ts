@@ -13,6 +13,7 @@ import { IMockState } from "./mocks/MockState"
 import {MockLeafState} from "./mocks/MockLeafState"
 import {setGlobalStore} from "../actions/Actions"
 import {MockActionFactory} from "./mocks/MockActionFactory"
+import {isDev} from "../dev"
 
 
 require("source-map-support").install()
@@ -118,9 +119,10 @@ describe('#selectors', function () {
     //const selector = selectorChain(o).a.b.c()
     
     for (const [[value, keyPath], testValue, testKeyPath] of propChainTests) {
-      //const [value, keyPath] = chain()
+      if (log.isDebugEnabled() && isDev) {
+        log.debug("Key path", keyPath, "value", value)
+      }
       
-      log.info("Key path", keyPath, "value", value)
       expect(value).toBe(testValue)
       expect(keyPath).toMatchObject(testKeyPath)
     }

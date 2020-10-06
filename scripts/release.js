@@ -12,10 +12,13 @@ const result = Sh.exec(`git describe --dirty`, {
   cwd: rootDir
 })
 
-assert(
-  result.code === 0 && !result.stdout.endsWith("dirty"),
-  `Codebase is dirty: ${rootDir}`
-)
+if (
+  result.code !== 0 ||
+  [result.stdout, result.stderr].some(it => it.includes("dirty"))
+) {
+  console.error(`ERROR: Git is not clean ${rootDir}`)
+  process.exit(1)
+}
 
 const cmds = [
   `yarn version --patch --non-interactive`,

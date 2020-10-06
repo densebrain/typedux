@@ -15,6 +15,7 @@ import * as ID from "shortid"
 import {isDefined, isFunction} from "@3fv/guard"
 import * as Immutable from "immutable"
 import {clone, uniqBy } from "lodash"
+import {isDev} from "../dev"
 
 const log = getLogger(__filename)
 
@@ -86,9 +87,11 @@ abstract class BaseActionFactory<
    */
   protected constructor(
     stateType: StateConstructor<S, K>,
-    withStore: ObservableStore<any> = undefined
+    withStore: ObservableStore = undefined
   ) {
-    log.debug(`Created action factory with state type: ${stateType.name}`)
+    if (log.isDebugEnabled() && isDev) {
+      log.debug(`Created action factory with state type: ${stateType.name}`)
+    }
     this.stateType = stateType
     this.store = withStore
     

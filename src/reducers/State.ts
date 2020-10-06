@@ -30,8 +30,10 @@ export interface State<T extends string = any> {
   //[key:string]:any
 }
 
-export type RootState = State &
-  { [key in keyof any]: { [key in keyof any]: any } }
+export interface RootState extends State, Record<string | number | symbol, any> {
+
+}
+
 
 /**
  * Function to patch an existing state

@@ -1,5 +1,6 @@
 import {isFunction,getProperty} from "./index"
 import {getLogger} from '@3fv/logger-proxy'
+import {isDev} from "../dev"
 const log = getLogger(__filename)
 
 /**
@@ -20,8 +21,9 @@ export class VariableProxy<T> {
 		if (!o) return
 
 		let keys = Object.getOwnPropertyNames(o);
-		log.info("Creating proxy for",keys)
-
+		if (log.isInfoEnabled() && isDev) {
+			log.info("Creating proxy for", keys)
+		}
 		keys.forEach((prop) => {
 			if (!/(constructor|prototype|__proto__)/.test(prop) &&
 					!this.proxy[prop] &&
