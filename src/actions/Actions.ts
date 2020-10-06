@@ -1,6 +1,6 @@
 import type { ObservableStore } from "../store/ObservableStore"
 import type { Dispatch } from "redux"
-import type { State, TRootState } from "../reducers"
+import type { State, RootState } from "../reducers"
 
 import type {
   ActionFactory,
@@ -18,7 +18,7 @@ import { Option } from "@3fv/prelude-ts"
 import { getLogger } from "@3fv/logger-proxy"
 import { makeId } from "../util/IdGenerator"
 import { InternalState } from "../internal/InternalState"
-import { INTERNAL_KEY } from "../Constants"
+import { INTERNAL_KEY } from "../constants"
 
 // const
 // 	_cloneDeep = require('lodash.cloneDeep')

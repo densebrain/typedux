@@ -10,7 +10,7 @@ import {MockActionFactory} from "./mocks/MockActionFactory"
 import {configureMockStoreFactory, MockStoreFactory} from "./mocks/MockStore"
 import {MockLeafState} from "./mocks/MockLeafState"
 import {ObservableStore} from "../store/ObservableStore"
-import {INTERNAL_KEY} from "../Constants"
+import {INTERNAL_KEY} from "../constants"
 import {InternalState} from "../internal/InternalState"
 
 

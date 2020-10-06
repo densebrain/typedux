@@ -7,4 +7,6 @@ export * from './util'
 export * from './reducers'
 export * from './store'
 export * from './actions'
-export * from './internal/InternalState'
+export * from './internal'
+
+export * as TypeDuxConstants from "./constants"

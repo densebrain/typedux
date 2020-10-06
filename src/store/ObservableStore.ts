@@ -1,4 +1,4 @@
-import { getLogger } from "@3fv/logger-proxy"
+import {getLogger} from "@3fv/logger-proxy"
 
 import RootReducer, {RootReducerErrorHandler} from "../reducers/RootReducer"
 // Vendor
@@ -15,27 +15,22 @@ import {
   Unsubscribe
 } from "redux"
 import "symbol-observable"
-import { getValue } from "@3fv/guard"
-import { isFunction, isString } from "../util"
+import {getValue} from "@3fv/guard"
+import {isFunction, isString} from "../util"
 
-import type { ILeafReducer, State, StateArgs } from "../reducers"
-import type {
-  ActionFactory,
-  ActionFactoryConstructor,
-  ActionMessage
-} from "../actions"
+import type {ILeafReducer, State, StateArgs} from "../reducers"
+import type {ActionFactory, ActionFactoryConstructor, ActionMessage} from "../actions"
+import {ActionContainer} from "../actions"
 
-import { ActionContainer } from "../actions"
-
-import StateObserver, { TStateChangeHandler } from "./StateObserver"
-import { DefaultLeafReducer } from "../reducers/DefaultLeafReducer"
-import { INTERNAL_KEY } from "../Constants"
-import { InternalState } from "../internal/InternalState"
+import StateObserver, {TStateChangeHandler} from "./StateObserver"
+import {DefaultLeafReducer} from "../reducers/DefaultLeafReducer"
+import {INTERNAL_KEY} from "../constants"
+import {InternalState} from "../internal/InternalState"
 
 import DumbReducer from "../reducers/DumbReducer"
-import { SelectorChain, selectorChain, SelectorChainType, SelectorFn } from "../selectors"
+import {selectorChain, SelectorChainType, SelectorFn} from "../selectors"
 import _get from "lodash/get"
-import { Option } from "@3fv/prelude-ts"
+import {Option} from "@3fv/prelude-ts"
 
 const log = getLogger(__filename)
 

@@ -1,6 +1,6 @@
 import type { PendingAction } from "../actions"
 import type { State } from "../reducers"
-import { INTERNAL_KEY } from "../Constants"
+import { INTERNAL_KEY } from "../constants"
 
 export type InternalStateKey = typeof INTERNAL_KEY
 

@@ -9,7 +9,7 @@ import type {
 } from "./ActionTypes"
 import { getGlobalStore, createLeafActionType } from "./Actions"
 import { getLogger } from "@3fv/logger-proxy"
-import type {Reducer, State, StateConstructor, StateKey, TRootState} from "../reducers"
+import type {Reducer, State, StateConstructor, StateKey, RootState} from "../reducers"
 import type { Action, Dispatch, Store } from "redux"
 import * as ID from "shortid"
 import {isDefined, isFunction} from "@3fv/guard"
@@ -26,7 +26,7 @@ abstract class BaseActionFactory<
   S extends State = State,
   M extends ActionMessage<S> = ActionMessage<S>,
   K extends StateKey<S> = StateKey<S>,
-  RS extends TRootState & {[key in K]: S} = TRootState & {[key in K]: S}
+  RS extends RootState & {[key in K]: S} = RootState & {[key in K]: S}
 > implements ActionFactory<S, M, K> {
   
   protected actionMap:Map<string, ActionRegistration<S, any>>

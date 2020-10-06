@@ -30,7 +30,7 @@ export interface State<T extends string = any> {
   //[key:string]:any
 }
 
-export type TRootState = State &
+export type RootState = State &
   { [key in keyof any]: { [key in keyof any]: any } }
 
 /**

@@ -4,14 +4,9 @@ import { PendingAction, ActionStatus, ActionMessage } from "../actions/ActionTyp
 import {BaseActionFactory} from "../actions/BaseActionFactory"
 import {ActionReducer} from "../actions/ActionDecorations"
 import { InternalState, InternalStateKey } from "./InternalState"
-
-import { INTERNAL_KEY } from "../Constants"
-
-
+import { INTERNAL_KEY } from "../constants"
 import _clone from "lodash/clone"
 
-
-//export type InternalStateKey = typeof INTERNAL_KEY
 
 export class InternalActionFactory extends BaseActionFactory<InternalState,ActionMessage<InternalState>, InternalStateKey> {
 	
