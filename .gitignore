@@ -1,4 +1,7 @@
 # Typedux
+/tsconfig-commonjs.json
+/tsconfig-esnext.json
+/tsconfig-umd.json
 target
 /out
 dist
