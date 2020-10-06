@@ -11,6 +11,11 @@ const rootDir = Path.resolve(__dirname, ".."),
   tsConfigFile = Path.join(rootDir, "tsconfig.json"),
   distDir = Path.join(rootDir, "dist")
 
+if (Sh.test("-d")) {
+  Sh.echo("Removing `dist` build directory")
+  Sh.rm("-Rf",distDir)
+}
+
 Sh.echo("Starting build")
 Array(["es2016","commonjs"], ["es2018","esnext"], ["es5","umd"])
   .map(([target,mod]) => [target,mod, Path.join(distDir, mod.toString())])

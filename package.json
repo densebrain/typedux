@@ -9,7 +9,7 @@
     "import": "dist/esnext/index.js",
     "require": "dist/commonjs/index.js"
   },
-  "typings": "dist/index.d.ts",
+  "typings": "dist/esnext/index.d.ts",
   "scripts": {
     "clean": "rm -Rf dist",
     "build": "tsc --project tsconfig.json",
