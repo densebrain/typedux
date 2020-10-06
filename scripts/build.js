@@ -35,21 +35,22 @@ Array(["es2016","commonjs"], ["es2018","esnext"], ["es5","umd"])
             ...pkg.compilerOptions,
             target,
             module: mod,
-            outDir: "./"
+            outDir: `./dist/${mod}`
           }
         }))
         .getOrThrow(),
-      outTsConfigFile = Path.join(outDir, "tsconfig.json")
+      outTsConfigFilename = `tsconfig-${mod}.json`,
+      outTsConfigFile = Path.join(rootDir, outTsConfigFilename)
 
     
     Sh.echo(`Writing tsconfig for (${mod}) to ${outTsConfigFile}`)
     Fs.writeFileSync(outTsConfigFile, JSON.stringify(outTsConfig, null, 2))
 
     Sh.echo(`Building for module system: ${mod}`)
-    Sh.cp("-R", `${srcDir}/*`, outDir)
+    // Sh.cp("-R", `${srcDir}/*`, outDir)
 
-    const result = Sh.exec(`../../node_modules/.bin/tsc -p tsconfig.json`, {
-      cwd: outDir
+    const result = Sh.exec(`./node_modules/.bin/tsc -p ${outTsConfigFilename}`, {
+      cwd: rootDir
     })
 
     assert(
