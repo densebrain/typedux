@@ -1,6 +1,6 @@
 {
   "name": "typedux",
-  "version": "3.0.11",
+  "version": "3.0.12",
   "description": "Slightly adjusted Redux (awesome by default) for TS",
   "main": "dist/commonjs/index.js",
   "module": "dist/esnext/index.js",
