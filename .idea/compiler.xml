@@ -2,6 +2,7 @@
 <project version="4">
   <component name="TypeScriptCompiler">
     <option name="enableServiceForProjectsWithoutConfig" value="false" />
+    <option name="recompileOnChanges" value="true" />
     <option name="showAllErrors" value="true" />
     <option name="typeScriptCompilerParams" value="--sourceMap true" />
     <option name="useConfig" value="true" />

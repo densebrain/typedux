@@ -2,12 +2,12 @@
   "name": "typedux",
   "version": "3.0.22",
   "description": "Slightly adjusted Redux (awesome by default) for TS",
-  "main": "dist/commonjs/index.js",
-  "module": "dist/esm/index.js",
-  "umd": "dist/umd/index.js",
+  "main": "./dist/commonjs/index.js",
+  "module": "./dist/esm/index.js",
+  "umd": "./dist/umd/index.js",
   "exports": {
-    "import": "dist/esm/index.js",
-    "require": "dist/commonjs/index.js"
+    "import": "./dist/esm/index.js",
+    "require": "./dist/commonjs/index.js"
   },
   "typings": "dist/esm/index.d.ts",
   "scripts": {
