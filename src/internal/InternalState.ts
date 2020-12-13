@@ -17,7 +17,7 @@ export class InternalState implements State<InternalStateKey> {
     if (o instanceof InternalState) return o
 
     const state = new InternalState(),
-      { pendingActions = {} } = o
+      { pendingActions = [] } = o
 
     return Object.assign(state, { pendingActions })
   }
@@ -34,7 +34,7 @@ export class InternalState implements State<InternalStateKey> {
   /**
    * All pending actions
    */
-  pendingActions: { [id: string]: PendingAction } = {}
+  pendingActions: PendingAction[] = []
 	
 	/**
 	 * Total actions executed

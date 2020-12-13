@@ -1,10 +1,10 @@
 import type {ObservableStore} from "../store/ObservableStore"
-import {ActionMessage, ActionStatus} from "./ActionTypes"
+import {ActionAsyncConfig, ActionMessage, ActionStatus, PendingAction} from "./ActionTypes"
 
 
 import type {InternalActionFactory as InternalActionFactoryType} from "../internal/InternalActionFactory"
 import {Bluebird as Promise} from '../util'
-
+import _clone from "lodash/clone"
 
 
 
@@ -13,7 +13,7 @@ import {Bluebird as Promise} from '../util'
 /**
  * Wraps an action providing tracking events and data
  */
-export class ActionTracker<T> {
+export class ActionTracker<T> implements PendingAction {
   
   
   /**
@@ -31,7 +31,7 @@ export class ActionTracker<T> {
    *
    * @type {ActionStatus}
    */
-  status = ActionStatus.Started
+  status = ActionStatus.started
   
   /**
    * Action promise
@@ -56,13 +56,16 @@ export class ActionTracker<T> {
    * @param action
    * @param id
    * @param store
+   * @param asyncConfig
    */
   constructor(
     public id:string,
     public leaf:string,
+    public actionType: string,
     public name:string,
     public action:(dispatch, getState) => T,
-    public store: ObservableStore<any>
+    public store: ObservableStore,
+    public asyncConfig: ActionAsyncConfig
   ) {
     
     
@@ -77,7 +80,7 @@ export class ActionTracker<T> {
         resolve
       })
       try {
-        internalActions.setPendingAction(this)
+        internalActions.pushPendingAction(this)
         
         const
           dispatch = <A extends ActionMessage<any>>(action: A): A =>
@@ -97,8 +100,8 @@ export class ActionTracker<T> {
       }
     }).finally(() => {
       // FINALLY NOTIFY INTERNAL STATE
-      this.status = ActionStatus.Finished
-      internalActions.setPendingAction({...this})
+      this.status = ActionStatus.finished
+      internalActions.pushPendingAction(_clone(this))
       
       
     })

@@ -23,6 +23,13 @@ export interface ActionRegistration<S extends State = State, F extends ActionFac
   actionFactoryCtor: ActionFactoryConstructor<F>
 }
 
+export interface ActionAsyncConfig {
+  parallel?: boolean
+}
+
+export const ActionAsyncConfigDefaults: ActionAsyncConfig = {
+  parallel: true
+}
 
 export type ActionOptions<A extends ActionFactoryConstructor<any> = ActionFactoryConstructor<any>> = {
   isPromise?:boolean
@@ -30,6 +37,7 @@ export type ActionOptions<A extends ActionFactoryConstructor<any> = ActionFactor
   factoryCtor?: A
   reducers?:Reducer<any, any>[]
   mapped?:string[]
+  asyncConfig?: ActionAsyncConfig
 }
 
 
@@ -144,13 +152,17 @@ export interface ActionMessage<S extends State> extends Action {
 }
 
 export enum ActionStatus {
-  Started = 1,
-  Finished = 2
+  started = "started",
+  finished = "finished",
+  cancelled = "cancelled"
 }
+
+
 
 export interface PendingAction {
   id: string
   leaf: string
   name: string
+  actionType: string
   status: ActionStatus
 }
